@@ -1,0 +1,40 @@
+directory	outwej2			# directory's name
+plot_tqwk	No			# plot disc torque or power on planets? (No, torque, rtatorque, power or rtapower)
+					# rta means running-time average
+plot_planet	No			# plot planet orbital elements? enter x,y to plot y vs. x: x can be t (time) 
+					# or a (semi-major axis); y can be a, e (eccentricity), r (orbital radius), m (planet mass), 
+					# p (orbital period ratio, if several planets) or mmr (mean-motion resonant angles)
+mmr_integers	5,3			# enter as fo,fi to compute the fo:fi mean-motion resonant angles (eg, 3,2 or 2,1)
+plot_dust	No			# plot dust stuff? enter x,y to plot y vs. x: x can be r (radius) or 
+					# phi (azimuth); y can be phi, size (dust size), Stokes (Stokes number), vr (radial velocity)
+					# or vphi (azimuthal velocity)
+on		100,150			# fargo's output number(s), separated by a comma (,)
+movie		Yes			# make a movie? requires on to take the form onmin,onmax (eg: 1,10)
+fluid		gas			# what fluid? gas or dust
+whatfield	dens			# field to display? (dens,vrad,vtheta,pressure,temp,entropy,vorticity,vortensity)
+onedprofile	No			# plot azimuthally-averaged radial profile (1D)?
+nodiff	        Yes			# relative difference wrt initial field? (Yes or No)
+physical_units	No			# convert field in physical units? (Yes or No)
+override_units	No			# do we override units specified in .par file or in units.dat?
+new_unit_length	4.5e12			# if so, new unit of length needs to be specified in meters
+new_unit_mass	4e30			# if so, new unit of mass needs to be specified in kg
+fieldmin	1e-6			# 1e-3 if specified, minimum value of field to display (for color bar)
+fieldmax	2e-3			# 22 if specified, maximum value of field to display (for color bar)
+log_colorscale	Yes			# logarithmic color scale? (Yes or No)
+fieldofview	polar			# field of view: cartesian (cart) or polar (polar, default: phi vs. r)?
+rvsphi		Yes			# if field of view is polar, do we plot radius vs phi instead?	
+myrmin					# if specified, minimum radius to display field over
+myrmax	       				# if specified, maximum radius to display field over
+myphimin				# if specified, minimum azimuth to display field over (between 0 and 2pi)
+myphimax				# if specified, maximum azimuth to display field over (between 0 and 2pi)
+mytmin					# if specified, minimum time for y=f(time) plots
+mytmax					# if specified, maximum time for y=f(time) plots
+showdust	No			# show dust particles? (Yes or No)
+showplanet	No
+streamlines	No			# show gas streamlines? (Yes or No)
+nstreamlines	20			# number of streamlines to compute and display
+sizemin		1e-5			# if specified, maximum particle size (in meters)
+sizemax		1e-2			# if specified, minimum particle size (in meters)
+take_one_point_every			# if specified, take one point every Nth in y=f(x) plots
+saveaspdf	Yes			# save image as pdf file? (Yes or No)
+saveaspng	No			# save image as png file? (Yes or No)
