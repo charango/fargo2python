@@ -12,7 +12,7 @@ def plottqwk():
     
     # first prepare figure
     fig = plt.figure(figsize=(8.,8.))
-    plt.subplots_adjust(left=0.16, right=0.94, top=0.94, bottom=0.12)
+    plt.subplots_adjust(left=0.19, right=0.94, top=0.94, bottom=0.12)
     ax = fig.gca()
     ax.set_xlabel('time [orbit]')
     if par.plot_tqwk == 'torque':
@@ -64,6 +64,17 @@ def plottqwk():
            else:
                xmax = par.mytmax
            ax.set_xlim(xmin,xmax)
+
+           ymin = 0.0
+           ymax = 0.0
+           if ('myymin' in open('paramsf2p.dat').read()) and (par.myymin != '#'):
+               ymin = par.myymin
+           if ('myymax' in open('paramsf2p.dat').read()) and (par.myymax != '#'):
+               ymax = par.myymax
+           if ymin != 0.0 or ymax != 0.0:
+               ax.set_ylim(ymin,ymax)
+               
+           
            ax.plot(time[::par.take_one_point_every], y[::par.take_one_point_every], color=par.c20[k*len(directory)+j], lw=2., linestyle = 'solid', label=directory[j])
            ax.legend(frameon=False,fontsize=15)
            fig.add_subplot(ax)

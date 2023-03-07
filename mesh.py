@@ -24,7 +24,10 @@ class Mesh():
         # -----
         if self.fargo3d == 'No':
             domain_azi = np.loadtxt(directory+"used_azi.dat")  # azimuthal interfaces of grid cells
-            self.pedge = np.append(domain_azi[:,1],domain_azi[-1:,2][0])
+            if self.nsec > 1:
+                self.pedge = np.append(domain_azi[:,1],domain_azi[-1:,2][0])
+            else:
+                self.pedge = np.linspace(0.,2.*np.pi,self.nsec+1)
         else:
             self.pedge = np.linspace(0.,2.*np.pi,self.nsec+1)  # phi-edge         
         self.pmed = 0.5*(self.pedge[:-1] + self.pedge[1:]) # phi-center

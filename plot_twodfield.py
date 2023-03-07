@@ -73,7 +73,10 @@ def plottwodfield():
 
         if par.allfluids == 'Yes':
             # prepare figure for each output number
-            fig, axes = plt.subplots(2,int(np.ceil(par.nbfluids/2)), figsize=(24.,12.))
+            if par.nbfluids > 6:  # could be refined...
+                fig, axes = plt.subplots(2,int(np.ceil(par.nbfluids/2)), figsize=(24.,12.))
+            else:
+                fig, axes = plt.subplots(2,int(np.ceil(par.nbfluids/2)), figsize=(18.,12.))
             plt.subplots_adjust(left=0.05, bottom=0.08, right=0.95, top=0.92, wspace=0.4, hspace=0.4)
 
         # loop over fluids
@@ -207,33 +210,6 @@ def plottwodfield():
                 sizedust = mydustsize2
 
             # -------------------
-            # read information on the planets (inner one so far)
-            # -------------------
-            if par.showplanet == 'Yes':
-                if par.fargo3d == 'Yes':
-                    f1, xpla, ypla, f4, f5, f6, f7, f8, date, omega = np.loadtxt(directory+"/planet0.dat",unpack=True)
-                else:
-                    f1, xpla, ypla, f4, f5, f6, f7, date, omega, f10, f11 = np.loadtxt(directory+"/planet0.dat",unpack=True)
-                xp = xpla[on[k]]
-                yp = ypla[on[k]]
-                if par.physical_units == 'Yes':
-                    xp *= (myfield.culength / 1.5e11)  # in au
-                    yp *= (myfield.culength / 1.5e11)  # in au
-                rp = np.sqrt(xp*xp + yp*yp)  # planet's orbital radius
-                tp = math.atan2(yp,xp)       # planet's azimuthal angle
-
-                # rotate particles azimuth by user-defined angle specified in degree in .dat file
-                if ('rotate_angle' in open('paramsf2p.dat').read()) and (par.rotate_angle != '#'):
-                    planet_shift_angle = np.pi*par.rotate_angle/180  # in radian
-                    tp += pc_shift_angle                  
-                    if tp > 2.0*np.pi:
-                        tp -= 2.0*np.pi
-                    if tp < 0.0:
-                        tp += 2.0*np.pi
-                    xp = rp*np.cos(tp)
-                    yp = rp*np.sin(tp)
-        
-            # -------------------
             # POLAR FIELD OF VIEW
             # -------------------
             if par.fieldofview == 'polar':
@@ -246,10 +222,6 @@ def plottwodfield():
                     for i in range(len(td)):
                         if td[i] > 2.0*np.pi:
                             td[i] -= 2.0*np.pi
-                if par.showplanet == 'Yes':
-                    tp += np.pi
-                    if tp > 2.0*np.pi:
-                        tp -= 2.0*np.pi
                 # plot radius in y-axis, azimuth in x-axis
                 if par.rvsphi == 'Yes':
                     X = T
@@ -257,9 +229,6 @@ def plottwodfield():
                     if par.showdust == 'Yes':   # particles
                         xdust = td
                         ydust = rd
-                    if par.showplanet == 'Yes':   # particles
-                        xp = tp
-                        yp = rp
                 else:
                 # plot azimuth in y-axis, radius in x-axis
                     array = np.transpose(array)
@@ -268,9 +237,6 @@ def plottwodfield():
                     if par.showdust == 'Yes':   # particles
                         xdust = rd
                         ydust = td
-                    if par.showplanet == 'Yes':   # particles
-                        xp = rp
-                        yp = tp
                         
                 # figure
                 if par.allfluids == 'No':
@@ -356,9 +322,6 @@ def plottwodfield():
                         if ('flip_xaxis' in open('paramsf2p.dat').read()) and (par.flip_xaxis == 'Yes'):
                             xdust = -xdust
                         ydust = rd*np.sin(td)
-                    if par.showplanet == 'Yes':
-                        if ('flip_xaxis' in open('paramsf2p.dat').read()) and (par.flip_xaxis == 'Yes'):
-                            xp = -xp
 
                 if myfield.cartesian_grid == 'Yes':
                     X = myfield.xmed
@@ -439,27 +402,30 @@ def plottwodfield():
 
             if par.log_colorscale == 'Yes':
                 if (par.fieldmin == 'auto' or par.fieldmax == 'auto'):
-                    minarray = 1e-8*array.max() #*myfieldmax?
+                    minarray = array.min() #1e-3*array.max()?
                     maxarray = array.max()
                     array = np.log(array/minarray)/np.log(maxarray/minarray)
-                    myfieldmin = 0.0
+                    #print(par.fluids[f],minarray,maxarray,array.min(),array.max())
+                    #print(array)
+                    myfieldmin = 1e-5
                     myfieldmax = 1.0
-                    mynorm = matplotlib.colors.Normalize()
+                    mynorm = matplotlib.colors.Normalize(vmin=myfieldmin,vmax=myfieldmax)
                     strfield = r' $\log(\rho/\rho_{min})~/~\log(\rho_{max}/\rho_{min})$'+' at '+myfield.strtime
                 else:
-                    if (myfieldmax/myfieldmin > 1e3):
+                    if (myfieldmax/myfieldmin > 1e3 and (par.fieldmin == '#')):
                         myfieldmin = 1e-3*myfieldmax
 
             # Normalization for colorbar: linear or logarithmic scale
             if par.log_colorscale == 'Yes':
-                mynorm = matplotlib.colors.LogNorm(vmin=myfieldmin,vmax=myfieldmax)
+                if (par.fieldmin != 'auto' and par.fieldmax != 'auto'):
+                    mynorm = matplotlib.colors.LogNorm(vmin=myfieldmin,vmax=myfieldmax)
             else:
                 mynorm = matplotlib.colors.Normalize(vmin=myfieldmin,vmax=myfieldmax)
                 
             # -----------------------
             # display contour field
-            # -----------------------        
-            CF = ax.pcolormesh(X,Y,array,cmap=mycolormap,vmin=myfieldmin,vmax=myfieldmax,norm=mynorm,rasterized=True)
+            # -----------------------
+            CF = ax.pcolormesh(X,Y,array,cmap=mycolormap,norm=mynorm,rasterized=True)
             #CF = ax.imshow(array, origin='lower', cmap=mycolormap, interpolation='bilinear', vmin=myfieldmin, vmax=myfieldmax, aspect='auto', extent=[X.min(),X.max(),Y.min(),Y.max()])
 
             # ------------------
@@ -484,12 +450,61 @@ def plottwodfield():
                 CD = ax.scatter(xdust,ydust,s=1,c=sizedust,cmap=colored_cmap,alpha=0.3,vmin=sizemin,vmax=sizemax,norm=matplotlib.colors.LogNorm())
 
             # ------------------
-            # overlay planet
+            # overlay planets
             # ------------------
-            if par.showplanet == 'Yes':            
+            if par.showplanet == 'Yes':
+
+                # Find how many 'planets' there are
+                nbplanets = len(fnmatch.filter(os.listdir(directory), 'planet*.dat'))
+                xp = np.zeros(nbplanets)
+                yp = np.zeros(nbplanets)
+
+                for l in range(nbplanets):
+                    # read information on the planets (inner one so far)
+                    if par.fargo3d == 'Yes':
+                        f1, xpla, ypla, f4, f5, f6, f7, f8, date, omega = np.loadtxt(directory+"/planet"+str(l)+".dat",unpack=True)
+                    else:
+                        f1, xpla, ypla, f4, f5, f6, f7, date, omega, f10, f11 = np.loadtxt(directory+"/planet"+str(l)+".dat",unpack=True)
+                    xp[l] = xpla[on[k]]
+                    yp[l] = ypla[on[k]]
+                    if par.physical_units == 'Yes':
+                        xp[l] *= (myfield.culength / 1.5e11)  # in au
+                        yp[l] *= (myfield.culength / 1.5e11)  # in au
+                    rp = np.sqrt(xp[l]*xp[l] + yp[l]*yp[l])  # planet's orbital radius
+                    tp = math.atan2(yp[l],xp[l])       # planet's azimuthal angle
+
+                    # rotate particles azimuth by user-defined angle specified in degree in .dat file
+                    if ('rotate_angle' in open('paramsf2p.dat').read()) and (par.rotate_angle != '#'):
+                        planet_shift_angle = np.pi*par.rotate_angle/180  # in radian
+                        tp += pc_shift_angle                  
+                        if tp > 2.0*np.pi:
+                            tp -= 2.0*np.pi
+                        if tp < 0.0:
+                            tp += 2.0*np.pi
+                        xp[l] = rp*np.cos(tp)
+                        yp[l] = rp*np.sin(tp)
+
+                    if par.fieldofview == 'polar':
+                        tp += np.pi
+                        if tp > 2.0*np.pi:
+                            tp -= 2.0*np.pi
+                        if par.rvsphi == 'Yes':
+                            xp[l] = tp
+                            yp[l] = rp
+                        else:
+                            xp[l] = tp
+                            yp[l] = tp
+
+                    if par.fieldofview == 'cart' and myfield.cartesian_grid == 'No':
+                        if ('flip_xaxis' in open('paramsf2p.dat').read()) and (par.flip_xaxis == 'Yes'):
+                            xp[l] = -xp[l]
+                    
+                # add planets via scatter plot
                 CP = ax.scatter(xp,yp,s=10,c='lightpink',cmap=colored_cmap,alpha=1)
 
-                
+            # ----------------
+            # special case all fluids 
+            # ----------------
             if par.allfluids == 'Yes':
                 colorstr = 'white' # 'lightpink'
                 xmin,xmax = ax.get_xlim()
@@ -509,6 +524,7 @@ def plottwodfield():
             cb = plt.colorbar(CF, cax=cax, orientation='horizontal')
             cax.xaxis.tick_top()
             cax.xaxis.set_tick_params(direction='out')
+            cax.xaxis.set_major_locator(plt.MaxNLocator(4))
             # title on top
             cax.xaxis.set_label_position('top')
             cax.set_xlabel(strfield)

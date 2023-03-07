@@ -67,7 +67,9 @@ def plotonedprofile():
                     # conversion in physical units
                     if par.physical_units == 'Yes':
                         array = myfield.data * myfield.unit
-                    
+                    if par.log_colorscale == 'Yes' and (par.whatfield == 'vrad' or par.whatfield == 'vy'):
+                        array = np.abs(array)
+                        
                 axiarray = np.sum(array[imin:imax,:],axis=1)/myfield.nsec
                 
                 if axiarray.min() < ymin:
@@ -138,6 +140,9 @@ def plotonedprofile():
                 # conversion in physical units
                 if par.physical_units == 'Yes':
                     array = myfield.data * myfield.unit
+                if par.log_colorscale == 'Yes' and (par.whatfield == 'vrad' or par.whatfield == 'vy'):
+                    print('1D vrad displayed with log y-scale')
+                    array = np.abs(array)
                     
             axiarray = np.sum(array,axis=1)/myfield.nsec
             #axiarray = axiarray[2:-2]  # CUIDADIN!!

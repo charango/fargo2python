@@ -245,6 +245,9 @@ class Field(Mesh):
                     else:                         # python 3.X
                         buf = subprocess.getoutput(command)
                     gamma = float(buf.split()[1])
+
+                    if field == 'toomre':
+                        vphi = self.__open_field(directory+fluid+'vtheta'+str(on)+'.dat',dtype,fieldofview)
                     
                 # case we're running with Fargo3D    
                 else:
@@ -273,8 +276,10 @@ class Field(Mesh):
                     else:
                         buf = subprocess.getoutput(command)
                     gamma = float(buf.split()[1])          
-                        
 
+                    if field == 'toomre':
+                        vphi = self.__open_field(directory+fluid+'vx'+str(on)+'.dat',dtype,fieldofview)
+                        
                 # work out temperature first: self.data contains the gas temperature
                 if energyequation == 'No':
                     # expression below valid both for Fargo-3D and Dusty FARGO-ADSG:
@@ -296,10 +301,18 @@ class Field(Mesh):
                 if field == 'toomre':
                     dens = self.__open_field(directory+fluid+'dens'+str(on)+'.dat',dtype,fieldofview)
                     cs = np.sqrt(gamma*self.data)
-                    self.data = cs/np.pi/dens
-                    omega = (self.rmed)**(-1.5)
-                    for j in range(self.nsec):
-                        self.data[:,j] *= omega
+                    self.data = cs/np.pi/dens  # (nrad,nsec)
+                    
+                    omega = np.zeros((self.nrad,self.nsec))
+                    # vphi, read above, is in the corotating frame!
+                    for i in range(self.nrad):
+                        vphi[i,:] += (self.rmed)[i]*omegaframe
+                    axivphi = np.sum(vphi,axis=1)/self.nsec  # just in case...
+                    
+                    for i in range(self.nrad):
+                        omega[i,:] = vphi[i,:] / self.rmed[i]
+
+                    self.data *= omega
                     
 
             #
@@ -389,9 +402,15 @@ class Field(Mesh):
             # VORTICITY or VORTENSITY
             # ----
             if (field == 'vorticity' or field == 'vortensity'):
-                vrad = self.__open_field(directory+fluid+'vrad'+str(on)+'.dat',dtype,fieldofview)
+
+                if self.fargo3d == 'No':
+                    vrad = self.__open_field(directory+fluid+'vrad'+str(on)+'.dat',dtype,fieldofview)
+                    vphi = self.__open_field(directory+fluid+'vtheta'+str(on)+'.dat',dtype,fieldofview)
+                else:
+                    vrad = self.__open_field(directory+fluid+'vy'+str(on)+'.dat',dtype,fieldofview)
+                    vphi = self.__open_field(directory+fluid+'vx'+str(on)+'.dat',dtype,fieldofview)
+                
                 # vphi is in the corotating frame!
-                vphi = self.__open_field(directory+fluid+'vtheta'+str(on)+'.dat',dtype,fieldofview)
                 for i in range(self.nrad):
                     vphi[i,:] += (self.rmed)[i]*omegaframe
                 # we first calculate drrvphi
@@ -561,18 +580,28 @@ class Field(Mesh):
                 if field == 'vtheta':
                     #print(vphi_cart.min(),vphi_cart.max())
                     self.data = vphi_cart
-                    
+
+            # ----
+            # Non-axisymmetric part of gas density
+            # ----        
+            if field == 'naodens':
+                dens = self.__open_field(directory+fluid+'dens'+str(on)+'.dat',dtype,fieldofview)
+                axidens = np.sum(dens,axis=1)/self.nsec
+                self.data = dens-axidens.repeat(self.nsec).reshape(self.nrad,self.nsec)
+                print('#### NAO DENSITY ###')
+                print(self.data.min(),self.data.max())
+                self.strname = r'$\Sigma - \langle\Sigma\rangle_\varphi$'
+                
         # field name and units
         if field == 'dens':
+            self.strname += ' density'
             #self.strname += r' $\Sigma$'
             if self.fargo3d == 'No':  # 2D
-                self.strname += ' density'
                 if physical_units == 'Yes' and nodiff == 'Yes':
                     self.unit = (self.cumass*1e3)/((self.culength*1e2)**2.)
                     self.strname += r' [g cm$^{-2}$]'
             else:
                 #self.strname += ' midplane density'
-                self.strname += ' density'
                 if physical_units == 'Yes' and nodiff == 'Yes':
                     if self.ncol > 1:  # 3D
                         self.unit = (self.cumass*1e3)/((self.culength*1e2)**3.)
