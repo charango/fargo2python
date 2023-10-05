@@ -9,7 +9,7 @@ new_unit_length	4.5e12			# new unit of length in meters
 new_unit_mass	4e30			# new unit of mass in kg
 
 movie		No			# make a movie? requires on to take the form onmin,onmax (eg: 1,10)
-on	   	20			# fargo's output number(s), separated by a comma (,) if several
+on	   	0,20			# fargo's output number(s), separated by a comma (,) if several
 
 
 ###############
@@ -37,6 +37,12 @@ mmr_integers	5,3
 # type x,y to plot y vs. x: x can be r (radius) or phi (azimuth);
 # y can be phi, size (dust size), Stokes (Stokes number), vr (radial velocity) or vphi (azimuthal velocity)
 plot_dust	No
+
+
+### plot disc's centre-of-mass? (new -- Aug. 2023)
+# type 'xy' to plot x vs. y (time in colour) or 'tr' to show time evolution of radial distance
+# of centre-of-mass from frame's origin (ie the central star)
+plot_disccom	No
 
 
 ### if all above plot booleans are set to No, gas quantities are displayed:
@@ -68,9 +74,11 @@ nstreamlines	20			# number of streamlines to show
 ### Common options ###
 ######################
 
-log_colorscale	No			# logarithmic color scale?
+log_colorscale	No			# logarithmic color scale for 2D plots?
+log_xyplots_y	Yes			# logarithmic y-scale for y=f(x) plots?
+log_xyplots_x	No			# logarithmic x-scale for y=f(x) plots?
 
-use_legend				# manually enter legend to be used for 1D profiles if plot_tqwk set to Yes
+use_legend	''			# manually enter legend to be used for 1D profiles if plot_tqwk set to Yes
 
 myrmin					# if specified, minimum radius to display field over
 myrmax	        			# if specified, maximum radius to display field over
