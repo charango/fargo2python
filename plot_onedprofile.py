@@ -27,9 +27,9 @@ def plotonedprofile():
         directory = [par.directory]       
  
     if par.physical_units == 'Yes':
-        xtitle = 'Radius [au]'
+        xtitle = 'radius [au]'
     else:
-        xtitle = 'Radius [code units]'
+        xtitle = 'radius [code units]'
     strfield = Field(field=par.whatfield, fluid=par.fluid, on=on[0], directory=directory[0], physical_units=par.physical_units, nodiff=par.nodiff, fieldofview=par.fieldofview, onedprofile=par.onedprofile, override_units=par.override_units).strname
 
     # if fieldmin and fieldmax are undefined, find out min and max of
@@ -67,7 +67,7 @@ def plotonedprofile():
                     # conversion in physical units
                     if par.physical_units == 'Yes':
                         array = myfield.data * myfield.unit
-                    if par.log_colorscale == 'Yes' and (par.whatfield == 'vrad' or par.whatfield == 'vy'):
+                    if par.log_xyplots_y == 'Yes' and (par.whatfield == 'vrad' or par.whatfield == 'vy'):
                         array = np.abs(array)
                         
                 axiarray = np.sum(array[imin:imax,:],axis=1)/myfield.nsec
@@ -96,8 +96,10 @@ def plotonedprofile():
         plt.subplots_adjust(left=0.20, right=0.96, top=0.94, bottom=0.12)
         ax = fig.gca()
         ax.set_xlabel(xtitle)
-        if par.log_colorscale == 'Yes':
+        if par.log_xyplots_y == 'Yes':
             ax.set_yscale('log')
+        if par.log_xyplots_x == 'Yes':
+            ax.set_xscale('log')
 
     # -----------------------------
     # then plot via double for loop
@@ -111,8 +113,10 @@ def plotonedprofile():
             plt.subplots_adjust(left=0.20, right=0.96, top=0.94, bottom=0.12)
             ax = fig.gca()
             ax.set_xlabel(xtitle)
-            if par.log_colorscale == 'Yes':
+            if par.log_xyplots_y == 'Yes':
                 ax.set_yscale('log')
+            if par.log_xyplots_x == 'Yes':
+                ax.set_xscale('log')
                 
         for j in range(len(directory)):  # loop over directories
             # it does not take much time to read all fields again...
@@ -140,8 +144,8 @@ def plotonedprofile():
                 # conversion in physical units
                 if par.physical_units == 'Yes':
                     array = myfield.data * myfield.unit
-                if par.log_colorscale == 'Yes' and (par.whatfield == 'vrad' or par.whatfield == 'vy'):
-                    print('1D vrad displayed with log y-scale')
+                if par.log_xyplots_y == 'Yes' and (par.whatfield == 'vrad' or par.whatfield == 'vy'):
+                    #print('1D vrad displayed with log y-scale')
                     array = np.abs(array)
                     
             axiarray = np.sum(array,axis=1)/myfield.nsec
@@ -154,7 +158,13 @@ def plotonedprofile():
             mylabel = myfield.strtime
 
             if len(directory) > 1:
-                mylabel = str(directory[j]) + ', '+ mylabel
+                if ('use_legend' in open('paramsf2p.dat').read()) and (par.use_legend != '#'):
+                    if len(directory) == 1:
+                        mylabel = str(par.use_legend) + ', '+ mylabel
+                    else:
+                        mylabel = str(par.use_legend[j]) + ', '+ mylabel
+                else:
+                    mylabel = str(directory[j]) + ', '+ mylabel
             if par.movie == 'Yes':
                 mycolor = par.c20[j]
             else:

@@ -14,10 +14,10 @@ def plotplanet():
 
     # first prepare figure
     fig = plt.figure(figsize=(8.,8.))
-    plt.subplots_adjust(left=0.16, right=0.96, top=0.94, bottom=0.12)
+    plt.subplots_adjust(left=0.17, right=0.94, top=0.94, bottom=0.12)
     ax = fig.gca()
     if par.plot_planet[0] == 't':
-        xtitle = 'Time [orbit]'
+        xtitle = 'Time [orbits]'
     if par.plot_planet[0] == 'a':
         xtitle = 'Semi-major axis'
         if par.physical_units == 'Yes':

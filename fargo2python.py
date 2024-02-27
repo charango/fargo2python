@@ -66,3 +66,10 @@ if par.plot_planet != 'No':
 if par.plot_dust != 'No' and par.fargo3d == 'No':
     from plot_dust import *
     plotdust()
+
+# =====================
+# 7. DISC'S CENTER OF MASS
+# =====================
+if par.plot_disccom != 'No':
+    from plot_disccom import *
+    plotdisccom()

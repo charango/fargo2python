@@ -12,9 +12,9 @@ def plottqwk():
     
     # first prepare figure
     fig = plt.figure(figsize=(8.,8.))
-    plt.subplots_adjust(left=0.19, right=0.94, top=0.94, bottom=0.12)
+    plt.subplots_adjust(left=0.17, right=0.94, top=0.94, bottom=0.12)
     ax = fig.gca()
-    ax.set_xlabel('time [orbit]')
+    ax.set_xlabel('time [orbits]')
     if par.plot_tqwk == 'torque':
         ytitle = 'Specific torque on planet'
     if par.plot_tqwk == 'rtatorque':
@@ -33,7 +33,16 @@ def plottqwk():
         directory = [par.directory]
 
     # loop over directories
-    for j in range(len(directory)): 
+    for j in range(len(directory)):
+
+       if ('use_legend' in open('paramsf2p.dat').read()) and (par.use_legend != '#'):
+           if len(directory) == 1:
+               mylabel = str(par.use_legend)
+           else:
+               mylabel = str(par.use_legend[j])
+       else:
+           mylabel = str(directory[j])
+
        # start by reading planet0.dat file to get the initial radial position of the planet
        if par.fargo3d == 'Yes':
            f1, xpla, ypla, f4, f5, f6, f7, f8, date, omega = np.loadtxt(directory[j]+"/planet0.dat",unpack=True)
@@ -74,10 +83,22 @@ def plottqwk():
            if ymin != 0.0 or ymax != 0.0:
                ax.set_ylim(ymin,ymax)
                
-           
-           ax.plot(time[::par.take_one_point_every], y[::par.take_one_point_every], color=par.c20[k*len(directory)+j], lw=2., linestyle = 'solid', label=directory[j])
+           # new (Nov. 2023): display in y-axis log scale (indirect term
+           # project)
+           if par.log_xyplots_y == 'Yes':
+               y = np.abs(y)
+               ax.set_yscale('log')
+               ytitle = str('|')+ytitle+str('|')
+               
+           ax.plot(time[::par.take_one_point_every], y[::par.take_one_point_every], color=par.c20[k*len(directory)+j], lw=2., linestyle = 'solid', label=mylabel)
            ax.legend(frameon=False,fontsize=15)
            fig.add_subplot(ax)
+
+    ax.set_axisbelow(False)
+    ax.grid(axis='both', which='major', ls='-', alpha=0.8)
+    legend = plt.legend(loc='upper right',fontsize=15,facecolor='white',edgecolor='white',framealpha=0.85,numpoints=1,bbox_transform=plt.gcf().transFigure)
+    for line, text in zip(legend.get_lines(), legend.get_texts()):
+        text.set_color(line.get_color())
               
     # save file
     if len(directory) == 1:           

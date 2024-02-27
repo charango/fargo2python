@@ -77,8 +77,11 @@ def plottwodfield():
                 fig, axes = plt.subplots(2,int(np.ceil(par.nbfluids/2)), figsize=(24.,12.))
             else:
                 fig, axes = plt.subplots(2,int(np.ceil(par.nbfluids/2)), figsize=(18.,12.))
-            plt.subplots_adjust(left=0.05, bottom=0.08, right=0.95, top=0.92, wspace=0.4, hspace=0.4)
-
+            if par.fieldofview == 'cart':  
+                plt.subplots_adjust(left=0.25, right=0.75, top=0.90, bottom=0.10, wspace=0.6, hspace=0.6)
+            else:
+                plt.subplots_adjust(left=0.05, bottom=0.08, right=0.95, top=0.92, wspace=0.4, hspace=0.4)
+            
         # loop over fluids
         for f in range(len(par.fluids)):
 
@@ -476,7 +479,7 @@ def plottwodfield():
                     # rotate particles azimuth by user-defined angle specified in degree in .dat file
                     if ('rotate_angle' in open('paramsf2p.dat').read()) and (par.rotate_angle != '#'):
                         planet_shift_angle = np.pi*par.rotate_angle/180  # in radian
-                        tp += pc_shift_angle                  
+                        tp += planet_shift_angle                  
                         if tp > 2.0*np.pi:
                             tp -= 2.0*np.pi
                         if tp < 0.0:
@@ -492,7 +495,7 @@ def plottwodfield():
                             xp[l] = tp
                             yp[l] = rp
                         else:
-                            xp[l] = tp
+                            xp[l] = rp
                             yp[l] = tp
 
                     if par.fieldofview == 'cart' and myfield.cartesian_grid == 'No':
@@ -500,13 +503,14 @@ def plottwodfield():
                             xp[l] = -xp[l]
                     
                 # add planets via scatter plot
+                print('xp = ', xp, ' , yp = ', yp)
                 CP = ax.scatter(xp,yp,s=10,c='lightpink',cmap=colored_cmap,alpha=1)
 
             # ----------------
             # special case all fluids 
             # ----------------
             if par.allfluids == 'Yes':
-                colorstr = 'white' # 'lightpink'
+                colorstr = 'lightpink' # 'white'
                 xmin,xmax = ax.get_xlim()
                 ymin,ymax = ax.get_ylim()
                 if f > 0:
