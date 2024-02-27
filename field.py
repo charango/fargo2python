@@ -282,6 +282,7 @@ class Field(Mesh):
                         
                 # work out temperature first: self.data contains the gas temperature
                 if energyequation == 'No':
+                    gamma = 1.0  # reset gamma to 1
                     # expression below valid both for Fargo-3D and Dusty FARGO-ADSG:
                     for i in range(self.nrad):
                         self.data[i,:] = aspectratio*aspectratio*(((self.rmed)[i])**(-1.0+2.0*flaringindex))
@@ -401,7 +402,7 @@ class Field(Mesh):
             # ----
             # VORTICITY or VORTENSITY
             # ----
-            if (field == 'vorticity' or field == 'vortensity'):
+            if (field == 'vorticity' or field == 'drl' or field == 'vortensity' or field == 'invvortensity'):
 
                 if self.fargo3d == 'No':
                     vrad = self.__open_field(directory+fluid+'vrad'+str(on)+'.dat',dtype,fieldofview)
@@ -432,12 +433,24 @@ class Field(Mesh):
                 for j in range(self.nsec):
                     for i in range(self.nrad):
                         self.data[i,j] = (drrvphi[i,j] - dphivr[i,j]) / (self.redge)[i]
-                #
-                if field == 'vortensity':
+
+                # this is the radial derivative of the specific angular momentum
+                if field == 'drl':
+                    for j in range(self.nsec):
+                        for i in range(self.nrad):
+                            self.data[i,j] *= (self.redge)[i]
+                    self.strname += r' $\partial_r \ell$'
+                    
+                # vortensity or inverse vortensity
+                if field == 'vortensity' or field == 'invvortensity':
                     dens = self.__open_field(directory+fluid+'dens'+str(on)+'.dat',dtype,fieldofview)
                     self.data /= dens
-                    self.strname += ' vortensity'
-                else:
+                    if field == 'invvortensity':
+                        self.data = (1.0/self.data)
+                        self.strname += ' inverse vortensity'
+                    else:
+                        self.strname += ' vortensity'
+                if field == 'vorticity':
                     self.strname += ' vorticity'
             
             # ----
@@ -457,6 +470,25 @@ class Field(Mesh):
                 if physical_units == 'Yes' and nodiff == 'Yes':
                     self.unit = 1e-3*(self.culength)/(self.cutime)/(self.cutime)
                     self.strname += r' [km s$^{-2}$]'
+
+
+            # ----
+            # Torque in every cell
+            # ----
+            if (field == 'torquesg'):
+                input_file = directory+'torquesg'+str(on)+'.dat'
+                self.data = self.__open_field(input_file,dtype,fieldofview)
+                self.strname += r' SG spec. torque'
+                if physical_units == 'Yes' and nodiff == 'Yes':
+                    self.unit = (self.culength)*(self.culength)/(self.cutime)
+                    self.strname += r' [m$^{2}$ s$^{-1}$]'
+            if (field == 'torquesumdisc'):
+                input_file = directory+'torquesumdisc'+str(on)+'.dat'
+                self.data = self.__open_field(input_file,dtype,fieldofview)
+                self.strname += r' spec. torque via summation'
+                if physical_units == 'Yes' and nodiff == 'Yes':
+                    self.unit = (self.culength)*(self.culength)/(self.cutime)
+                    self.strname += r' [m$^{2}$ s$^{-1}$]'
 
 
             # ----
@@ -550,7 +582,7 @@ class Field(Mesh):
                     else:
                         self.data = buf[-1,:,:]   # midplane field
                 else:  # 2D
-                    self.data = 0.5*np.pi*s*rho_dust_int/sigma_gas                    
+                    self.data = 0.5*np.pi*s*rho_dust_int/sigma_gas
                 self.strname += ' Stokes number'
                 
             # ----
@@ -591,6 +623,18 @@ class Field(Mesh):
                 print('#### NAO DENSITY ###')
                 print(self.data.min(),self.data.max())
                 self.strname = r'$\Sigma - \langle\Sigma\rangle_\varphi$'
+
+            # ----
+            # time-averaged particle density: means that we read
+            # dustdensX.dat files for X from 0 to current output
+            # number 'on' and we time-average arrays
+            # ----        
+            if fluid == 'pc' and field == 'rtadens':
+                for z in np.arange(on+1):
+                    print('reading pcdens'+str(z)+'.dat file')
+                    self.data += self.__open_field(directory+fluid+'dens'+str(z)+'.dat',dtype,fieldofview)
+                self.data /= len(np.arange(on))
+                self.strname = 'r.t.a. particle density'
                 
         # field name and units
         if field == 'dens':
