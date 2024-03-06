@@ -33,17 +33,27 @@ class Field(Mesh):
                 directory += '/'
 
         # check if simulation has been carried out with fargo3d or
-        # with fargo2d (already done in par.py...)
+        # with fargo2d / original fargo code (somewhat redundant with
+        # what is done in par.py...)
         if isinstance(directory, str) == False:
-            input_file = directory[0]+'/summary0.dat'
+            summary0_file = directory[0]+'/summary0.dat'
+            usedazi_file  = directory[0]+'/used_azi.dat'
         else:
-            input_file = directory+'/summary0.dat'
-        if os.path.isfile(input_file) == True:
-            #print('Simulations were carried out with Fargo3D')
+            summary0_file = directory+'/summary0.dat'
+            usedazi_file  = directory+'/used_azi.dat'
+        if os.path.isfile(summary0_file) == True:
+            # Simulations were carried out with Fargo3D
             self.fargo3d = 'Yes'
         else:
-            #print('Simulations were carried out with Fargo2D')
+            # Simulations were carried out with Fargo2D
             self.fargo3d = 'No'
+            if os.path.isfile(usedazi_file) == True:
+                # Simulations were carried out with Dusty FARGO-ADSG
+                self.fargo_orig = 'No'
+            else:
+                # Simulations were carried out with original FARGO code
+                self.fargo_orig = 'Yes'
+            
         self.cartesian_grid = 'No'
         if self.fargo3d == 'Yes':
             command = 'awk " /^COORDINATES/ " '+directory+'/variables.par'
@@ -143,13 +153,21 @@ class Field(Mesh):
         if self.fargo3d == 'Yes':
             f1, xpla, ypla, f4, f5, f6, f7, f8, date, omega = np.loadtxt(directory+"/planet0.dat",unpack=True)
         else:
-            f1, xpla, ypla, f4, f5, f6, f7, date, omega, f10, f11 = np.loadtxt(directory+"planet0.dat",unpack=True)
+            if self.fargo_orig == 'Yes':
+                f1, xpla, ypla, f4, f5, f6, f7, date, omega = np.loadtxt(directory+"planet0.dat",unpack=True)
+            else:
+                f1, xpla, ypla, f4, f5, f6, f7, date, omega, f10, f11 = np.loadtxt(directory+"planet0.dat",unpack=True)
 
         # read only first line of file orbit0.dat to get initial semi-major axis:
         # procedure is independent of how many columns there is in the file
-        with open(directory+"/orbit0.dat") as f_in:
-            firstline_orbitfile = np.genfromtxt(itertools.islice(f_in, 0, 1, None), dtype=float)
-        apla = firstline_orbitfile[2]
+        if os.path.isfile(directory+"/orbit0.dat") == True:
+            with open(directory+"/orbit0.dat") as f_in:
+                firstline_orbitfile = np.genfromtxt(itertools.islice(f_in, 0, 1, None), dtype=float)
+            apla = firstline_orbitfile[2]
+        else:
+            with open(directory+"/planet0.dat") as f_in:
+                firstline_orbitfile = np.genfromtxt(itertools.islice(f_in, 0, 1, None), dtype=float)
+            apla = firstline_orbitfile[1]
             
         # check if planet0.dat file has only one line or more!
         if isinstance(xpla, (list, tuple, np.ndarray)) == True:

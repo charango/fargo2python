@@ -74,7 +74,7 @@ if isinstance(directory, str) == False:
 else:
     input_file = directory+'/summary0.dat'
 if os.path.isfile(input_file) == True:
-    fargo3d = 'Yes'    
+    fargo3d = 'Yes'  
     
 # global boolean: if True, then plot 1D or 2D fields
 plot_field = True
