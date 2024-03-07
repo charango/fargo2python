@@ -66,16 +66,16 @@ def plotplanet():
     directory = par.directory
     if isinstance(par.directory, str) == True:
         directory = [par.directory]
-    
+
     # loop over directories
     for j in range(len(directory)):
 
         # work out physical units
         if par.physical_units == 'Yes':
-            if par.fargo3d == 'No':
+            if par.fargo3d == 'No' and par.fargo_orig == 'No':
             # units.dat contains physical units of mass [kg], length [m], time [s], and temperature [k] 
                 cumass, culength, cutime, cutemp = np.loadtxt(directory[j]+"/units.dat",unpack=True)
-            else:
+            if par.fargo3d == 'Yes':
             # get units via variable.par file
                 command = 'awk " /^UNITOFLENGTHAU/ " '+directory[j]+'/variables.par'
                 # check which version of python we're using
@@ -93,9 +93,34 @@ def plotplanet():
                 cumass = float(buf.split()[1])*2e30  #from Msol to kg
                 # unit of time = sqrt( pow(L,3.) / 6.673e-11 / M );
                 cutime = np.sqrt( culength**3.0 / 6.673e-11 / cumass)
-        
+            # case we overrride code units
+            if par.override_units == 'Yes':
+                if par.new_unit_length == 0.0:
+                    sys.exit('override_units set to yes but new_unit_length is not defined in params.dat, I must exit!')
+                else:
+                    print('new unit of length in meters? : ', par.new_unit_length)
+                if par.new_unit_mass == 0.0:
+                    sys.exit('override_units set to yes but new_unit_mass is not defined in params.dat, I must exit!')
+                else:
+                    print('new unit of mass in kg? : ', par.new_unit_mass)
+                cumass = par.new_unit_mass
+                culength = par.new_unit_length
+                # Deduce new units of time and temperature:
+                # T = sqrt( pow(L,3.) / 6.673e-11 / M )
+                # U = mmw * 8.0841643e-15 * M / L;
+                cutime = np.sqrt( culength**3 / 6.673e-11 / cumass)
+                cutemp = 2.35 * 8.0841643e-15 * cumass / culength
+                print('### NEW UNITS SPECIFIED: ###')
+                print('new unit of length [m] = ',culength)
+                print('new unit of mass [kg]  = ',cumass)
+                print('new unit of time [s] = ',cutime)
+                print('new unit of temperature [K] = ',cutemp)
+                
         if par.fargo3d == 'No':
-            time, e, a, M, V, PA, mylambda, varpi = np.loadtxt(directory[j]+"/orbit0.dat",unpack=True)
+            if par.fargo_orig == 'No':
+                time, e, a, M, V, PA, mylambda, varpi = np.loadtxt(directory[j]+"/orbit0.dat",unpack=True)
+            else:
+                time, e, a, M, V, PA = np.loadtxt(directory[j]+"/orbit0.dat",unpack=True)
         else:
             command = 'awk "{print NF; exit}" '+directory[j]+'/orbit0.dat'
             # check which version of python we're using
@@ -120,7 +145,10 @@ def plotplanet():
         for k in range(nbplanets):
             
             if par.fargo3d == 'No':
-                time, e, a, M, V, PA, mylambda, varpi = np.loadtxt(directory[j]+"/orbit"+str(k)+".dat",unpack=True)
+                if par.fargo_orig == 'No':
+                    time, e, a, M, V, PA, mylambda, varpi = np.loadtxt(directory[j]+"/orbit"+str(k)+".dat",unpack=True)
+                else:
+                    time, e, a, M, V, PA = np.loadtxt(directory[j]+"/orbit"+str(k)+".dat",unpack=True)
             else:
                 if nbcol == 11:
                     time, e, a, M, V, argPA, phiangle, incl, longAN, PA, mylambda = np.loadtxt(directory[j]+"/orbit"+str(k)+".dat",unpack=True)

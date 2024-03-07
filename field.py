@@ -32,6 +32,9 @@ class Field(Mesh):
             if directory[-1] != '/':
                 directory += '/'
 
+        # first import global variables
+        import par
+    
         # check if simulation has been carried out with fargo3d or
         # with fargo2d / original fargo code (somewhat redundant with
         # what is done in par.py...)
@@ -92,14 +95,14 @@ class Field(Mesh):
         Mesh.__init__(self, directory)    
 
         if physical_units == 'Yes':
-            if self.fargo3d == 'No':
+            if self.fargo3d == 'No' and self.fargo_orig == 'No':
                 # units.dat contains physical units of mass [kg], length [m], time [s], and temperature [k] 
                 cumass, culength, cutime, cutemp = np.loadtxt(directory+"units.dat",unpack=True)
                 self.cumass = cumass
                 self.culength = culength
                 self.cutime = cutime 
                 self.cutemp = cutemp
-            else:
+            if self.fargo3d == 'Yes':
                 # get units via variable.par file
                 command = 'awk " /^UNITOFLENGTHAU/ " '+directory+'variables.par'
                 # check which version of python we're using
@@ -121,16 +124,16 @@ class Field(Mesh):
                 self.cutemp = 2.35 * 8.0841643e-15 * self.cumass / self.culength
 
             if override_units == 'Yes':
-                if new_unit_length == 0.0:
+                if par.new_unit_length == 0.0:
                     sys.exit('override_units set to yes but new_unit_length is not defined in params.dat, I must exit!')
                 else:
-                    print('new unit of length in meters? : ', new_unit_length)
-                if new_unit_mass == 0.0:
+                    print('new unit of length in meters? : ', par.new_unit_length)
+                if par.new_unit_mass == 0.0:
                     sys.exit('override_units set to yes but new_unit_mass is not defined in params.dat, I must exit!')
                 else:
-                    print('new unit of mass in kg? : ', new_unit_mass)
-                self.cumass = new_unit_mass
-                self.culength = new_unit_length
+                    print('new unit of mass in kg? : ', par.new_unit_mass)
+                self.cumass = par.new_unit_mass
+                self.culength = par.new_unit_length
                 # Deduce new units of time and temperature:
                 # T = sqrt( pow(L,3.) / 6.673e-11 / M )
                 # U = mmw * 8.0841643e-15 * M / L;

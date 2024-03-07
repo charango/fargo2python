@@ -69,13 +69,26 @@ for i in range(len(par)):
 # Below we work out specific parameters and/or error messages
 # was simulation carried out with Fargo3D?
 fargo3d = 'No'
+fargo_orig = 'No'
 if isinstance(directory, str) == False:
-    input_file = directory[0]+'/summary0.dat'
+    summary0_file = directory[0]+'/summary0.dat'
+    usedazi_file  = directory[0]+'/used_azi.dat'
 else:
-    input_file = directory+'/summary0.dat'
-if os.path.isfile(input_file) == True:
-    fargo3d = 'Yes'  
-    
+    summary0_file = directory+'/summary0.dat'
+    usedazi_file  = directory+'/used_azi.dat'
+if os.path.isfile(summary0_file) == True:
+    # Simulations were carried out with Fargo3D
+    fargo3d = 'Yes'
+else:
+    # Simulations were carried out with Fargo2D
+    fargo3d = 'No'
+    if os.path.isfile(usedazi_file) == True:
+    # Simulations were carried out with Dusty FARGO-ADSG
+        fargo_orig = 'No'
+    else:
+    # Simulations were carried out with original FARGO code
+        fargo_orig = 'Yes'
+
 # global boolean: if True, then plot 1D or 2D fields
 plot_field = True
 if plot_tqwk != 'No' or plot_planet != 'No' or plot_disccom != 'No':
