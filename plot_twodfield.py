@@ -170,11 +170,14 @@ def plottwodfield():
                     jmax = np.argmin(np.abs(T-T.max()))
 
                 # color bar for background field
+                mycolormap = colored_cmap
+                '''
                 if par.showdust == 'No':
                     mycolormap = colored_cmap
                 else:
                     mycolormap = 'gray'
-                    
+                '''
+                
                 # end of stuff done only at first output number
             
             # -------------------
@@ -450,7 +453,9 @@ def plottwodfield():
             # overlay particles
             # ------------------
             if par.showdust == 'Yes':
-                CD = ax.scatter(xdust,ydust,s=1,c=sizedust,cmap=colored_cmap,alpha=0.3,vmin=sizemin,vmax=sizemax,norm=matplotlib.colors.LogNorm())
+                mynorm = matplotlib.colors.LogNorm(vmin=sizemin,vmax=sizemax)
+                CD = ax.scatter(xdust,ydust,s=1,c=sizedust,cmap='nipy_spectral',alpha=0.3,norm=mynorm)
+                #CD = ax.scatter(xdust,ydust,s=1,c=sizedust,cmap='nipy_spectral',alpha=0.3,vmin=sizemin,vmax=sizemax,norm=matplotlib.colors.LogNorm())
 
             # ------------------
             # overlay planets
@@ -542,7 +547,13 @@ def plottwodfield():
                 cb2 = plt.colorbar(CD, cax=cax2, orientation='vertical')
                 cax2.yaxis.tick_right()        
                 cb2.set_alpha(0.7)
-                cb2.draw_all()
+                from packaging import version
+                # if matplotlib version >= 3.6, draw_all no longer
+                # exists and becomes _draw_all
+                if version.parse(matplotlib.__version__) < version.parse("3.6"):
+                    cb2.draw_all()
+                else:
+                    cb2._draw_all()
                 cax2.yaxis.set_tick_params(direction='out')
                 # title on right-hand side
                 cax2.set_ylabel('dust size [meter]')
