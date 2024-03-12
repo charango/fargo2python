@@ -48,7 +48,7 @@ plot_disccom	No
 ### if all above plot booleans are set to No, gas quantities are displayed:
 
 fluid		gas			# what fluid? gas, dust or all (FARGO3D only)
-whatfield	dens			# dens,vrad,vtheta,vcol,pressure,temp,toomre,entropy,vorticity,vortensity,ecc,stokes...
+whatfield	dens			# dens,densoveraxi,vrad,vtheta,vcol,pressure,temp,toomre,entropy,vorticity,vortensity,ecc,stokes...
 onedprofile	No			# plot azimuthally-averaged radial profile (1D)?
 nodiff	        Yes			# relative difference wrt initial field? (Yes or No)
 
