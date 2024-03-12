@@ -656,6 +656,17 @@ class Field(Mesh):
                     self.data += self.__open_field(directory+fluid+'dens'+str(z)+'.dat',dtype,fieldofview)
                 self.data /= len(np.arange(on))
                 self.strname = 'r.t.a. particle density'
+
+            # ----
+            # time-averaged particle density: means that we read
+            # dustdensX.dat files for X from 0 to current output
+            # number 'on' and we time-average arrays
+            # ----        
+            if field == 'densoveraxi':
+                dens = self.__open_field(directory+fluid+'dens'+str(on)+'.dat',dtype,fieldofview)
+                axidens = np.sum(dens,axis=1)/self.nsec
+                self.data = dens/(axidens.repeat(self.nsec).reshape(self.nrad,self.nsec))
+                self.strname = r'$\Sigma / \langle\Sigma\rangle_\varphi$'
                 
         # field name and units
         if field == 'dens':
