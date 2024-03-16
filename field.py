@@ -59,7 +59,7 @@ class Field(Mesh):
             
         self.cartesian_grid = 'No'
         if self.fargo3d == 'Yes':
-            command = 'awk " /^COORDINATES/ " '+directory+'/variables.par'
+            command = par.awk_command+' " /^COORDINATES/ " '+directory+'/variables.par'
             if sys.version_info[0] < 3:   # python 2.X
                 buf = subprocess.check_output(command, shell=True)
             else:                         # python 3.X
@@ -81,7 +81,7 @@ class Field(Mesh):
 
         # get number of cells in (co)latitude, if any
         if self.fargo3d == 'Yes':
-            command = 'awk " /^NZ/ " '+directory+'variables.par'
+            command = par.awk_command+' " /^NZ/ " '+directory+'variables.par'
             # check which version of python we're using
             if sys.version_info[0] < 3:   # python 2.X
                 buf = subprocess.check_output(command, shell=True)
@@ -104,14 +104,14 @@ class Field(Mesh):
                 self.cutemp = cutemp
             if self.fargo3d == 'Yes':
                 # get units via variable.par file
-                command = 'awk " /^UNITOFLENGTHAU/ " '+directory+'variables.par'
+                command = par.awk_command+' " /^UNITOFLENGTHAU/ " '+directory+'variables.par'
                 # check which version of python we're using
                 if sys.version_info[0] < 3:   # python 2.X
                     buf = subprocess.check_output(command, shell=True)
                 else:                         # python 3.X
                     buf = subprocess.getoutput(command)
                 self.culength = float(buf.split()[1])*1.5e11  #from au to meters
-                command = 'awk " /^UNITOFMASSMSUN/ " '+directory+'variables.par'
+                command = par.awk_command+' " /^UNITOFMASSMSUN/ " '+directory+'variables.par'
                 # check which version of python we're using
                 if sys.version_info[0] < 3:   # python 2.X
                     buf = subprocess.check_output(command, shell=True)
@@ -233,7 +233,7 @@ class Field(Mesh):
                     
                 # check that no energy equation was employed
                 if self.fargo3d == 'No':
-                    command = 'awk " /^EnergyEquation/ " '+directory+'*.par'
+                    command = par.awk_command+' " /^EnergyEquation/ " '+directory+'*.par'
                     # check which version of python we're using
                     if sys.version_info[0] < 3:   # python 2.X
                         buf = subprocess.check_output(command, shell=True)
@@ -243,7 +243,7 @@ class Field(Mesh):
                     
                     if energyequation == 'No':
                         # get the aspect ratio and flaring index used in the numerical simulation
-                        command = 'awk " /^AspectRatio/ " '+directory+'*.par'
+                        command = par.awk_command+' " /^AspectRatio/ " '+directory+'*.par'
                         # check which version of python we're using
                         if sys.version_info[0] < 3:   # python 2.X
                             buf = subprocess.check_output(command, shell=True)
@@ -251,7 +251,7 @@ class Field(Mesh):
                             buf = subprocess.getoutput(command)
                         aspectratio = float(buf.split()[1])
                         # get the flaring index used in the numerical simulation
-                        command = 'awk " /^FlaringIndex/ " '+directory+'*.par'
+                        command = par.awk_command+' " /^FlaringIndex/ " '+directory+'*.par'
                         if sys.version_info[0] < 3:
                             buf = subprocess.check_output(command, shell=True)
                         else:
@@ -259,7 +259,7 @@ class Field(Mesh):
                         flaringindex = float(buf.split()[1])
                     
                     # get the adiabatic index index used in the numerical simulation
-                    command = 'awk " /^AdiabaticIndex/ " '+directory+'*.par'
+                    command = par.awk_command+' " /^AdiabaticIndex/ " '+directory+'*.par'
                     # check which version of python we're using
                     if sys.version_info[0] < 3:   # python 2.X
                         buf = subprocess.check_output(command, shell=True)
@@ -275,14 +275,14 @@ class Field(Mesh):
                     if "ISOTHERMAL" in open(directory+'summary'+str(on)+'.dat',"r").read():
                         energyequation = "No"
                         if energyequation == 'No':
-                            command = 'awk " /^ASPECTRATIO/ " '+directory+'*.par'
+                            command = par.awk_command+' " /^ASPECTRATIO/ " '+directory+'*.par'
                             if sys.version_info[0] < 3:   # python 2.X
                                 buf = subprocess.check_output(command, shell=True)
                             else:                         # python 3.X
                                 buf = subprocess.getoutput(command)
                             aspectratio = float(buf.split()[1])                
                             # then get the flaring index used in the numerical simulation
-                            command = 'awk " /^FLARINGINDEX/ " '+directory+'*.par'
+                            command = par.awk_command+' " /^FLARINGINDEX/ " '+directory+'*.par'
                             if sys.version_info[0] < 3:
                                 buf = subprocess.check_output(command, shell=True)
                             else:
@@ -291,7 +291,7 @@ class Field(Mesh):
                     else:
                         energyequation = "Yes"
                      # then get the adiabatic index 'gamma' in the numerical simulation
-                    command = 'awk " /^GAMMA/ " '+directory+'*.par'
+                    command = par.awk_command+' " /^GAMMA/ " '+directory+'*.par'
                     if sys.version_info[0] < 3:
                         buf = subprocess.check_output(command, shell=True)
                     else:
@@ -343,7 +343,7 @@ class Field(Mesh):
             # ----
             if field == 'entropy':
                 # get the adiabatic index index used in the numerical simulation
-                command = 'awk " /^AdiabaticIndex/ " '+directory+'*.par'
+                command = par.awk_command+' " /^AdiabaticIndex/ " '+directory+'*.par'
                 # check which version of python we're using
                 if sys.version_info[0] < 3:   # python 2.X
                     buf = subprocess.check_output(command, shell=True)
@@ -556,7 +556,7 @@ class Field(Mesh):
                 else:
                     sigma_gas = self.__open_field(directory+'gasdens'+str(on)+'.dat',dtype,fieldofview)
                 # get dust internal density
-                command = 'awk " /^DUSTINTERNALRHO/ " '+directory+'variables.par'
+                command = par.awk_command+' " /^DUSTINTERNALRHO/ " '+directory+'variables.par'
                 if sys.version_info[0] < 3:   # python 2.X
                     buf = subprocess.check_output(command, shell=True)
                 else:                         # python 3.X
@@ -577,14 +577,14 @@ class Field(Mesh):
                 # aspect ratio and flaring index used in the numerical
                 # simulation
                 if self.ncol > 1:  # 3D
-                    command = 'awk " /^ASPECTRATIO/ " '+directory+'*.par'
+                    command = par.awk_command+' " /^ASPECTRATIO/ " '+directory+'*.par'
                     if sys.version_info[0] < 3:   # python 2.X
                         buf = subprocess.check_output(command, shell=True)
                     else:                         # python 3.X
                         buf = subprocess.getoutput(command)
                     aspectratio = float(buf.split()[1])                
                     # then get the flaring index used in the numerical simulation
-                    command = 'awk " /^FLARINGINDEX/ " '+directory+'*.par'
+                    command = par.awk_command+' " /^FLARINGINDEX/ " '+directory+'*.par'
                     if sys.version_info[0] < 3:
                         buf = subprocess.check_output(command, shell=True)
                     else:

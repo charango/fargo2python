@@ -77,14 +77,14 @@ def plotplanet():
                 cumass, culength, cutime, cutemp = np.loadtxt(directory[j]+"/units.dat",unpack=True)
             if par.fargo3d == 'Yes':
             # get units via variable.par file
-                command = 'awk " /^UNITOFLENGTHAU/ " '+directory[j]+'/variables.par'
+                command = par.awk_command+' " /^UNITOFLENGTHAU/ " '+directory[j]+'/variables.par'
                 # check which version of python we're using
                 if sys.version_info[0] < 3:   # python 2.X
                     buf = subprocess.check_output(command, shell=True)
                 else:                         # python 3.X
                     buf = subprocess.getoutput(command)
                 culength = float(buf.split()[1])*1.5e11  #from au to meters
-                command = 'awk " /^UNITOFMASSMSUN/ " '+directory[j]+'/variables.par'
+                command = par.awk_command+' " /^UNITOFMASSMSUN/ " '+directory[j]+'/variables.par'
                 # check which version of python we're using
                 if sys.version_info[0] < 3:   # python 2.X
                     buf = subprocess.check_output(command, shell=True)
@@ -122,7 +122,7 @@ def plotplanet():
             else:
                 time, e, a, M, V, PA = np.loadtxt(directory[j]+"/orbit0.dat",unpack=True)
         else:
-            command = 'awk "{print NF; exit}" '+directory[j]+'/orbit0.dat'
+            command = par.awk_command+' "{print NF; exit}" '+directory[j]+'/orbit0.dat'
             # check which version of python we're using
             if sys.version_info[0] < 3:   # python 2.X
                 buf = subprocess.check_output(command, shell=True)

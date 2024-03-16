@@ -5,6 +5,8 @@ import os
 import re
 import subprocess
 
+from shutil import which
+
 # special color scale for 1D plots:
 c20 = [(31, 119, 180), (255, 128, 128), (0, 153, 76), (255, 187, 120),
        (214, 39, 40), (174, 199, 232), (152, 223, 138), (255, 152, 150),    
@@ -66,6 +68,15 @@ for line in lines_params:
 for i in range(len(par)):
     exec(var[i]+"="+str(par[i]))
 
+# Check whether awk or gawk are installed!
+if which('gawk') is not None:
+    awk_command = 'gawk'
+else:
+    if which('awk') is not None:
+        awk_command = 'awk'
+    else:
+        print('neither gawk not awk are installed on your system! I cannot use them to extract relevant parameters from your .par parameter file in the simulation directory. Please install either awk or gawk.')
+    
 # Below we work out specific parameters and/or error messages
 # was simulation carried out with Fargo3D?
 fargo3d = 'No'
