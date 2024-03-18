@@ -107,7 +107,7 @@ def plotonedprofile():
     for k in range(len(on)):     # loop over output numbers
         
         if par.movie == 'Yes':
-            print('animation: output number '+str(k)+' / '+str(len(on)-1))
+            print('animation: output number '+str(k)+' / '+str(len(on)-1),end='\r')
             # first prepare figure
             fig = plt.figure(figsize=(8.,8.))
             plt.subplots_adjust(left=0.20, right=0.96, top=0.94, bottom=0.12)

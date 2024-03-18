@@ -126,12 +126,12 @@ class Field(Mesh):
             if override_units == 'Yes':
                 if par.new_unit_length == 0.0:
                     sys.exit('override_units set to yes but new_unit_length is not defined in params.dat, I must exit!')
-                else:
-                    print('new unit of length in meters? : ', par.new_unit_length)
+                #else:
+                    #print('new unit of length in meters : ', par.new_unit_length)
                 if par.new_unit_mass == 0.0:
                     sys.exit('override_units set to yes but new_unit_mass is not defined in params.dat, I must exit!')
-                else:
-                    print('new unit of mass in kg? : ', par.new_unit_mass)
+                #else:
+                    #print('new unit of mass in kg : ', par.new_unit_mass)
                 self.cumass = par.new_unit_mass
                 self.culength = par.new_unit_length
                 # Deduce new units of time and temperature:
@@ -139,11 +139,13 @@ class Field(Mesh):
                 # U = mmw * 8.0841643e-15 * M / L;
                 self.cutime = np.sqrt( self.culength**3 / 6.673e-11 / self.cumass)
                 self.cutemp = 2.35 * 8.0841643e-15 * self.cumass / self.culength
+                '''
                 print('### NEW UNITS SPECIFIED: ###')
                 print('new unit of length [m] = ',self.culength)
                 print('new unit of mass [kg]  = ',self.cumass)
                 print('new unit of time [s] = ',self.cutime)
                 print('new unit of temperature [K] = ',self.cutemp)
+                '''
 
         # now, staggering:
         if staggered.count('r')>0:

@@ -71,7 +71,7 @@ def plotdust():
     # now plot: one figure for each output number, several directories can be dealt with
     for k in range(len(on)):   # loop over output numbers
         if par.movie == 'Yes':
-            print('animation: output number '+str(k)+' / '+str(len(on)-1))
+            print('animation: output number '+str(k)+' / '+str(len(on)-1),end='\r')
             fig = plt.figure(figsize=(8.,8.))
             plt.subplots_adjust(left=0.16, right=0.96, top=0.95, bottom=0.12)
             ax = fig.gca()

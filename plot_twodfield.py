@@ -69,7 +69,7 @@ def plottwodfield():
 
     for k in range(len(on)):
         if par.movie == 'Yes':
-            print('animation: output number '+str(k)+' / '+str(len(on)-1))
+            print('animation: output number '+str(k)+' / '+str(len(on)-1),end='\r')
 
         if par.allfluids == 'Yes':
             # prepare figure for each output number
