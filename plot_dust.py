@@ -27,12 +27,7 @@ def plotdust():
     if par.movie == 'Yes':
         on = range(par.on[0],par.on[1]+1,par.take_one_point_every)
         
-    # get time and length units
-    myfield = Field(field=par.whatfield, fluid=par.fluid, on=on[0], directory=directory[0], physical_units=par.physical_units, nodiff=par.nodiff, fieldofview=par.fieldofview, onedprofile='No', override_units=par.override_units)
-    cutime = myfield.cutime
-    culength = myfield.culength
-        
-    # first prepare figure
+     # first prepare figure
     if par.plot_dust[0] == 'r':
         xtitle = 'Radius '
         if par.physical_units == 'Yes':
@@ -79,9 +74,11 @@ def plotdust():
             ax.set_ylabel(ytitle)
             ax.tick_params(top='on', right='on', length = 5, width=1.0, direction='out')
 
-        # get time
-        myfield  = Field(field=par.whatfield, fluid=par.fluid, on=on[k], directory=directory[0], physical_units=par.physical_units, nodiff=par.nodiff, fieldofview=par.fieldofview, onedprofile=par.onedprofile, override_units=par.override_units)
+        # get time and relevant code units
+        myfield  = Field(field='vtheta', fluid='gas', on=on[k], directory=directory[0], physical_units=par.physical_units, nodiff=par.nodiff, fieldofview=par.fieldofview, onedprofile=par.onedprofile, override_units=par.override_units)
         mylabel = myfield.strtime
+        cutime = myfield.cutime
+        culength = myfield.culength
             
         for j in range(len(directory)):   # loop over directories
 
@@ -158,21 +155,59 @@ def plotdust():
                 mycolor = par.c20[j]
             else:
                 mycolor = par.c20[k*len(directory)+j]
-            ax.scatter(x, y, s=1, c=mycolor, alpha=0.3)
+
+            ax.scatter(x, y, s=1, color=mycolor, alpha=0.3)
+
+            # CUIDADIN size selection (testing purposes)
+            '''
+            x1 = x[(sizedust>5e-3) & (sizedust<1e-2) & (x>70.0)]
+            y1 = y[(sizedust>5e-3) & (sizedust<1e-2) & (x>70.0)]
+            ax.scatter(x1, y1, s=1, color=mycolor, alpha=0.3)
+            '''
+            '''
+            td += np.pi
+            for v in range(len(td)):
+                if td[v] > 2.0*np.pi:
+                    td[v] -= 2.0*np.pi
+
+            x0 = x[(sizedust>5e-3) & (sizedust<1e-2) & (x<60.0) & (td > 0.8) & (td < 1.5)]
+            y0 = y[(sizedust>5e-3) & (sizedust<1e-2) & (x<60.0) & (td > 0.8) & (td < 1.5)]
+            ax.scatter(x0, y0, s=1, color=mycolor, alpha=0.3)
+
+            x1 = x[(sizedust>5e-3) & (sizedust<1e-2) & (x>70.0) & (td > 4.3) & (td < 5.5)]
+            y1 = y[(sizedust>5e-3) & (sizedust<1e-2) & (x>70.0) & (td > 4.3) & (td < 5.5)]
+            ax.scatter(x1, y1, s=1, color=mycolor, alpha=0.3)
             ax.legend(frameon=False,fontsize=15)
+            '''
+
             fig.add_subplot(ax)
+            
+            # if dust's vphi is requested, add Keplerian velocity for comparison:
+            if par.plot_dust[1] == 'vphi':
+                myrmed = myfield.rmed
+                axivphi = np.sum(myfield.data,axis=1)/myfield.nsec
+                if par.physical_units == 'Yes':
+                    axivphi *= 1e-3*culength/cutime  # in km / s
+                    myrmed = myfield.rmed*culength/1.5e11 # in au
+                ax.plot(myrmed,axivphi,color='k',label=r'$v_{\rm gas}$')
+                ax.plot(myrmed,axivphi[0]*np.sqrt(myrmed[0]/myrmed),color='r',label=r'$v_{\rm K}$')
 
             # show time in plot's top-right corner
             xstr = 0.99*xmax
             ystr = 0.97*ymax
             colorstr = 'black'
             ax.text(xstr,ystr,mylabel,fontsize=18,color=colorstr,weight='bold',horizontalalignment='right',verticalalignment='top')
+            ax.legend(frameon=False,fontsize=15,loc='lower left')
 
         # save file
         if len(directory) == 1:           
             outfile = par.plot_dust[0]+'_'+par.plot_dust[1]+'_'+str(directory[0])+'_'+str(on[k]).zfill(4)
+            if par.movie == 'Yes' and par.take_one_point_every != 1:
+                outfile = par.plot_dust[0]+'_'+par.plot_dust[1]+'_'+str(directory[0])+'_'+str(k).zfill(4)
         else:
             outfile = par.plot_dust[0]+'_'+par.plot_dust[1]+'_'+str(on[k]).zfill(4)
+            if par.movie == 'Yes' and par.take_one_point_every != 1:
+                outfile = par.plot_dust[0]+'_'+par.plot_dust[1]+'_'+str(k).zfill(4)
         fileout = outfile+'.pdf'
         if par.saveaspdf == 'Yes':
             plt.savefig('./'+fileout, dpi=160)
@@ -184,6 +219,11 @@ def plotdust():
         if len(directory) == 1:
             # png files that have been created above
             allpngfiles = [par.plot_dust[0]+'_'+par.plot_dust[1]+'_'+str(directory[0])+'_'+str(on[x]).zfill(4)+'.png' for x in range(len(on))]
+            if par.take_one_point_every != 1:
+                allpngfiles = [par.plot_dust[0]+'_'+par.plot_dust[1]+'_'+str(directory[0])+'_'+str(x).zfill(4)+'.png' for x in range(len(on))]
+                str_on_start_number = str(0)
+            else:
+                str_on_start_number = str(on[0])
             # input files for ffpmeg
             input_files = par.plot_dust[0]+'_'+par.plot_dust[1]+'_'+str(directory[0])+'_%04d.png'
             # output file for ffmpeg
@@ -191,6 +231,8 @@ def plotdust():
         else:
             # png files that have been created above
             allpngfiles = [par.plot_dust[0]+'_'+par.plot_dust[1]+'_'+str(on[x]).zfill(4)+'.png' for x in range(len(on))]
+            if par.take_one_point_every != 1:
+                allpngfiles = [par.plot_dust[0]+'_'+par.plot_dust[1]+'_'+str(x).zfill(4)+'.png' for x in range(len(on))]
             # input files for ffpmeg
             input_files = par.plot_dust[0]+'_'+par.plot_dust[1]+'_%04d.png'
             # output file for ffmpeg
@@ -199,7 +241,7 @@ def plotdust():
         import ffmpeg
         (
             ffmpeg            
-            .input(input_files, framerate=10, start_number=str(on[0]))
+            .input(input_files, framerate=10, start_number=str_on_start_number)
             # framerate=10 means the video will play at 10 of the original images per second
             .output(filempg, r=30, pix_fmt='yuv420p', **{'qscale:v': 3})
             # r=30 means the video will play at 30 frames per second
