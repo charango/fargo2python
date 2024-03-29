@@ -219,6 +219,24 @@ class Field(Mesh):
                         for j in range(self.nsec):
                             self.data[i,j] *= ((self.rmed[i]/self.rmed[imin])**(6.0))
             '''
+            # ----
+            # print out disc mass if density field is computed
+            # ----
+            if field == 'dens' and par.verbose == 'Yes':
+                mass    = np.zeros((self.nrad,self.nsec))
+                surface = np.zeros((self.nrad,self.nsec))
+
+                Rinf = self.redge[0:len(self.redge)-1]
+                Rsup = self.redge[1:len(self.redge)]
+                surf = np.pi * (Rsup*Rsup - Rinf*Rinf) / self.nsec
+                for th in range(self.nsec):
+                    surface[:,th] = surf
+
+                # mass of each grid cell
+                mass = self.data*surface
+                # total disc mass 
+                print('disc mass / star mass = ', np.sum(mass)) 
+                    
         else:
             #print('input file ',input_file,' does not exist!')
             self.data = np.zeros((self.nrad,self.nsec))  # default
@@ -337,7 +355,6 @@ class Field(Mesh):
                         omega[i,:] = vphi[i,:] / self.rmed[i]
 
                     self.data *= omega
-                    
 
             #
             # ----
@@ -367,6 +384,7 @@ class Field(Mesh):
                     for i in range(self.nrad):
                         self.data[i,j] = np.abs(2.0*np.pi*(self.rmed[i])*vrad[i,j]*dens[i,j])
                 self.strname += r' $\dot{M}$'
+
             #
             # ----
             # DISC ECCENTRICITY
@@ -643,8 +661,9 @@ class Field(Mesh):
                 dens = self.__open_field(directory+fluid+'dens'+str(on)+'.dat',dtype,fieldofview)
                 axidens = np.sum(dens,axis=1)/self.nsec
                 self.data = dens-axidens.repeat(self.nsec).reshape(self.nrad,self.nsec)
-                print('#### NAO DENSITY ###')
-                print(self.data.min(),self.data.max())
+                if par.verbose == 'Yes':
+                    print('#### NAO DENSITY ###')
+                    print(self.data.min(),self.data.max())
                 self.strname = r'$\Sigma - \langle\Sigma\rangle_\varphi$'
 
             # ----

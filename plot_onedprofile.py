@@ -36,7 +36,8 @@ def plotonedprofile():
     # y-values to be displayed on plot by going though all directories
     # and all output numbers:
     if (par.fieldmin == '#') and (par.fieldmax == '#'):
-        print('fieldmin and fieldmax are unspecified, I will set them automatically...')
+        if par.verbose == 'Yes':
+            print('fieldmin and fieldmax are unspecified, I will set them automatically...')
         ymin = 1e8
         ymax = -1e8
         
@@ -76,9 +77,10 @@ def plotonedprofile():
                     ymin = axiarray.min()
                 if axiarray.max() > ymax:
                     ymax = axiarray.max()
-                    
-        print('fieldmin = ', ymin)
-        print('fieldmin = ', ymax)
+
+        if par.verbose == 'Yes':              
+            print('fieldmin = ', ymin)
+            print('fieldmin = ', ymax)
                 
     else:
         if (par.fieldmin != '#'):

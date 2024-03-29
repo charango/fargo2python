@@ -98,11 +98,13 @@ def plotplanet():
                 if par.new_unit_length == 0.0:
                     sys.exit('override_units set to yes but new_unit_length is not defined in params.dat, I must exit!')
                 else:
-                    print('new unit of length in meters? : ', par.new_unit_length)
+                    if par.verbose == 'Yes':
+                        print('new unit of length in meters : ', par.new_unit_length)
                 if par.new_unit_mass == 0.0:
                     sys.exit('override_units set to yes but new_unit_mass is not defined in params.dat, I must exit!')
                 else:
-                    print('new unit of mass in kg? : ', par.new_unit_mass)
+                    if par.verbose == 'Yes':
+                        print('new unit of mass in kg : ', par.new_unit_mass)
                 cumass = par.new_unit_mass
                 culength = par.new_unit_length
                 # Deduce new units of time and temperature:
@@ -110,11 +112,12 @@ def plotplanet():
                 # U = mmw * 8.0841643e-15 * M / L;
                 cutime = np.sqrt( culength**3 / 6.673e-11 / cumass)
                 cutemp = 2.35 * 8.0841643e-15 * cumass / culength
-                print('### NEW UNITS SPECIFIED: ###')
-                print('new unit of length [m] = ',culength)
-                print('new unit of mass [kg]  = ',cumass)
-                print('new unit of time [s] = ',cutime)
-                print('new unit of temperature [K] = ',cutemp)
+                if par.verbose == 'Yes':
+                    print('### NEW UNITS SPECIFIED: ###')
+                    print('new unit of length [m] = ',culength)
+                    print('new unit of mass [kg]  = ',cumass)
+                    print('new unit of time [s] = ',cutime)
+                    print('new unit of temperature [K] = ',cutemp)
                 
         if par.fargo3d == 'No':
             if par.fargo_orig == 'No':
