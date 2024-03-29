@@ -11,6 +11,8 @@ new_unit_mass	4e30			# new unit of mass in kg
 movie		No			# make a movie? requires on to take the form onmin,onmax (eg: 1,10)
 on	   	0,20			# fargo's output number(s), separated by a comma (,) if several
 
+verbose		No			# extra information shown on screen
+
 
 ###############
 ### Roadmap ###
