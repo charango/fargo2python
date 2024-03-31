@@ -77,6 +77,9 @@ else:
     else:
         print('neither gawk not awk are installed on your system! I cannot use them to extract relevant parameters from your .par parameter file in the simulation directory. Please install either awk or gawk.')
     
+if not('verbose' in open('paramsf2p.dat').read()):
+    verbose = 'No'
+
 # Below we work out specific parameters and/or error messages
 # was simulation carried out with Fargo3D?
 fargo3d = 'No'
