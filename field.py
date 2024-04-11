@@ -235,7 +235,7 @@ class Field(Mesh):
                 # mass of each grid cell
                 mass = self.data*surface
                 # total disc mass 
-                print('disc mass / star mass = ', np.sum(mass)) 
+                print('disc mass / star mass = ', np.sum(mass),end='\r') 
                     
         else:
             #print('input file ',input_file,' does not exist!')
@@ -663,7 +663,7 @@ class Field(Mesh):
                 self.data = dens-axidens.repeat(self.nsec).reshape(self.nrad,self.nsec)
                 if par.verbose == 'Yes':
                     print('#### NAO DENSITY ###')
-                    print(self.data.min(),self.data.max())
+                    print(self.data.min(),self.data.max(),end='\r')
                 self.strname = r'$\Sigma - \langle\Sigma\rangle_\varphi$'
 
             # ----
@@ -673,7 +673,7 @@ class Field(Mesh):
             # ----        
             if fluid == 'pc' and field == 'rtadens':
                 for z in np.arange(on+1):
-                    print('reading pcdens'+str(z)+'.dat file')
+                    print('reading pcdens'+str(z)+'.dat file',end='\r')
                     self.data += self.__open_field(directory+fluid+'dens'+str(z)+'.dat',dtype,fieldofview)
                 self.data /= len(np.arange(on))
                 self.strname = 'r.t.a. particle density'

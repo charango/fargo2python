@@ -472,7 +472,10 @@ def plottwodfield():
                     if par.fargo3d == 'Yes':
                         f1, xpla, ypla, f4, f5, f6, f7, f8, date, omega = np.loadtxt(directory+"/planet"+str(l)+".dat",unpack=True)
                     else:
-                        f1, xpla, ypla, f4, f5, f6, f7, date, omega, f10, f11 = np.loadtxt(directory+"/planet"+str(l)+".dat",unpack=True)
+                        if par.fargo_orig == 'No':
+                            f1, xpla, ypla, f4, f5, f6, f7, date, omega, f10, f11 = np.loadtxt(directory+"/planet"+str(l)+".dat",unpack=True)
+                        else:
+                            f1, xpla, ypla, f4, f5, f6, f7, date, omega = np.loadtxt(directory+"/planet"+str(l)+".dat",unpack=True)
                     xp[l] = xpla[on[k]]
                     yp[l] = ypla[on[k]]
                     if par.physical_units == 'Yes':
@@ -509,7 +512,7 @@ def plottwodfield():
                     
                 # add planets via scatter plot
                 if par.verbose == 'Yes':
-                    print('xp = ', xp, ' , yp = ', yp)
+                    print('xp = ', xp, ' , yp = ', yp,end='\r')
                 CP = ax.scatter(xp,yp,s=10,c='lightpink',cmap=colored_cmap,alpha=1)
 
             # ----------------
