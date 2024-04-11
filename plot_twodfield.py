@@ -512,7 +512,7 @@ def plottwodfield():
                     
                 # add planets via scatter plot
                 if par.verbose == 'Yes':
-                    print('xp = ', xp, ' , yp = ', yp,end='\r')
+                    print('xp = ', xp, ' , yp = ', yp)
                 CP = ax.scatter(xp,yp,s=10,c='lightpink',cmap=colored_cmap,alpha=1)
 
             # ----------------
