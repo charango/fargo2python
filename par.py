@@ -58,7 +58,7 @@ for line in lines_params:
             if(regex.search(value) != None):  # we try with array with several values separated by a comma (,)
                 if name == 'on' or name == 'mmr_integers':
                     value = [int(x) for x in value.split(',')]
-                if name == 'directory' or name == 'plot_planet' or name == 'plot_dust':
+                if name == 'directory' or name == 'plot_planet' or name == 'plot_dust' or name == 'use_legend':
                     value = [str(x) for x in value.split(',')]
             else:
                 value = '"' + value + '"'   # if none of the above tests work, we know value is a string

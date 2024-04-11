@@ -144,6 +144,17 @@ def plotplanet():
         if (nbplanets <= 1 and par.plot_planet[1] == 'p'):
             sys.exit('ERROR: you requested to plot orbital period ratio, but there is only one planet simulated in directory: ', directory[j])
            
+        if len(directory) > 1:
+            if ('use_legend' in open('paramsf2p.dat').read()) and (par.use_legend != '#'):
+                use_legend = par.use_legend
+                if isinstance(par.use_legend, str) == True:
+                    use_legend = [par.use_legend]
+                mylabel = str(use_legend[j])
+            else:
+                mylabel = str(directory[j])
+        else:
+            mylabel = str(directory[j])
+        
         # now, read orbitN.dat or bigplanetN.dat files
         for k in range(nbplanets):
             
@@ -239,14 +250,14 @@ def plotplanet():
                     ax.legend_ = None
                 else:
                     ax.legend(frameon=False,fontsize=15)
-                ax.plot(x[::par.take_one_point_every], y[::par.take_one_point_every], color=par.c20[k*len(directory)+j], lw=2., linestyle = 'solid', label=directory[j])
+                ax.plot(x[::par.take_one_point_every], y[::par.take_one_point_every], color=par.c20[k*len(directory)+j], lw=2., linestyle = 'solid', label=mylabel)
                 fig.add_subplot(ax)
                 
         if par.plot_planet[1] == 'p':
             y = p1/p0
             if len(directory) == 1:
                 ax.legend_ = None
-            ax.plot(x[::par.take_one_point_every], y[::par.take_one_point_every], color=par.c20[j], lw=2., linestyle = 'solid', label=directory[j])
+            ax.plot(x[::par.take_one_point_every], y[::par.take_one_point_every], color=par.c20[j], lw=2., linestyle = 'solid', label=mylabel)
             fig.add_subplot(ax)
             
         if par.plot_planet[1] == 'mmr':
@@ -269,6 +280,9 @@ def plotplanet():
             ax2.yaxis.label.set_color(color=par.c20[2*j+1])
             ax2.set_ylabel(ytitle_o)
             fig.add_subplot(ax)
+
+    if len(directory) != 1:
+        ax.legend(frameon=False,fontsize=15)
             
     # save file
     if len(directory) == 1:           
