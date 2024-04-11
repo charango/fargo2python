@@ -235,7 +235,7 @@ class Field(Mesh):
                 # mass of each grid cell
                 mass = self.data*surface
                 # total disc mass 
-                print('disc mass / star mass = ', np.sum(mass),end='\r') 
+                print('disc mass / star mass = ', np.sum(mass)) 
                     
         else:
             #print('input file ',input_file,' does not exist!')
