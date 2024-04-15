@@ -384,8 +384,8 @@ class Field(Mesh):
                     vrad = self.__open_field(directory+fluid+'vy'+str(on)+'.dat',dtype,fieldofview)
                 for j in range(self.nsec):
                     for i in range(self.nrad):
-                        self.data[i,j] = np.abs(2.0*np.pi*(self.rmed[i])*vrad[i,j]*dens[i,j])
-                self.strname += r' $|\dot{M}|$'
+                        self.data[i,j] = -2.0*np.pi*self.rmed[i]*vrad[i,j]*dens[i,j]
+                self.strname += r' $\dot{M}$'
 
             #
             # ----
