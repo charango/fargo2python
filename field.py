@@ -378,12 +378,14 @@ class Field(Mesh):
             # ----
             if field == 'mdot':
                 dens = self.__open_field(directory+fluid+'dens'+str(on)+'.dat',dtype,fieldofview)
-                # vphi is in the corotating frame!
-                vrad = self.__open_field(directory+fluid+'vrad'+str(on)+'.dat',dtype,fieldofview)
+                if self.fargo3d == 'No':
+                    vrad = self.__open_field(directory+fluid+'vrad'+str(on)+'.dat',dtype,fieldofview)
+                else:
+                    vrad = self.__open_field(directory+fluid+'vy'+str(on)+'.dat',dtype,fieldofview)
                 for j in range(self.nsec):
                     for i in range(self.nrad):
                         self.data[i,j] = np.abs(2.0*np.pi*(self.rmed[i])*vrad[i,j]*dens[i,j])
-                self.strname += r' $\dot{M}$'
+                self.strname += r' $|\dot{M}|$'
 
             #
             # ----
