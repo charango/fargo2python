@@ -11,8 +11,7 @@ new_unit_mass	4e30			# new unit of mass in kg
 movie		No			# make a movie? requires on to take the form onmin,onmax (eg: 1,10)
 on	   	0,20			# fargo's output number(s), separated by a comma (,) if several
 
-verbose		No			# extra information shown on screen
-
+verbose     Yes
 
 ###############
 ### Roadmap ###
@@ -47,11 +46,15 @@ plot_dust	No
 plot_disccom	No
 
 
+### plot time evolution of disc mass? (new -- April 2024)
+plot_discmass	No
+
+
 ### if all above plot booleans are set to No, gas quantities are displayed:
 
 fluid		gas			# what fluid? gas, dust or all (FARGO3D only)
-whatfield	dens			# dens,densoveraxi,vrad,vtheta,vcol,pressure,temp,toomre,entropy,vorticity,vortensity,ecc,stokes...
-onedprofile	No			# plot azimuthally-averaged radial profile (1D)?
+whatfield	dens			# dens,vrad,vtheta,vcol,pressure,temp,toomre,entropy,vorticity,vortensity,ecc,stokes...
+onedprofile	Yes			# plot azimuthally-averaged radial profile (1D)?
 nodiff	        Yes			# relative difference wrt initial field? (Yes or No)
 
 fieldmin        			# if specified, minimum value of field to display (for color bar)
@@ -76,11 +79,11 @@ nstreamlines	20			# number of streamlines to show
 ### Common options ###
 ######################
 
-log_colorscale	No			# logarithmic color scale for 2D plots?
-log_xyplots_y	Yes			# logarithmic y-scale for y=f(x) plots?
-log_xyplots_x	No			# logarithmic x-scale for y=f(x) plots?
+log_colorscale	Yes			# logarithmic color scale for 2D plots?
+log_xyplots_y	No			# logarithmic y-scale for y=f(x) plots?
+log_xyplots_x	Yes			# logarithmic x-scale for y=f(x) plots?
 
-use_legend	''			# manually enter legend to be used for 1D profiles if plot_tqwk set to Yes
+use_legend				# manually enter legend to be used for 1D profiles if plot_tqwk set to Yes
 
 myrmin					# if specified, minimum radius to display field over
 myrmax	        			# if specified, maximum radius to display field over
@@ -96,3 +99,4 @@ take_one_point_every     		# if specified, take one point every Nth in y=f(x) pl
 
 saveaspdf	No			# save image as pdf file? (Yes or No)
 saveaspng	Yes			# save image as png file? (Yes or No)
+mycolormap	nipy_spectral 		# nipy_spectral # gray
