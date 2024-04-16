@@ -156,6 +156,11 @@ def plottwodfield():
                     if (myphimax == '#'):
                         myphimax = T.max()
                     jmax = np.argmin(np.abs(T-myphimax))
+                    if ('flip_xaxis' in open('paramsf2p.dat').read()) and (par.flip_xaxis == 'Yes'):
+                        bufmin = myphimin
+                        bufmax = myphimax
+                        myphimax = bufmin
+                        myphimin = bufmax
                 
                 # VISUALISATION IN VERTICAL (LATITUDINAL) PLANE
                 if par.fargo3d == 'Yes' and par.fieldofview == 'latitudinal':
