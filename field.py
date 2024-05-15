@@ -570,30 +570,47 @@ class Field(Mesh):
             # ----
             # DUST STOKES NUMBER St = sqrt(pi/8) x (s rho_dust_int) / (H rho_gas)
             # ----
-            if self.fargo3d == 'Yes' and field == 'stokes':
+            if field == 'stokes':
                 # gas mass surface (2D run) or volume density (3D run)
                 if self.ncol > 1:  # 3D
                     field = np.fromfile(directory+'gasdens'+str(on)+'.dat', dtype)
                     rho_gas = field.reshape(self.ncol,self.nrad,self.nsec)
                 else:
                     sigma_gas = self.__open_field(directory+'gasdens'+str(on)+'.dat',dtype,fieldofview)
+                
                 # get dust internal density
-                command = par.awk_command+' " /^DUSTINTERNALRHO/ " '+directory+'variables.par'
+                if self.fargo3d == 'Yes':
+                    command = par.awk_command+' " /^DUSTINTERNALRHO/ " '+directory+'variables.par'
+                else:
+                    command = par.awk_command+' " /^Rhopart/ " '+directory+'*.par'
+
                 if sys.version_info[0] < 3:   # python 2.X
                     buf = subprocess.check_output(command, shell=True)
                 else:                         # python 3.X
                     buf = subprocess.getoutput(command)
+
                 rho_dust_int = float(buf.split()[1])   # in g/cm^3
                 rho_dust_int *= 1e3 # in kg/m^3
                 rho_dust_int /= (self.cumass)
                 rho_dust_int *= (self.culength**3.)  # in code units
+
                 # get dust size
-                dust_id, dust_size, dust_gas_ratio = np.loadtxt(directory+'/dustsizes.dat',unpack=True)
-                if fluid != 'gas':
-                    s = dust_size[int(fluid[-1])-1] # fluid[-1] = index of dust fluid
+                if self.fargo3d == 'Yes':
+                    dust_id, dust_size, dust_gas_ratio = np.loadtxt(directory+'/dustsizes.dat',unpack=True)
+                    if fluid != 'gas':
+                        s = dust_size[int(fluid[-1])-1] # fluid[-1] = index of dust fluid
+                    else:
+                        s = 1e-10  # arbitrarily small
                 else:
-                    s = 1e-10  # arbitrarily small
+                    command = par.awk_command+' " /^Sizepart/ " '+directory+'*.par'
+                    if sys.version_info[0] < 3:   # python 2.X
+                        buf = subprocess.check_output(command, shell=True)
+                    else:                         # python 3.X
+                        buf = subprocess.getoutput(command)
+                    s = float(buf.split()[1])     # in meters
+
                 s /= self.culength  # in code units
+
                 # get angular frequency and sound speed, assuming
                 # locally isothermal equation of state: first get the
                 # aspect ratio and flaring index used in the numerical
