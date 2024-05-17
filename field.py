@@ -691,11 +691,23 @@ class Field(Mesh):
             # number 'on' and we time-average arrays
             # ----        
             if fluid == 'pc' and field == 'rtadens':
-                for z in np.arange(on+1):
-                    print('reading pcdens'+str(z)+'.dat file',end='\r')
-                    self.data += self.__open_field(directory+fluid+'dens'+str(z)+'.dat',dtype,fieldofview)
-                self.data /= len(np.arange(on))
+                # case where on in paramsf2p.dat is specified as X,Y like for an animation: 
+                # we then compute the r.t.a. density from on=X to on=Y
+                if isinstance(par.on, int) == False:
+                    on = range(par.on[0],par.on[1]+1,par.take_one_point_every)
+                    for z in on:
+                        print('reading pcdens'+str(z)+'.dat file',end='\r')
+                        self.data += self.__open_field(directory+fluid+'dens'+str(z)+'.dat',dtype,fieldofview)
+                    self.data /= len(on)
+                else:
+                    for z in np.arange(on+1):
+                        print('reading pcdens'+str(z)+'.dat file',end='\r')
+                        self.data += self.__open_field(directory+fluid+'dens'+str(z)+'.dat',dtype,fieldofview)
+                    self.data /= len(np.arange(on))
                 self.strname = 'r.t.a. particle density'
+                if physical_units == 'Yes' and nodiff == 'Yes':
+                    self.unit = (self.cumass*1e3)/((self.culength*1e2)**2.)
+                    self.strname += r' [g cm$^{-2}$]'
 
             # ----
             # time-averaged particle density: means that we read
