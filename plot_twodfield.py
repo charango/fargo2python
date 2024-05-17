@@ -520,6 +520,23 @@ def plottwodfield():
                     print('xp = ', xp, ' , yp = ', yp)
                 CP = ax.scatter(xp,yp,s=10,c='lightpink',cmap=colored_cmap,alpha=1)
 
+
+            # ------------------
+            # overlay CPU
+            # ------------------
+            if par.showcpus == 'Yes':
+                cpunb, cpurmin, cpurmax = np.loadtxt(directory+"/minmaxradii.dat",unpack=True)
+                if par.physical_units == 'Yes':
+                    cpurmin *= (myfield.culength / 1.5e11) # in au  
+                    cpurmax *= (myfield.culength / 1.5e11) # in au              
+                for i in range(len(cpurmin)):
+                    if par.fieldofview == 'polar':
+                        if par.rvsphi == 'No':
+                            ax.plot([cpurmin[i],cpurmin[i]],[Y.min(),Y.max()],'-',linewidth=1,color='grey')
+                        else:
+                            ax.plot([X.min(),X.max()],[cpurmin[i],cpurmin[i]],'-',linewidth=1,color='grey')
+                            
+
             # ----------------
             # special case all fluids 
             # ----------------
