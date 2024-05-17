@@ -524,7 +524,7 @@ def plottwodfield():
             # ------------------
             # overlay CPU
             # ------------------
-            if par.showcpus == 'Yes':
+            if ('showcpus' in open('paramsf2p.dat').read()) and par.showcpus == 'Yes':
                 cpunb, cpurmin, cpurmax = np.loadtxt(directory+"/minmaxradii.dat",unpack=True)
                 if par.physical_units == 'Yes':
                     cpurmin *= (myfield.culength / 1.5e11) # in au  
