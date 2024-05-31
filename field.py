@@ -509,6 +509,8 @@ class Field(Mesh):
             if (field == 'sgaccr'):
                 input_file = directory+'sgaccr'+str(on)+'.dat'
                 self.data = self.__open_field(input_file,dtype,fieldofview)
+                if par.log_xyplots_y == 'Yes':
+                    self.data = np.abs(self.data)
                 self.strname += r' SG $a_{r}$'
                 if physical_units == 'Yes' and nodiff == 'Yes':
                     self.unit = 1e-3*(self.culength)/(self.cutime)/(self.cutime)
