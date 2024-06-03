@@ -588,9 +588,9 @@ def plottwodfield():
         # ------------------
         # save in pdf or png files
         # ------------------
-        outfile = par.fluid+'_'+par.whatfield+'_'+directory+'_'+par.fieldofview+'_'+str(on[k]).zfill(4)
+        outfile = par.fluid+'_'+par.whatfield+'_'+directory+'_'+par.fieldofview+'_'+par.horiz_slice+'_'+str(on[k]).zfill(4)
         if par.movie == 'Yes' and par.take_one_point_every != 1:
-            outfile = par.fluid+'_'+par.whatfield+'_'+directory+'_'+par.fieldofview+'_'+str(k).zfill(4)
+            outfile = par.fluid+'_'+par.whatfield+'_'+directory+'_'+par.fieldofview+'_'+par.horiz_slice+'_'+str(k).zfill(4)
         if par.showdust == 'Yes':
             outfile += '_dust'
         fileout = outfile+'.pdf'
@@ -607,22 +607,22 @@ def plottwodfield():
     # ------------------
     if par.movie == 'Yes':
         # png files that have been created above
-        allpngfiles = [par.fluid+'_'+par.whatfield+'_'+directory+'_'+par.fieldofview+'_'+str(on[x]).zfill(4)+'.png' for x in range(len(on))]
+        allpngfiles = [par.fluid+'_'+par.whatfield+'_'+directory+'_'+par.fieldofview+'_'+par.horiz_slice+'_'+str(on[x]).zfill(4)+'.png' for x in range(len(on))]
         if par.take_one_point_every != 1:
-            allpngfiles = [par.fluid+'_'+par.whatfield+'_'+directory+'_'+par.fieldofview+'_'+str(x).zfill(4)+'.png' for x in range(len(on))]
+            allpngfiles = [par.fluid+'_'+par.whatfield+'_'+directory+'_'+par.fieldofview+'_'+par.horiz_slice+'_'+str(x).zfill(4)+'.png' for x in range(len(on))]
             str_on_start_number = str(0)
         else:
             str_on_start_number = str(on[0])
         # input files for ffpmeg
-        input_files = par.fluid+'_'+par.whatfield+'_'+directory+'_'+par.fieldofview+'_%04d.png'
+        input_files = par.fluid+'_'+par.whatfield+'_'+directory+'_'+par.fieldofview+'_'+par.horiz_slice+'_%04d.png'
         # output file for ffmpeg
-        filempg = par.fluid+'_'+par.whatfield+'_'+directory+'_'+par.fieldofview+'_'+str(on[0])+'_'+str(on[len(on)-1])+'.mpg'
+        filempg = par.fluid+'_'+par.whatfield+'_'+directory+'_'+par.fieldofview+'_'+par.horiz_slice+'_'+str(on[0])+'_'+str(on[len(on)-1])+'.mpg'
         # options
         if par.showdust == 'Yes':
-            allpngfiles = [par.fluid+'_'+par.whatfield+'_'+directory+'_'+par.fieldofview+'_'+str(on[x]).zfill(4)+'_dust.png' for x in range(len(on))]
+            allpngfiles = [par.fluid+'_'+par.whatfield+'_'+directory+'_'+par.fieldofview+'_'+par.horiz_slice+'_'+str(on[x]).zfill(4)+'_dust.png' for x in range(len(on))]
             if par.take_one_point_every != 1:
-                allpngfiles = [par.fluid+'_'+par.whatfield+'_'+directory+'_'+par.fieldofview+'_'+str(x).zfill(4)+'_dust.png' for x in range(len(on))]
-            input_files = par.fluid+'_'+par.whatfield+'_'+directory+'_'+par.fieldofview+'_%04d_dust.png'
+                allpngfiles = [par.fluid+'_'+par.whatfield+'_'+directory+'_'+par.fieldofview+'_'+par.horiz_slice+'_'+str(x).zfill(4)+'_dust.png' for x in range(len(on))]
+            input_files = par.fluid+'_'+par.whatfield+'_'+directory+'_'+par.fieldofview+'_'+par.horiz_slice+'_%04d_dust.png'
             filempg = re.sub('.mpg', '_dust.mpg', filempg)
         if par.nodiff == 'Yes':
             filempg = re.sub('.mpg', '_nodiff.mpg', filempg)
