@@ -97,12 +97,12 @@ def plottwodfield():
                 if len(par.fluids) % 2 != 0 and f == len(par.fluids)-1:
                     fig.delaxes(axes[1,int(np.ceil(par.nbfluids/2))-1])
 
-            myfield = Field(field=par.whatfield, fluid=par.fluids[f], on=on[k], directory=directory, physical_units=par.physical_units, nodiff=par.nodiff, fieldofview=par.fieldofview, onedprofile='No', override_units=par.override_units)
+            myfield = Field(field=par.whatfield, fluid=par.fluids[f], on=on[k], directory=directory, physical_units=par.physical_units, nodiff=par.nodiff, fieldofview=par.fieldofview, horiz_slice=par.horiz_slice, onedprofile='No', override_units=par.override_units)
             array = myfield.data
             
             # plot relative difference wrt initial field 
             if par.nodiff == 'No':
-                myfield0 = Field(field=par.whatfield, fluid=par.fluids[f], on=0, directory=directory, physical_units=par.physical_units, nodiff=par.nodiff, fieldofview=par.fieldofview, onedprofile='No', override_units=par.override_units)
+                myfield0 = Field(field=par.whatfield, fluid=par.fluids[f], on=0, directory=directory, physical_units=par.physical_units, nodiff=par.nodiff, fieldofview=par.fieldofview, horiz_slice=par.horiz_slice, onedprofile='No', override_units=par.override_units)
                 array0 = myfield0.data
                 array = (myfield.data-array0)/array0
             else:
@@ -448,10 +448,10 @@ def plottwodfield():
                     myR0 = myrmin   + np.random.rand()*(myrmax-myrmin)
                     myT0 = myphimin + np.random.rand()*(myphimax-myphimin)
                     # forward integration of streamlines
-                    xstr,ystr = myfield.compute_streamline(niterations=10000,R0=myR0,T0=myT0,rmin=myrmin,rmax=myrmax,pmin=myphimin,pmax=myphimax,forward=True,fieldofview=par.fieldofview)
+                    xstr,ystr = myfield.compute_streamline(niterations=10000,R0=myR0,T0=myT0,rmin=myrmin,rmax=myrmax,pmin=myphimin,pmax=myphimax,forward=True,fieldofview=par.fieldofview,horiz_slice=par.horiz_slice)
                     ax.scatter(xstr,ystr,s=3,marker='o',color='white')
                     # backward integration of streamlines
-                    xstr,ystr = myfield.compute_streamline(niterations=10000,R0=myR0,T0=myT0,rmin=myrmin,rmax=myrmax,pmin=myphimin,pmax=myphimax,forward=False,fieldofview=par.fieldofview)
+                    xstr,ystr = myfield.compute_streamline(niterations=10000,R0=myR0,T0=myT0,rmin=myrmin,rmax=myrmax,pmin=myphimin,pmax=myphimax,forward=False,fieldofview=par.fieldofview,horiz_slice=par.horiz_slice)
                     ax.scatter(xstr,ystr,s=3,marker='o',color='white')
             
             # ------------------
