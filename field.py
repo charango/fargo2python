@@ -816,11 +816,11 @@ class Field(Mesh):
                         return datacube[self.ncol-1,:,:]   # field at disc surface only if "half-a-disc" is simulated in latitudinal direction!
                 else:
                     if horiz_slice == 'midplane':
-                        return datacube[self.ncol//2-1,:,:]   # midplane field only if "full" disc is simulated in latitudinal direction!
+                        return datacube[self.ncol//2,:,:]   # midplane field only if "full" disc is simulated in latitudinal direction!
                     if horiz_slice == 'lower':
-                        return datacube[0,:,:]   # field at lower surface only if "half-a-disc" is simulated in latitudinal direction!
+                        return datacube[1,:,:]   # field at lower surface only if "half-a-disc" is simulated in latitudinal direction!
                     if horiz_slice == 'upper':
-                        return datacube[self.ncol-1,:,:]   # field at upper surface only if "half-a-disc" is simulated in latitudinal direction!
+                        return datacube[-1,:,:]   # field at upper surface only if "half-a-disc" is simulated in latitudinal direction!
 
 
     def compute_streamline(self, dtype='float64',niterations=100000,R0=0,T0=0,rmin=0,rmax=1e4,pmin=0,pmax=6.28,forward=True,fieldofview='polar',horiz_slice='midplane'):
