@@ -73,6 +73,12 @@ class Field(Mesh):
                 field = 'vx'
             if field == 'vcol':
                 field = 'vz'
+            command = par.awk_command+' " /^ZMAX/ " '+directory+'/variables.par'
+            if sys.version_info[0] < 3:   # python 2.X
+                buf = subprocess.check_output(command, shell=True)
+            else:                         # python 3.X
+                buf = subprocess.getoutput(command)
+            self.zmax = float(buf.split()[1])
                                 
         # get nrad and nsec (number of cells in radial and azimuthal directions)
         buf, buf, buf, buf, buf, buf, nrad, nsec = np.loadtxt(directory+"dims.dat",unpack=True)
@@ -803,7 +809,10 @@ class Field(Mesh):
                 myfield = np.sum(datacube,axis=2)/self.nsec  # azimuthally-averaged field (R vs. latitude)
                 return myfield [::-1,:]
             else:
-                return datacube[-1,:,:]   # midplane field
+                if np.abs(self.zmax-1.57) < 0.01:
+                    return datacube[-1,:,:]   # midplane field only if "half-a-disc" is simulated in latitudinal direction!
+                else:
+                    return datacube[self.ncol//2-1,:,:]   # midplane field only if "full" disc is simulated in latitudinal direction!
 
 
     def compute_streamline(self, dtype='float64',niterations=100000,R0=0,T0=0,rmin=0,rmax=1e4,pmin=0,pmax=6.28,forward=True,fieldofview='polar'):
