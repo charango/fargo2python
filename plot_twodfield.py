@@ -97,12 +97,12 @@ def plottwodfield():
                 if len(par.fluids) % 2 != 0 and f == len(par.fluids)-1:
                     fig.delaxes(axes[1,int(np.ceil(par.nbfluids/2))-1])
 
-            myfield = Field(field=par.whatfield, fluid=par.fluids[f], on=on[k], directory=directory, physical_units=par.physical_units, nodiff=par.nodiff, fieldofview=par.fieldofview, horiz_slice=par.horiz_slice, onedprofile='No', override_units=par.override_units)
+            myfield = Field(field=par.whatfield, fluid=par.fluids[f], on=on[k], directory=directory, physical_units=par.physical_units, nodiff=par.nodiff, fieldofview=par.fieldofview, slice=par.slice, onedprofile='No', override_units=par.override_units)
             array = myfield.data
             
             # plot relative difference wrt initial field 
             if par.nodiff == 'No':
-                myfield0 = Field(field=par.whatfield, fluid=par.fluids[f], on=0, directory=directory, physical_units=par.physical_units, nodiff=par.nodiff, fieldofview=par.fieldofview, horiz_slice=par.horiz_slice, onedprofile='No', override_units=par.override_units)
+                myfield0 = Field(field=par.whatfield, fluid=par.fluids[f], on=0, directory=directory, physical_units=par.physical_units, nodiff=par.nodiff, fieldofview=par.fieldofview, slice=par.slice, onedprofile='No', override_units=par.override_units)
                 array0 = myfield0.data
                 array = (myfield.data-array0)/array0
             else:
@@ -448,10 +448,10 @@ def plottwodfield():
                     myR0 = myrmin   + np.random.rand()*(myrmax-myrmin)
                     myT0 = myphimin + np.random.rand()*(myphimax-myphimin)
                     # forward integration of streamlines
-                    xstr,ystr = myfield.compute_streamline(niterations=10000,R0=myR0,T0=myT0,rmin=myrmin,rmax=myrmax,pmin=myphimin,pmax=myphimax,forward=True,fieldofview=par.fieldofview,horiz_slice=par.horiz_slice)
+                    xstr,ystr = myfield.compute_streamline(niterations=10000,R0=myR0,T0=myT0,rmin=myrmin,rmax=myrmax,pmin=myphimin,pmax=myphimax,forward=True,fieldofview=par.fieldofview,slice=par.slice)
                     ax.scatter(xstr,ystr,s=3,marker='o',color='white')
                     # backward integration of streamlines
-                    xstr,ystr = myfield.compute_streamline(niterations=10000,R0=myR0,T0=myT0,rmin=myrmin,rmax=myrmax,pmin=myphimin,pmax=myphimax,forward=False,fieldofview=par.fieldofview,horiz_slice=par.horiz_slice)
+                    xstr,ystr = myfield.compute_streamline(niterations=10000,R0=myR0,T0=myT0,rmin=myrmin,rmax=myrmax,pmin=myphimin,pmax=myphimax,forward=False,fieldofview=par.fieldofview,slice=par.slice)
                     ax.scatter(xstr,ystr,s=3,marker='o',color='white')
             
             # ------------------
@@ -588,9 +588,9 @@ def plottwodfield():
         # ------------------
         # save in pdf or png files
         # ------------------
-        outfile = par.fluid+'_'+par.whatfield+'_'+directory+'_'+par.fieldofview+'_'+par.horiz_slice+'_'+str(on[k]).zfill(4)
+        outfile = par.fluid+'_'+par.whatfield+'_'+directory+'_'+par.fieldofview+'_'+par.slice+'_'+str(on[k]).zfill(4)
         if par.movie == 'Yes' and par.take_one_point_every != 1:
-            outfile = par.fluid+'_'+par.whatfield+'_'+directory+'_'+par.fieldofview+'_'+par.horiz_slice+'_'+str(k).zfill(4)
+            outfile = par.fluid+'_'+par.whatfield+'_'+directory+'_'+par.fieldofview+'_'+par.slice+'_'+str(k).zfill(4)
         if par.showdust == 'Yes':
             outfile += '_dust'
         fileout = outfile+'.pdf'
@@ -607,22 +607,22 @@ def plottwodfield():
     # ------------------
     if par.movie == 'Yes':
         # png files that have been created above
-        allpngfiles = [par.fluid+'_'+par.whatfield+'_'+directory+'_'+par.fieldofview+'_'+par.horiz_slice+'_'+str(on[x]).zfill(4)+'.png' for x in range(len(on))]
+        allpngfiles = [par.fluid+'_'+par.whatfield+'_'+directory+'_'+par.fieldofview+'_'+par.slice+'_'+str(on[x]).zfill(4)+'.png' for x in range(len(on))]
         if par.take_one_point_every != 1:
-            allpngfiles = [par.fluid+'_'+par.whatfield+'_'+directory+'_'+par.fieldofview+'_'+par.horiz_slice+'_'+str(x).zfill(4)+'.png' for x in range(len(on))]
+            allpngfiles = [par.fluid+'_'+par.whatfield+'_'+directory+'_'+par.fieldofview+'_'+par.slice+'_'+str(x).zfill(4)+'.png' for x in range(len(on))]
             str_on_start_number = str(0)
         else:
             str_on_start_number = str(on[0])
         # input files for ffpmeg
-        input_files = par.fluid+'_'+par.whatfield+'_'+directory+'_'+par.fieldofview+'_'+par.horiz_slice+'_%04d.png'
+        input_files = par.fluid+'_'+par.whatfield+'_'+directory+'_'+par.fieldofview+'_'+par.slice+'_%04d.png'
         # output file for ffmpeg
-        filempg = par.fluid+'_'+par.whatfield+'_'+directory+'_'+par.fieldofview+'_'+par.horiz_slice+'_'+str(on[0])+'_'+str(on[len(on)-1])+'.mpg'
+        filempg = par.fluid+'_'+par.whatfield+'_'+directory+'_'+par.fieldofview+'_'+par.slice+'_'+str(on[0])+'_'+str(on[len(on)-1])+'.mpg'
         # options
         if par.showdust == 'Yes':
-            allpngfiles = [par.fluid+'_'+par.whatfield+'_'+directory+'_'+par.fieldofview+'_'+par.horiz_slice+'_'+str(on[x]).zfill(4)+'_dust.png' for x in range(len(on))]
+            allpngfiles = [par.fluid+'_'+par.whatfield+'_'+directory+'_'+par.fieldofview+'_'+par.slice+'_'+str(on[x]).zfill(4)+'_dust.png' for x in range(len(on))]
             if par.take_one_point_every != 1:
-                allpngfiles = [par.fluid+'_'+par.whatfield+'_'+directory+'_'+par.fieldofview+'_'+par.horiz_slice+'_'+str(x).zfill(4)+'_dust.png' for x in range(len(on))]
-            input_files = par.fluid+'_'+par.whatfield+'_'+directory+'_'+par.fieldofview+'_'+par.horiz_slice+'_%04d_dust.png'
+                allpngfiles = [par.fluid+'_'+par.whatfield+'_'+directory+'_'+par.fieldofview+'_'+par.slice+'_'+str(x).zfill(4)+'_dust.png' for x in range(len(on))]
+            input_files = par.fluid+'_'+par.whatfield+'_'+directory+'_'+par.fieldofview+'_'+par.slice+'_%04d_dust.png'
             filempg = re.sub('.mpg', '_dust.mpg', filempg)
         if par.nodiff == 'Yes':
             filempg = re.sub('.mpg', '_nodiff.mpg', filempg)

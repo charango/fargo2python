@@ -63,7 +63,8 @@ fieldmax				    # if specified, maximum value of field to display (for color bar
 
 fieldofview	    polar		# field of view: cartesian (cart), polar (polar, default: phi vs. r), vertical or latitudinal?
 rvsphi		    No			# if field of view is polar, do we plot radius vs phi instead?
-horiz_slice     midplane    # can be: midplane (default), upper or lower surface (only if field of view is polar or cart and the run is 3D) 
+slice           average     # can be: 'midplane', 'upper' or 'lower' if field of view is polar or cart
+                            # or can be 'average' or simply left undefined if field of view is vertical or latitudinal
 rotate_angle			    # if set, rotate 2D field by angle specified in degrees
 flip_xaxis	    No			# if Yes, flip x axis to -x axis
 
