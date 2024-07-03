@@ -179,7 +179,7 @@ class Field(Mesh):
             with open(directory+"/planet0.dat") as f_in:
                 firstline_orbitfile = np.genfromtxt(itertools.islice(f_in, 0, 1, None), dtype=float)
             apla = firstline_orbitfile[1]
-        if (apla <= 0.0):
+        if (apla <= 1e-5):
             apla = 1.0
             
         # check if planet0.dat file has only one line or more!
