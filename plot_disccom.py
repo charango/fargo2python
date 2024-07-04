@@ -63,7 +63,7 @@ def plotdisccom():
         gasdens1D0_file  = directory[j]+'/gasdens1D0.dat'
         if os.path.isfile(gasdens1D0_file) == True:
             fargo2d1d = 'Yes'
-        else
+        else:
             fargo2d1d = 'No'
 
 
