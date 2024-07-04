@@ -84,15 +84,12 @@ if not('verbose' in open('paramsf2p.dat').read()):
 # was simulation carried out with Fargo3D?
 fargo3d = 'No'
 fargo_orig = 'No'
-fargo2d1d = 'No'
 if isinstance(directory, str) == False:
     summary0_file = directory[0]+'/summary0.dat'
     usedazi_file  = directory[0]+'/used_azi.dat'
-    gasdens1D0_file  = directory[0]+'/gasdens1D0.dat'
 else:
     summary0_file = directory+'/summary0.dat'
     usedazi_file  = directory+'/used_azi.dat'
-    gasdens1D0_file  = directory+'/gasdens1D0.dat'
 if os.path.isfile(summary0_file) == True:
     # Simulations were carried out with Fargo3D
     fargo3d = 'Yes'
@@ -105,10 +102,6 @@ else:
     else:
     # Simulations were carried out with the original FARGO code
         fargo_orig = 'Yes'
-        if os.path.isfile(gasdens1D0_file) == True:
-            # Simulations were carried out with FARGO-2D1D
-            fargo2d1d = 'Yes'            
-
 
 # global boolean: if True, then plot 1D or 2D fields
 plot_field = True

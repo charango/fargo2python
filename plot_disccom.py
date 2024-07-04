@@ -58,11 +58,19 @@ def plotdisccom():
         else:
             mylabel = str(directory[j])
 
+        # Test if file gasdens1D0.dat exists to know if simulation in current directory 
+        # has been carried out with FARGO2D1D or not
+        gasdens1D0_file  = directory[j]+'/gasdens1D0.dat'
+        if os.path.isfile(gasdens1D0_file) == True:
+            fargo2d1d = 'Yes'
+        else
+            fargo2d1d = 'No'
+
 
         # DEFAULT CASE (= NO FARGO2D1D simulations): we obtain the position of the center-of-mass 
         # by inspecting at the gas density fields obtained in simulations run in a fixed reference 
         # frame centred on the star
-        if par.fargo2d1d == 'No':
+        if fargo2d1d == 'No':
 
             # find how many output numbers were produced for each directory
             if par.fargo3d == 'No':
