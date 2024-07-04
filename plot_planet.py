@@ -67,6 +67,10 @@ def plotplanet():
     if isinstance(par.directory, str) == True:
         directory = [par.directory]
 
+    if ( ('myymax' in open('paramsf2p.dat').read()) and ('myymin' in open('paramsf2p.dat').read()) ):
+        if ( (par.myymax != '#') and (par.myymin != '#') ):
+            ax.set_ylim(par.myymin,par.myymax)
+
     # loop over directories
     for j in range(len(directory)):
 
@@ -123,7 +127,10 @@ def plotplanet():
             if par.fargo_orig == 'No':
                 time, e, a, M, V, PA, mylambda, varpi = np.loadtxt(directory[j]+"/orbit0.dat",unpack=True)
             else:
-                time, e, a, M, V, PA = np.loadtxt(directory[j]+"/orbit0.dat",unpack=True)
+                if par.fargo2d1d == 'Yes':
+                    time, e, a, M, V, PA = np.loadtxt(directory[j]+"/orbit1.dat",unpack=True)
+                else:
+                    time, e, a, M, V, PA = np.loadtxt(directory[j]+"/orbit0.dat",unpack=True)
         else:
             command = par.awk_command+' "{print NF; exit}" '+directory[j]+'/orbit0.dat'
             # check which version of python we're using
@@ -144,14 +151,13 @@ def plotplanet():
         if (nbplanets <= 1 and par.plot_planet[1] == 'p'):
             sys.exit('ERROR: you requested to plot orbital period ratio, but there is only one planet simulated in directory: ', directory[j])
            
-        if len(directory) > 1:
-            if ('use_legend' in open('paramsf2p.dat').read()) and (par.use_legend != '#'):
-                use_legend = par.use_legend
-                if isinstance(par.use_legend, str) == True:
-                    use_legend = [par.use_legend]
-                mylabel = str(use_legend[j])
-            else:
-                mylabel = str(directory[j])
+        if ('use_legend' in open('paramsf2p.dat').read()) and (par.use_legend != '#'):
+            use_legend = par.use_legend
+            #print('use_legend = ', use_legend)
+            if isinstance(par.use_legend, str) == True:
+                use_legend = [par.use_legend]
+            mylabel = str(use_legend[j])
+            mylabel = mylabel.replace("_", " ")
         else:
             mylabel = str(directory[j])
         
@@ -204,7 +210,10 @@ def plotplanet():
                     
             if par.plot_planet[1] == 'r' or par.plot_planet[1] == 'm':
                 if par.fargo3d == 'No':
-                    f1, xpla, ypla, f4, f5, mpla, f7, date, f9, f10, f11 = np.loadtxt(directory[j]+"/bigplanet"+str(k)+".dat",unpack=True)
+                    if par.fargo2d1d == 'Yes':
+                        f1, xpla, ypla, f4, f5, mpla, f7, date, f9 = np.loadtxt(directory[j]+"/bigplanet"+str(k)+".dat",unpack=True)
+                    else:
+                        f1, xpla, ypla, f4, f5, mpla, f7, date, f9, f10, f11 = np.loadtxt(directory[j]+"/bigplanet"+str(k)+".dat",unpack=True)
                 else:
                     f1, xpla, ypla, zpla, f5, f6, f7, mpla, date, f10 = np.loadtxt(directory[j]+"/bigplanet"+str(k)+".dat",unpack=True)
                 mytime = date/(2.0*np.pi*rpla_0*np.sqrt(rpla_0))
@@ -239,11 +248,11 @@ def plotplanet():
                     
             if par.plot_planet[1] == 'mmr':
                 if k == 0:
-                    lambda0 = mylambda
-                    varpi0  = PA
+                    lambda0 = mylambda[umin:umax+1]
+                    varpi0  = PA[umin:umax+1]
                 if k == 1:
-                    lambda1 = mylambda
-                    varpi1  = PA
+                    lambda1 = mylambda[umin:umax+1]
+                    varpi1  = PA[umin:umax+1]
                     
             if par.plot_planet[1] != 'p' and par.plot_planet[1] != 'mmr':
                 if len(directory) == 1:
@@ -284,6 +293,7 @@ def plotplanet():
     if len(directory) != 1:
         ax.legend(frameon=False,fontsize=15)
             
+  
     # save file
     if len(directory) == 1:           
         outfile = par.plot_planet[0]+'_'+par.plot_planet[1]+'_'+str(directory[0])
