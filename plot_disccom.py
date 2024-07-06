@@ -78,7 +78,7 @@ def plotdisccom():
             else:
                 nboutputs = len(fnmatch.filter(os.listdir(directory[j]), 'summary*.dat'))
             print('number of outputs for directory ',directory[j],': ',nboutputs)
-            on = np.arange(nboutputs)/take_one_point_every
+            on = np.arange(nboutputs) #/take_one_point_every
 
             x_com = np.zeros(len(on))
             y_com = np.zeros(len(on))
