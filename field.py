@@ -171,14 +171,14 @@ class Field(Mesh):
 
         # read only first line of file orbit0.dat to get initial semi-major axis:
         # procedure is independent of how many columns there is in the file
-        if os.path.isfile(directory+"/orbit0.dat") == True:
-            with open(directory+"/orbit0.dat") as f_in:
-                firstline_orbitfile = np.genfromtxt(itertools.islice(f_in, 0, 1, None), dtype=float)
-            apla = firstline_orbitfile[2]
-        else:
+        if os.path.isfile(directory+"/planet0.dat") == True:
             with open(directory+"/planet0.dat") as f_in:
                 firstline_orbitfile = np.genfromtxt(itertools.islice(f_in, 0, 1, None), dtype=float)
             apla = firstline_orbitfile[1]
+        else:
+            with open(directory+"/orbit0.dat") as f_in:
+                firstline_orbitfile = np.genfromtxt(itertools.islice(f_in, 0, 1, None), dtype=float)
+            apla = firstline_orbitfile[2]
         if (apla <= 1e-5):
             apla = 1.0
             
