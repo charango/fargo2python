@@ -91,7 +91,7 @@ def plotdisccom():
             for k in range(len(on)):     
 
                 # get 2D gas surface density field (not compatible with 3D yet...)
-                dens = Field(field='dens', fluid='gas', on=on[k], directory=directory[j], physical_units=par.physical_units, nodiff='Yes', fieldofview='polar', slice='midplane', onedprofile='No', override_units=par.override_units)
+                dens = Field(field='dens', fluid='gas', on=int(on[k]), directory=directory[j], physical_units=par.physical_units, nodiff='Yes', fieldofview='polar', slice='midplane', onedprofile='No', override_units=par.override_units)
 
                 # things we do only when entering for loop
                 if first_time == 0:
