@@ -66,6 +66,13 @@ def plotdisccom():
         else:
             fargo2d1d = 'No'
 
+        if par.fargo3d == 'No':
+            if fargo2d1d == 'Yes':
+                f1, xpla, ypla, f4, f5, mpla, f7, date, f9 = np.loadtxt(directory[j]+"/planet0.dat",unpack=True)
+            else:
+                f1, xpla, ypla, f4, f5, mpla, f7, date, f9, f10, f11 = np.loadtxt(directory[j]+"/planet0.dat",unpack=True)
+        else:
+            f1, xpla, ypla, zpla, f5, f6, f7, mpla, date, f10 = np.loadtxt(directory[j]+"/planet0.dat",unpack=True)
 
         # DEFAULT CASE (= NO FARGO2D1D simulations): we obtain the position of the center-of-mass 
         # by inspecting at the gas density fields obtained in simulations run in a fixed reference 
@@ -129,10 +136,17 @@ def plotdisccom():
                 # mass of each grid cell (2D array)
                 mass = dens.data*surface
                 mass = np.transpose(mass)  # (nsec,nrad)
-                
+
+                # is there a planet?
+                mp = mpla[k]
+                xp = xpla[k]
+                yp = ypla[k]
+
                 # get x- and y-coordinates of centre-of-mass by double for loop
-                x_com[k] = np.sum(mass*X) / np.sum(mass)
-                y_com[k] = np.sum(mass*Y) / np.sum(mass)
+                x_com[k] = (np.sum(mass*X) + mp*xp) / (mp + np.sum(mass))
+                y_com[k] = (np.sum(mass*Y) + mp*yp) / (mp + np.sum(mass))
+                #x_com[k] = np.sum(mass*X) / np.sum(mass)
+                #y_com[k] = np.sum(mass*Y) / np.sum(mass)
                 r_com[k] = np.sqrt( x_com[k]*x_com[k] + y_com[k]*y_com[k] )
                 t_com[k] = round(date[k*take_one_point_every]/2./np.pi/apla/np.sqrt(apla),1)
 
