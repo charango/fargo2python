@@ -141,17 +141,15 @@ def plotdisccom():
                 # get x- and y-coordinates of centre-of-mass by double for loop
                 x_com[k] = (np.sum(mass*X) + mp*xp) / (mp + np.sum(mass))
                 y_com[k] = (np.sum(mass*Y) + mp*yp) / (mp + np.sum(mass))
-                #x_com[k] = np.sum(mass*X) / np.sum(mass)
-                #y_com[k] = np.sum(mass*Y) / np.sum(mass)
                 r_com[k] = np.sqrt( x_com[k]*x_com[k] + y_com[k]*y_com[k] )
                 t_com[k] = round(date[k*take_one_point_every]/2./np.pi/apla/np.sqrt(apla),1)
 
 
-        # SPECIAL CASE OF FARGO2D1D simulations run in a fixed frame centred on the {star+disc} barycentre: 
+        # SPECIAL CASE OF FARGO2D1D simulations run in a fixed frame centred on the {star+disc+planets} barycentre: 
         # the position of the centre of mass is simply inferred from that of the star!
         else:
             print('FARGO2D1D simulation detected!')
-            f1, xs, ys, f4, f5, f6, f7, date, f9 = np.loadtxt(directory[j]+"/planet0.dat",unpack=True)
+            f1, xs, ys, f4, f5, ms, f7, date, f9 = np.loadtxt(directory[j]+"/planet0.dat",unpack=True)
             x_com = -xs
             y_com = -ys
             r_com = np.sqrt( x_com*x_com + y_com*y_com )
