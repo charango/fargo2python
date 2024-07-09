@@ -66,13 +66,6 @@ def plotdisccom():
         else:
             fargo2d1d = 'No'
 
-        if par.fargo3d == 'No':
-            if fargo2d1d == 'Yes':
-                f1, xpla, ypla, f4, f5, mpla, f7, date, f9 = np.loadtxt(directory[j]+"/planet0.dat",unpack=True)
-            else:
-                f1, xpla, ypla, f4, f5, mpla, f7, date, f9, f10, f11 = np.loadtxt(directory[j]+"/planet0.dat",unpack=True)
-        else:
-            f1, xpla, ypla, zpla, f5, f6, f7, mpla, date, f10 = np.loadtxt(directory[j]+"/planet0.dat",unpack=True)
 
         # DEFAULT CASE (= NO FARGO2D1D simulations): we obtain the position of the center-of-mass 
         # by inspecting at the gas density fields obtained in simulations run in a fixed reference 
@@ -127,7 +120,10 @@ def plotdisccom():
                     if dens.fargo3d == 'Yes':
                         f1, xpla, ypla, f4, f5, f6, f7, f8, date, omega = np.loadtxt(directory[j]+"/planet0.dat",unpack=True)
                     else:
-                        f1, xpla, ypla, f4, f5, f6, f7, date, omega, f10, f11 = np.loadtxt(directory[j]+"/planet0.dat",unpack=True)
+                        if fargo2d1d == 'Yes':
+                            f1, xpla, ypla, f4, f5, mpla, f7, date, f9 = np.loadtxt(directory[j]+"/planet0.dat",unpack=True)
+                        else:
+                            f1, xpla, ypla, f4, f5, f6, f7, date, omega, f10, f11 = np.loadtxt(directory[j]+"/planet0.dat",unpack=True)
                     with open(directory[j]+"/orbit0.dat") as f_in:
                         firstline_orbitfile = np.genfromtxt(itertools.islice(f_in, 0, 1, None), dtype=float)
                     apla = firstline_orbitfile[2]
@@ -138,9 +134,9 @@ def plotdisccom():
                 mass = np.transpose(mass)  # (nsec,nrad)
 
                 # is there a planet?
-                mp = mpla[k]
-                xp = xpla[k]
-                yp = ypla[k]
+                mp = mpla[int(on[k])]
+                xp = xpla[int(on[k])]
+                yp = ypla[int(on[k])]
 
                 # get x- and y-coordinates of centre-of-mass by double for loop
                 x_com[k] = (np.sum(mass*X) + mp*xp) / (mp + np.sum(mass))
