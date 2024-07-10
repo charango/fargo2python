@@ -563,8 +563,8 @@ def plottwodfield():
             # ------------------
             if ( ('display_label' in open('paramsf2p.dat').read()) and (par.display_label != '#') ):
                 mylabel = par.display_label.replace('_','')
-                xlabel = X.max()-0.1*(X.max()-X.min())
-                ylabel = Y.max()-0.1*(Y.max()-Y.min())
+                xlabel = xlim_max - 0.1*(xlim_max-xlim_min)
+                ylabel = ylim_max - 0.1*(ylim_max-ylim_min)
                 print('xlabel=',xlabel, ' ylabel=', ylabel)
                 ax.text(xlabel, ylabel, mylabel, fontsize=20, color = 'white',weight='bold', horizontalalignment='right')
 
