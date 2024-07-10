@@ -541,7 +541,10 @@ def plottwodfield():
             # ------------------
             if ( ('display_label' in open('paramsf2p.dat').read()) and (par.display_label != '#') ):
                 mylabel = par.display_label.replace('_','')
-                ax.text(X.max()-0.1*(X.max()-X.min()),Y.max()-0.1*(Y.max()-Y.min()), mylabel, fontsize=20, color = 'white',weight='bold', horizontalalignment='right')
+                xlabel = X.max()-0.1*(X.max()-X.min())
+                ylabel = Y.max()-0.1*(Y.max()-Y.min())
+                print('xlabel=',xlabel, ' ylabel=', ylabel)
+                ax.text(xlabel, ylabel, mylabel, fontsize=20, color = 'white',weight='bold', horizontalalignment='right')
 
             # ----------------
             # special case all fluids 
