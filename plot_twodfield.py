@@ -268,16 +268,24 @@ def plottwodfield():
                         ax.set_ylabel('Radius [au]')
                     else:
                         ax.set_ylabel('Radius [code units]')
-                    ax.set_xlim(myphimin,myphimax)
-                    ax.set_ylim(myrmin,myrmax)
+                    xlim_min = myphimin
+                    xlim_max = myphimax
+                    ylim_min = myrmin
+                    ylim_max = myrmax
+                    #ax.set_xlim(myphimin,myphimax)
+                    #ax.set_ylim(myrmin,myrmax)
                 else:
                     ax.set_ylabel('Azimuth [rad]')
                     if par.physical_units == 'Yes':
                         ax.set_xlabel('Radius [au]')
                     else:
                         ax.set_xlabel('Radius [code units]')
-                    ax.set_ylim(myphimin,myphimax)
-                    ax.set_xlim(myrmin,myrmax)
+                    xlim_min = myrmin
+                    xlim_max = myrmax
+                    ylim_min = myphimin
+                    ylim_max = myphimax
+                    #ax.set_ylim(myphimin,myphimax)
+                    #ax.set_xlim(myrmin,myrmax)
             #
             # -------------------------
             # LATITUDINAL FIELD OF VIEW
@@ -304,8 +312,12 @@ def plottwodfield():
                 else:
                     ax.set_xlabel('Radius [au]')
                     ax.set_ylabel('Latitude [rad]')
-                ax.set_ylim(T.min(),T.max())
-                ax.set_xlim(myrmin,myrmax)
+                xlim_min = myrmin
+                xlim_max = myrmax
+                ylim_min = T.min()
+                ylim_max = T.max()
+                #ax.set_ylim(T.min(),T.max())
+                #ax.set_xlim(myrmin,myrmax)
             #
             # -----------------------
             # CARTESIAN FIELD OF VIEW
@@ -349,9 +361,13 @@ def plottwodfield():
                         # do not edit subplot position below!
                         plt.subplots_adjust(left=0.17, right=0.92, top=0.88, bottom=0.1)
                     ax = plt.gca()
-                    
-                ax.set_xlim(-myrmax,myrmax)
-                ax.set_ylim(-myrmax,myrmax)
+
+                xlim_min = -myrmax
+                xlim_max = myrmax
+                ylim_min = -myrmax
+                ylim_max = myrmax
+                #ax.set_xlim(-myrmax,myrmax)
+                #ax.set_ylim(-myrmax,myrmax)
                 if par.physical_units == 'Yes':
                     ax.set_xlabel('x [au]')
                     ax.set_ylabel('y [au]')
@@ -378,8 +394,12 @@ def plottwodfield():
                         plt.subplots_adjust(left=0.15, right=0.94, top=0.88, bottom=0.11)
                     ax = plt.gca()
                     
-                ax.set_ylim(Y.min(),Y.max())
-                ax.set_xlim(X.min(),X.max())
+                xlim_min = X.min()
+                xlim_max = X.max()
+                ylim_min = Y.min()
+                ylim_max = Y.max()
+                #ax.set_ylim(Y.min(),Y.max())
+                #ax.set_xlim(X.min(),X.max())
                 if par.physical_units == 'No':
                     ax.xaxis.set_minor_locator(MultipleLocator(0.1))
                     ax.yaxis.set_minor_locator(MultipleLocator(0.1))
@@ -390,6 +410,8 @@ def plottwodfield():
                     ax.set_ylabel('Altitude [au]')
 
             # common display
+            ax.set_xlim(xlim_min,xlim_max)
+            ax.set_ylim(ylim_min,ylim_max)
             ax.tick_params(top='on', right='on', length = 5, width=1.0, direction='out')
             ax.tick_params(axis='x', which='minor', top=True)
             ax.tick_params(axis='y', which='minor', right=True)
