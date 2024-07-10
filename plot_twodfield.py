@@ -565,7 +565,7 @@ def plottwodfield():
                 mylabel = par.display_label.replace('_',' ')
                 xlabel = xlim_max - 0.05*(xlim_max-xlim_min)
                 ylabel = ylim_max - 0.05*(ylim_max-ylim_min)
-                print('xlabel=',xlabel, ' ylabel=', ylabel)
+                #print('xlabel=',xlabel, ' ylabel=', ylabel)
                 ax.text(xlabel, ylabel, mylabel, fontsize=15, color = 'white',weight='bold', horizontalalignment='right')
 
             # ----------------
