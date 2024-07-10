@@ -535,7 +535,12 @@ def plottwodfield():
                             ax.plot([cpurmin[i],cpurmin[i]],[Y.min(),Y.max()],'-',linewidth=1,color='grey')
                         else:
                             ax.plot([X.min(),X.max()],[cpurmin[i],cpurmin[i]],'-',linewidth=1,color='grey')
-                            
+
+            # ------------------        
+            # Add user-defined string in top right corner
+            # ------------------
+            if ( ('display_label' in open('paramsf2p.dat').read()) and (par.display_label != '#') ):
+                ax.text(X.max()-0.1*(X.max()-X.min()),Y.max()-0.1*(Y.max()-Y.min()), par.display_label, fontsize=20, color = 'white',weight='bold', horizontalalignment='right')
 
             # ----------------
             # special case all fluids 
@@ -626,7 +631,7 @@ def plottwodfield():
             filempg = re.sub('.mpg', '_dust.mpg', filempg)
         if par.nodiff == 'Yes':
             filempg = re.sub('.mpg', '_nodiff.mpg', filempg)
-        # call to python-ffmpeg
+        # call to ffmpeg-python
         import ffmpeg
         (
             ffmpeg            

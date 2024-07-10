@@ -103,3 +103,5 @@ take_one_point_every     	# if specified, take one point every Nth in y=f(x) plo
 saveaspdf	No			    # save image as pdf file? (Yes or No)
 saveaspng	Yes			    # save image as png file? (Yes or No)
 mycolormap	nipy_spectral 	# nipy_spectral # gray
+
+display_label               # add user-defined label in top-right corner of 2D plots
