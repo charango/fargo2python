@@ -819,7 +819,8 @@ class Field(Mesh):
                         return datacube[-1,:,:]   # midplane field only if "half-a-disc" is simulated in latitudinal direction!
                     else:
                         return datacube[1,:,:]   # field at disc surface only if "half-a-disc" is simulated in latitudinal direction!
-                        #return datacube[self.ncol-1,:,:]   # field at disc surface only if "half-a-disc" is simulated in latitudinal direction!
+                    if slice == 'intermediate':
+                        return datacube[self.ncol//2,:,:]   # field at disc surface only if "half-a-disc" is simulated in latitudinal direction!
                 else:
                     if slice == 'midplane':
                         return datacube[self.ncol//2,:,:]   # midplane field only if "full" disc is simulated in latitudinal direction!
