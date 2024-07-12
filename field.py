@@ -817,7 +817,7 @@ class Field(Mesh):
                 if np.abs(self.zmax-1.57) < 0.01:
                     if slice == 'midplane':
                         return datacube[-1,:,:]   # midplane field only if "half-a-disc" is simulated in latitudinal direction!
-                    else:
+                    if (slice == 'upper' or slice == '#'):
                         return datacube[1,:,:]   # field at disc surface only if "half-a-disc" is simulated in latitudinal direction!
                     if slice == 'intermediate':
                         return datacube[self.ncol//2,:,:]   # field at disc surface only if "half-a-disc" is simulated in latitudinal direction!
