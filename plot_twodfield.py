@@ -135,26 +135,30 @@ def plottwodfield():
                 if par.physical_units == 'Yes':
                     R *= (myfield.culength / 1.5e11) # in au
             
-                # define visualisation params
-                myrmin = par.myrmin
+                # define visualisation params                
                 if (par.myrmin == '#'):
                     myrmin = R.min()
-                imin = np.argmin(np.abs(R-myrmin))
-                myrmax = par.myrmax
+                else:
+                    myrmin = par.myrmin
+                imin = np.argmin(np.abs(R-myrmin))                
                 if (par.myrmax == '#'):
                     myrmax = R.max()
+                else:
+                    myrmax = par.myrmax
                 imax = np.argmin(np.abs(R-myrmax))   
 
                 # VISUALISATION IN MIDPLANE: get azimuth 
                 if par.fargo3d == 'No' or (par.fieldofview != 'latitudinal' and par.fieldofview != 'vertical'):
                     T = myfield.pedge # myfield.pmed
-                    myphimin = par.myphimin
                     if (par.myphimin == '#'):
                         myphimin = T.min()
-                    jmin = np.argmin(np.abs(T-myphimin))
-                    myphimax = par.myphimax
+                    else:
+                        myphimin = par.myphimin
+                    jmin = np.argmin(np.abs(T-myphimin))                    
                     if (myphimax == '#'):
                         myphimax = T.max()
+                    else:
+                        myphimax = par.myphimax
                     jmax = np.argmin(np.abs(T-myphimax))
                     if ('flip_xaxis' in open('paramsf2p.dat').read()) and (par.flip_xaxis == 'Yes'):
                         bufmin = myphimin
@@ -191,13 +195,15 @@ def plottwodfield():
             if par.showdust == 'Yes':
                 (rd, td, vrd, vtd, Stokes, sizedust) = np.loadtxt(directory+'/dustsystat'+str(on[k])+'.dat', unpack=True)
                 if par.physical_units == 'Yes':
-                    rd *= (myfield.culength / 1.5e11)  # in au
-                sizemin = par.sizemin
+                    rd *= (myfield.culength / 1.5e11)  # in au                
                 if (par.sizemin == '#'):
                     sizemin = sizedust.min()
-                sizemax = par.sizemax
+                else:
+                    sizemin = par.sizemin                
                 if (par.sizemax == '#'):
                     sizemax = sizedust.max()
+                else:
+                    sizemax = par.sizemax
 
                 # rotate particles azimuth by user-defined angle specified in degree in .dat file
                 if ('rotate_angle' in open('paramsf2p.dat').read()) and (par.rotate_angle != '#'):
@@ -421,17 +427,15 @@ def plottwodfield():
             # -------------------
             # adjust min and max in color bar according to field of view
             # -------------------
-            #print(array_orig.shape,imin,imax,jmin,jmax)
-            myfieldmin = par.fieldmin
+            #print(array_orig.shape,imin,imax,jmin,jmax)            
             if (par.fieldmin == '#'):
                 myfieldmin = array_orig[imin:imax+1,jmin:jmax+1].min()
-                if par.fieldofview == 'latitudinal':
-                    myfieldmin = array_orig[imin:imax+1,jmin:jmax+1].min()
-            myfieldmax = par.fieldmax
+            else:
+                myfieldmin = par.fieldmin            
             if (par.fieldmax == '#'):
                 myfieldmax = array_orig[imin:imax+1,jmin:jmax+1].max()
-                if par.fieldofview == 'latitudinal':
-                    myfieldmax = array_orig[imin:imax+1,jmin:jmax+1].max()
+            else:
+                myfieldmax = par.fieldmax
 
             if par.log_colorscale == 'Yes':
                 if (par.fieldmin == 'auto' or par.fieldmax == 'auto'):
