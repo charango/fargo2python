@@ -149,10 +149,11 @@ def plotdisccom():
         # the position of the centre of mass is simply inferred from that of the star!
         else:
             print('FARGO2D1D simulation detected!')
-            f1, xs, ys, f4, f5, ms, f7, date, f9 = np.loadtxt(directory[j]+"/planet0.dat",unpack=True)
+            f1, xs, ys, zs, f5, ms, f7, date, f9 = np.loadtxt(directory[j]+"/planet0.dat",unpack=True)
             x_com = -xs
             y_com = -ys
-            r_com = np.sqrt( x_com*x_com + y_com*y_com )
+            z_com = -zs
+            r_com = np.sqrt( x_com*x_com + y_com*y_com + z_com+z_com )
             t_com = date/2./np.pi
 
 
