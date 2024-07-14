@@ -394,8 +394,8 @@ def plottwodfield():
                         plt.subplots_adjust(left=0.15, right=0.94, top=0.88, bottom=0.11)
                     ax = plt.gca()
                     
-                xlim_min = X.min()
-                xlim_max = X.max()
+                xlim_min = myrmin #X.min()
+                xlim_max = myrmax #X.max()
                 ylim_min = Y.min()
                 ylim_max = Y.max()
                 #ax.set_ylim(Y.min(),Y.max())
