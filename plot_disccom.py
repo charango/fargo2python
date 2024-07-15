@@ -66,11 +66,24 @@ def plotdisccom():
         else:
             fargo2d1d = 'No'
 
+        # Test if simulation has been done with FARGO3D in 3D
+        runwas3d = 'No'
+        summary_file  = directory[j]+'/summary0.dat'
+        if os.path.isfile(summary_file) == True:
+            command = par.awk_command+' " /^ZMAX/ " '+directory[j]+'/variables.par'
+            if sys.version_info[0] < 3:   # python 2.X
+                buf = subprocess.check_output(command, shell=True)
+            else:                         # python 3.X
+                buf = subprocess.getoutput(command)
+            zmax = float(buf.split()[1])
+            if zmax != 1:
+                runwas3d = 'Yes'
+
 
         # DEFAULT CASE (= NO FARGO2D1D simulations): we obtain the position of the center-of-mass 
         # by inspecting at the gas density fields obtained in simulations run in a fixed reference 
         # frame centred on the star
-        if fargo2d1d == 'No':
+        if fargo2d1d == 'No' and runwas3d == 'No':
 
             # find how many output numbers were produced for each directory
             if par.fargo3d == 'No':
@@ -145,15 +158,102 @@ def plotdisccom():
                 t_com[k] = round(date[k*take_one_point_every]/2./np.pi/apla/np.sqrt(apla),1)
 
 
+        # CASE OF 3D SIMULATIONS WITH FARGO3D: we obtain again the position of the center-of-mass 
+        # by inspecting at the 3D gas density fields obtained in simulations run in a fixed reference 
+        # frame centred on the star
+        if fargo2d1d == 'No' and runwas3d == 'Yes':
+            print('3D FARGO3D simulation detected!')
+
+            # find how many output numbers were produced for each directory
+            nboutputs = len(fnmatch.filter(os.listdir(directory[j]), 'summary*.dat'))
+            print('number of outputs for directory ',directory[j],': ',nboutputs)
+            on = np.arange(nboutputs)/take_one_point_every
+
+            x_com = np.zeros(len(on))
+            y_com = np.zeros(len(on))
+            z_com = np.zeros(len(on))
+            r_com = np.zeros(len(on))
+            t_com = np.zeros(len(on))
+
+            # get 2D gas surface density field just to inherit from mesh properties
+            buf = Field(field='dens', fluid='gas', on=int(on[0]), directory=directory[j], physical_units=par.physical_units, nodiff='Yes', fieldofview='polar', slice='midplane', onedprofile='No', override_units=par.override_units)
+
+            first_time = 0
+
+            # loop over output numbers
+            for k in range(len(on)):     
+
+                # get 3D gas volume density field
+                f = directory[j]+'/gasdens'+str(int(on[k]))+'.dat'
+                #print('file = ', f)
+                dens = np.fromfile(f, dtype='float64')
+                dens = dens.reshape(buf.ncol,buf.nrad,buf.nsec)  # 3D ncol, nrad, nsec
+
+                # things we do only when entering for loop
+                if first_time == 0:
+                
+                    first_time = 1
+                
+                    # get volume of every cell
+                    Redge,Cedge,Aedge = np.meshgrid(buf.redge, buf.tedge, buf.pedge)   # ncol+1, nrad+1, Nsec+1
+                    if par.physical_units == 'Yes':
+                        Redge *= (buf.culength / 1.5e11) # in au
+                    r2 = Redge*Redge
+
+                    jacob  = r2[:-1,:-1,:-1] * np.cos(Cedge[:-1,:-1,:-1])
+                    dphi   = Aedge[:-1,:-1,1:] - Aedge[:-1,:-1,:-1]     # same as 2pi/nsec
+                    dr     = Redge[:-1,1:,:-1] - Redge[:-1,:-1,:-1]     # same as Rsup-Rinf
+                    dtheta = Cedge[1:,:-1,:-1] - Cedge[:-1,:-1,:-1]
+                    volume = jacob * dr * dphi * dtheta     # ncol, nrad, nsec
+
+                    # get radius and azimuth arrays, infer X and Y for cell centres
+                    R = buf.rmed
+                    if par.physical_units == 'Yes':
+                        R *= (buf.culength / 1.5e11) # in au
+                    P = buf.pmed
+                    T = buf.tmed
+
+                    radius_matrix, phi_matrix, theta_matrix = np.meshgrid(R,P,T, indexing='ij')   # nrad nsec ncol
+                    X = radius_matrix * np.cos(theta_matrix) * np.cos(phi_matrix)  
+                    Y = radius_matrix * np.cos(theta_matrix) * np.sin(phi_matrix)
+                    Z = radius_matrix * np.sin(theta_matrix)
+
+                    # get time
+                    f1, xpla, ypla, zpla, f5, f6, f7, mpla, date, f10 = np.loadtxt(directory[j]+"/planet0.dat",unpack=True)
+                    with open(directory[j]+"/orbit0.dat") as f_in:
+                        firstline_orbitfile = np.genfromtxt(itertools.islice(f_in, 0, 1, None), dtype=float)
+                    apla = firstline_orbitfile[2]
+                
+
+                # mass of each grid cell (3D array)
+                mass = dens*volume            # ncol, nrad, nsec
+                mass = np.swapaxes(mass,1,2)  # ncol, nsec, nrad
+                mass = np.transpose(mass)     # nrad, nsec, ncol
+                #print('np.sum(mass) = ', np.sum(mass))
+
+                # is there a planet?
+                mp = mpla[int(on[k])]
+                xp = xpla[int(on[k])]
+                yp = ypla[int(on[k])]
+                zp = zpla[int(on[k])]
+
+                # get x-, y- and z-coordinates of centre-of-mass
+                x_com[k] = (np.sum(mass*X) + mp*xp) / (mp + np.sum(mass))
+                y_com[k] = (np.sum(mass*Y) + mp*yp) / (mp + np.sum(mass))
+                z_com[k] = (np.sum(mass*Z) + mp*zp) / (mp + np.sum(mass))
+                r_com[k] = np.sqrt( x_com[k]*x_com[k] + y_com[k]*y_com[k] + z_com[k]*z_com[k] )
+                #print('xcom, ycom, zcom, rcom = ', x_com[k], y_com[k], z_com[k], r_com[k])
+                t_com[k] = round(date[k*take_one_point_every]/2./np.pi/apla/np.sqrt(apla),1)
+
+
         # SPECIAL CASE OF FARGO2D1D simulations run in a fixed frame centred on the {star+disc+planets} barycentre: 
         # the position of the centre of mass is simply inferred from that of the star!
-        else:
+        if fargo2d1d == 'Yes':
             print('FARGO2D1D simulation detected!')
-            f1, xs, ys, zs, f5, ms, f7, date, f9 = np.loadtxt(directory[j]+"/planet0.dat",unpack=True)
+            f1, xs, ys, f4, f5, ms, f7, date, f9 = np.loadtxt(directory[j]+"/planet0.dat",unpack=True)
             x_com = -xs
             y_com = -ys
-            z_com = -zs
-            r_com = np.sqrt( x_com*x_com + y_com*y_com + z_com+z_com )
+            r_com = np.sqrt( x_com*x_com + y_com*y_com )
             t_com = date/2./np.pi
 
 
