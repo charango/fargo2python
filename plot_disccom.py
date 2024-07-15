@@ -183,6 +183,8 @@ def plotdisccom():
             # loop over output numbers
             for k in range(len(on)):     
 
+                print('disc com: output number '+str(k)+' / '+str(len(on)-1),end='\r')
+
                 # get 3D gas volume density field
                 f = directory[j]+'/gasdens'+str(int(on[k]))+'.dat'
                 #print('file = ', f)
