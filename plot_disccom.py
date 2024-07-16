@@ -80,10 +80,14 @@ def plotdisccom():
                 runwas3d = 'Yes'
 
 
+        fargo2d1d = 'No'  # CUIDADIN!!
+
         # DEFAULT CASE (= NO FARGO2D1D simulations): we obtain the position of the center-of-mass 
         # by inspecting at the gas density fields obtained in simulations run in a fixed reference 
         # frame centred on the star
         if fargo2d1d == 'No' and runwas3d == 'No':
+
+            fargo2d1d = 'Yes'  # CUIDADIN!!!
 
             # find how many output numbers were produced for each directory
             if par.fargo3d == 'No':
@@ -150,6 +154,7 @@ def plotdisccom():
                 mp = mpla[int(on[k])]
                 xp = xpla[int(on[k])]
                 yp = ypla[int(on[k])]
+                print('mp = , xp = , yp = ', mp, xp, yp)
 
                 # get x- and y-coordinates of centre-of-mass by double for loop
                 x_com[k] = (np.sum(mass*X) + mp*xp) / (mp + np.sum(mass))
