@@ -107,6 +107,8 @@ def plotdisccom():
             # loop over output numbers
             for k in range(len(on)):     
 
+                print('disc com: output number '+str(k)+' / '+str(len(on)-1),end='\r')
+
                 # get 2D gas surface density field (not compatible with 3D yet...)
                 dens = Field(field='dens', fluid='gas', on=int(on[k]), directory=directory[j], physical_units=par.physical_units, nodiff='Yes', fieldofview='polar', slice='midplane', onedprofile='No', override_units=par.override_units)
 
