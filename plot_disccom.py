@@ -95,6 +95,10 @@ def plotdisccom():
             else:
                 nboutputs = len(fnmatch.filter(os.listdir(directory[j]), 'summary*.dat'))
             print('number of outputs for directory ',directory[j],': ',nboutputs)
+
+            fargo2d1d = 'Yes'  # CUIDADIN!!!
+            nboutputs = 500  # CUIDADIN!!
+
             on = np.arange(nboutputs)/take_one_point_every
 
             x_com = np.zeros(len(on))
