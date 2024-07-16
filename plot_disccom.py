@@ -243,9 +243,9 @@ def plotdisccom():
                 x_com[k] = (np.sum(mass*X) + mp*xp) / (mp + np.sum(mass))
                 y_com[k] = (np.sum(mass*Y) + mp*yp) / (mp + np.sum(mass))
                 z_com[k] = (np.sum(mass*Z) + mp*zp) / (mp + np.sum(mass))
-                r_com[k] = np.sqrt( x_com[k]*x_com[k] + y_com[k]*y_com[k] + z_com[k]*z_com[k] )
+                #r_com[k] = np.sqrt( x_com[k]*x_com[k] + y_com[k]*y_com[k] + z_com[k]*z_com[k] )
                 # test:
-                #r_com[k] = np.sqrt( x_com[k]*x_com[k] + y_com[k]*y_com[k] )
+                r_com[k] = np.sqrt( x_com[k]*x_com[k] + y_com[k]*y_com[k] )
                 #print('xcom, ycom, zcom, rcom = ', x_com[k], y_com[k], z_com[k], r_com[k])
                 t_com[k] = round(date[k*take_one_point_every]/2./np.pi/apla/np.sqrt(apla),1)
 
