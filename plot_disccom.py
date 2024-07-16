@@ -80,14 +80,10 @@ def plotdisccom():
                 runwas3d = 'Yes'
 
 
-        fargo2d1d = 'No'  # CUIDADIN!!
-
         # DEFAULT CASE (= NO FARGO2D1D simulations): we obtain the position of the center-of-mass 
         # by inspecting at the gas density fields obtained in simulations run in a fixed reference 
         # frame centred on the star
         if fargo2d1d == 'No' and runwas3d == 'No':
-
-            fargo2d1d = 'Yes'  # CUIDADIN!!!
 
             # find how many output numbers were produced for each directory
             if par.fargo3d == 'No':
@@ -96,10 +92,7 @@ def plotdisccom():
                 nboutputs = len(fnmatch.filter(os.listdir(directory[j]), 'summary*.dat'))
             print('number of outputs for directory ',directory[j],': ',nboutputs)
 
-            fargo2d1d = 'Yes'  # CUIDADIN!!!
-            nboutputs = 500  # CUIDADIN!!
-
-            on = np.arange(nboutputs)/take_one_point_every
+            on = np.range(0,nboutputs-1,take_one_point_every)
 
             x_com = np.zeros(len(on))
             y_com = np.zeros(len(on))
@@ -136,8 +129,8 @@ def plotdisccom():
                     
                     T = dens.pmed
                     radius_matrix, theta_matrix = np.meshgrid(R,T)
-                    X = radius_matrix * np.cos(theta_matrix)
-                    Y = radius_matrix * np.sin(theta_matrix)
+                    X = radius_matrix * np.cos(theta_matrix)       # nsec, nrad
+                    Y = radius_matrix * np.sin(theta_matrix)       # nsec, nrad
 
                     # get time
                     if dens.fargo3d == 'Yes':
@@ -153,20 +146,23 @@ def plotdisccom():
                 
 
                 # mass of each grid cell (2D array)
-                mass = dens.data*surface
+                mass = dens.data*surface   
                 mass = np.transpose(mass)  # (nsec,nrad)
 
                 # is there a planet?
                 mp = mpla[int(on[k])]
                 xp = xpla[int(on[k])]
                 yp = ypla[int(on[k])]
-                print('mp = , xp = , yp = ', mp, xp, yp)
 
                 # get x- and y-coordinates of centre-of-mass by double for loop
                 x_com[k] = (np.sum(mass*X) + mp*xp) / (mp + np.sum(mass))
                 y_com[k] = (np.sum(mass*Y) + mp*yp) / (mp + np.sum(mass))
                 r_com[k] = np.sqrt( x_com[k]*x_com[k] + y_com[k]*y_com[k] )
                 t_com[k] = round(date[k*take_one_point_every]/2./np.pi/apla/np.sqrt(apla),1)
+
+                #print(mp*xp, np.sum(mass*X), mp*xp+np.sum(mass*X))
+                #print(mp*yp, np.sum(mass*Y), mp*yp+np.sum(mass*Y))
+                print(x_com[k],y_com[k],r_com[k])
 
 
         # CASE OF 3D SIMULATIONS WITH FARGO3D: we obtain again the position of the center-of-mass 
@@ -178,7 +174,8 @@ def plotdisccom():
             # find how many output numbers were produced for each directory
             nboutputs = len(fnmatch.filter(os.listdir(directory[j]), 'summary*.dat'))
             print('number of outputs for directory ',directory[j],': ',nboutputs)
-            on = np.arange(nboutputs)/take_one_point_every
+
+            on = np.range(0,nboutputs-1,take_one_point_every)
 
             x_com = np.zeros(len(on))
             y_com = np.zeros(len(on))
