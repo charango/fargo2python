@@ -26,6 +26,8 @@ def plotplanet():
         ytitle = 'Semi-major axis'
         if par.physical_units == 'Yes':
             ytitle += ' [au]'
+    if par.plot_planet[1] == 'adot':
+        ytitle = 'da/dt'
     if par.plot_planet[1] == 'r':
         ytitle = 'Orbital radius'
         if par.physical_units == 'Yes':
@@ -209,7 +211,11 @@ def plotplanet():
                 y = a[umin:umax+1]
                 if par.physical_units == 'Yes':
                     y *= (culength / 1.5e11) # in au
-                    
+            
+            if par.plot_planet[1] == 'adot':
+                y = (a[umin+1:umax+1]-a[umin:umax])/(mytime[umin+1:umax+1]-mytime[umin:umax])
+                x = mytime[umin:umax]
+
             if par.plot_planet[1] == 'r' or par.plot_planet[1] == 'rdot' or par.plot_planet[1] == 'm':
                 if par.fargo3d == 'No':
                     if par.fargo2d1d == 'Yes':
