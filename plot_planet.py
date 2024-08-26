@@ -30,6 +30,8 @@ def plotplanet():
         ytitle = 'Orbital radius'
         if par.physical_units == 'Yes':
             ytitle += ' [au]'
+    if par.plot_planet[1] == 'rdot':
+        ytitle = 'dr/dt'
     if par.plot_planet[1] == 'e':
         ytitle = 'Eccentricity'
     if par.plot_planet[1] == 'i':
@@ -208,7 +210,7 @@ def plotplanet():
                 if par.physical_units == 'Yes':
                     y *= (culength / 1.5e11) # in au
                     
-            if par.plot_planet[1] == 'r' or par.plot_planet[1] == 'm':
+            if par.plot_planet[1] == 'r' or par.plot_planet[1] == 'rdot' or par.plot_planet[1] == 'm':
                 if par.fargo3d == 'No':
                     if par.fargo2d1d == 'Yes':
                         f1, xpla, ypla, f4, f5, mpla, f7, date, f9 = np.loadtxt(directory[j]+"/bigplanet"+str(k)+".dat",unpack=True)
@@ -235,6 +237,13 @@ def plotplanet():
                     y = y[umin:umax+1]
                     if par.physical_units == 'Yes':
                         y *= (culength / 1.5e11) # in au
+                if par.plot_planet[1] == 'rdot':
+                    if par.fargo3d == 'No':
+                        r = np.sqrt( xpla*xpla + ypla*ypla )
+                    else:
+                        r = np.sqrt( xpla*xpla + ypla*ypla + zpla*zpla )
+                    y = (r[umin+1:umax+1]-r[umin:umax])/(mytime[umin+1:umax+1]-mytime[umin:umax])
+                    x = mytime[umin:umax]
                 if par.plot_planet[1] == 'm':
                     y = mpla[umin:umax+1]
                     if par.physical_units == 'Yes':
