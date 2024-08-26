@@ -178,24 +178,22 @@ def plotplanet():
                     time, e, a, M, V, argPA, phiangle, incl, longAN, PA, mylambda = np.loadtxt(directory[j]+"/orbit"+str(k)+".dat",unpack=True)
                 else:
                     time, e, a, M, V, argPA, phiangle, incl, longAN, PA = np.loadtxt(directory[j]+"/orbit"+str(k)+".dat",unpack=True)
-            time /= (2.0*np.pi*rpla_0*np.sqrt(rpla_0))  # time in orbital periods at inner planet's initial location
             
             if (par.mytmin == '#'):
-                xmin = time.min()
+                xmin = time.min() / (2.0*np.pi*rpla_0*np.sqrt(rpla_0))  # time in orbital periods at inner planet's initial location
                 umin = 0
             else:
                 xmin = par.mytmin
                 umin = np.argmin(np.abs(time-xmin))
             if (par.mytmax == '#'):
-                xmax = time.max()
+                xmax = time.max() / (2.0*np.pi*rpla_0*np.sqrt(rpla_0))  # time in orbital periods at inner planet's initial location
                 umax = len(time)-1
             else:
                 xmax = par.mytmax
                 umax = np.argmin(np.abs(time-xmax))
                 
             if par.plot_planet[0] == 't':                              
-                #x = time[umin:umax]
-                x = time[umin:umax+1]
+                x = time[umin:umax+1] / (2.0*np.pi*rpla_0*np.sqrt(rpla_0))  # time in orbital periods at inner planet's initial location
                 ax.set_xlim(xmin,xmax)
                 
             if par.plot_planet[0] == 'a':
@@ -213,8 +211,8 @@ def plotplanet():
                     y *= (culength / 1.5e11) # in au
             
             if par.plot_planet[1] == 'adot':
-                y = (a[umin+1:umax+1]-a[umin:umax])/(mytime[umin+1:umax+1]-mytime[umin:umax])
-                x = mytime[umin:umax]
+                y = (a[umin+1:umax+1]-a[umin:umax])/(time[umin+1:umax+1]-time[umin:umax])
+                x = time[umin:umax] / (2.0*np.pi*rpla_0*np.sqrt(rpla_0))  # time in orbital periods at inner planet's initial location
 
             if par.plot_planet[1] == 'r' or par.plot_planet[1] == 'rdot' or par.plot_planet[1] == 'm':
                 if par.fargo3d == 'No':
@@ -248,7 +246,7 @@ def plotplanet():
                         r = np.sqrt( xpla*xpla + ypla*ypla )
                     else:
                         r = np.sqrt( xpla*xpla + ypla*ypla + zpla*zpla )
-                    y = (r[umin+1:umax+1]-r[umin:umax])/(mytime[umin+1:umax+1]-mytime[umin:umax])
+                    y = (r[umin+1:umax+1]-r[umin:umax])/(date[umin+1:umax+1]-date[umin:umax])
                     x = mytime[umin:umax]
                 if par.plot_planet[1] == 'm':
                     y = mpla[umin:umax+1]
