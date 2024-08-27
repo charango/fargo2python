@@ -304,7 +304,10 @@ def plotplanet():
             fig.add_subplot(ax)
 
     if len(directory) != 1:
-        ax.legend(frameon=False,fontsize=15)
+        legend = plt.legend(loc='upper right',fontsize=15,facecolor='white',edgecolor='white',framealpha=0.85,numpoints=1,bbox_transform=plt.gcf().transFigure)
+        for line, text in zip(legend.get_lines(), legend.get_texts()):
+            text.set_color(line.get_color())
+        #ax.legend(frameon=False,fontsize=15)
             
   
     # save file
