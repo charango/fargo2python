@@ -78,12 +78,31 @@ def plotplanet():
     # loop over directories
     for j in range(len(directory)):
 
+        # Locally check with which version of FARGO each simulation was run
+        fargo3d = 'No'
+        fargo_orig = 'Yes'
+        fargo2d1d = 'No'
+        if os.path.isfile(directory[j]+'/summary0.dat') == True:
+            # Simulation was carried out with Fargo3D
+            fargo3d = 'Yes'
+            fargo_orig = 'No'
+        else:
+            if os.path.isfile(directory[j]+'/used_azi.dat') == True:
+            # Simulation was carried out with Dusty FARGO-ADSG
+                fargo_orig = 'No'
+            else:
+                # Simulations were carried out with the original FARGO code or with FARGO-2D1D
+                if os.path.isfile(directory[j]+'/gasdens1D0.dat') == True:
+                    fargo2d1d = 'Yes'
+                    fargo_orig = 'No'
+                
+
         # work out physical units
         if par.physical_units == 'Yes':
-            if par.fargo3d == 'No' and par.fargo_orig == 'No':
+            if fargo3d == 'No' and fargo_orig == 'No':
             # units.dat contains physical units of mass [kg], length [m], time [s], and temperature [k] 
                 cumass, culength, cutime, cutemp = np.loadtxt(directory[j]+"/units.dat",unpack=True)
-            if par.fargo3d == 'Yes':
+            if fargo3d == 'Yes':
             # get units via variable.par file
                 command = par.awk_command+' " /^UNITOFLENGTHAU/ " '+directory[j]+'/variables.par'
                 # check which version of python we're using
@@ -127,11 +146,11 @@ def plotplanet():
                     print('new unit of time [s] = ',cutime)
                     print('new unit of temperature [K] = ',cutemp)
                 
-        if par.fargo3d == 'No':
-            if par.fargo_orig == 'No':
+        if fargo3d == 'No':
+            if fargo_orig == 'No':
                 time, e, a, M, V, PA, mylambda, varpi = np.loadtxt(directory[j]+"/orbit0.dat",unpack=True)
             else:
-                if par.fargo2d1d == 'Yes':
+                if fargo2d1d == 'Yes':
                     time, e, a, M, V, PA = np.loadtxt(directory[j]+"/orbit1.dat",unpack=True)
                 else:
                     time, e, a, M, V, PA = np.loadtxt(directory[j]+"/orbit0.dat",unpack=True)
@@ -168,8 +187,8 @@ def plotplanet():
         # now, read orbitN.dat or bigplanetN.dat files
         for k in range(nbplanets):
             
-            if par.fargo3d == 'No':
-                if par.fargo_orig == 'No':
+            if fargo3d == 'No':
+                if fargo_orig == 'No':
                     time, e, a, M, V, PA, mylambda, varpi = np.loadtxt(directory[j]+"/orbit"+str(k)+".dat",unpack=True)
                 else:
                     time, e, a, M, V, PA = np.loadtxt(directory[j]+"/orbit"+str(k)+".dat",unpack=True)
@@ -215,8 +234,8 @@ def plotplanet():
                 x = time[umin:umax] / (2.0*np.pi*rpla_0*np.sqrt(rpla_0))  # time in orbital periods at inner planet's initial location
 
             if par.plot_planet[1] == 'r' or par.plot_planet[1] == 'rdot' or par.plot_planet[1] == 'm':
-                if par.fargo3d == 'No':
-                    if par.fargo2d1d == 'Yes':
+                if fargo3d == 'No':
+                    if fargo2d1d == 'Yes':
                         f1, xpla, ypla, f4, f5, mpla, f7, date, f9 = np.loadtxt(directory[j]+"/bigplanet"+str(k)+".dat",unpack=True)
                     else:
                         f1, xpla, ypla, f4, f5, mpla, f7, date, f9, f10, f11 = np.loadtxt(directory[j]+"/bigplanet"+str(k)+".dat",unpack=True)
@@ -234,7 +253,7 @@ def plotplanet():
                     umax = np.argmin(np.abs(mytime-xmax))
                 x = mytime[umin:umax+1]
                 if par.plot_planet[1] == 'r':
-                    if par.fargo3d == 'No':
+                    if fargo3d == 'No':
                         y = np.sqrt( xpla*xpla + ypla*ypla )
                     else:
                         y = np.sqrt( xpla*xpla + ypla*ypla + zpla*zpla )
@@ -242,7 +261,7 @@ def plotplanet():
                     if par.physical_units == 'Yes':
                         y *= (culength / 1.5e11) # in au
                 if par.plot_planet[1] == 'rdot':
-                    if par.fargo3d == 'No':
+                    if fargo3d == 'No':
                         r = np.sqrt( xpla*xpla + ypla*ypla )
                     else:
                         r = np.sqrt( xpla*xpla + ypla*ypla + zpla*zpla )
