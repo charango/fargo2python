@@ -43,14 +43,22 @@ def plottqwk():
        else:
            mylabel = str(directory[j])
 
+        # Locally check if simulations were carried out with Fargo3D
+        summary0_file = directory[j]+'/summary0.dat'
+        if os.path.isfile(summary0_file) == True:
+            fargo3d = 'Yes'
+        else:
+            fargo3d = 'No'
+
        # start by reading planet0.dat file to get the initial radial position of the planet
-       if par.fargo3d == 'Yes':
+       if fargo3d == 'Yes':
            f1, xpla, ypla, f4, f5, f6, f7, f8, date, omega = np.loadtxt(directory[j]+"/planet0.dat",unpack=True)
        else:
            f1, xpla, ypla, f4, f5, f6, f7, date, omega, f10, f11 = np.loadtxt(directory[j]+"/planet0.dat",unpack=True)
        rpla_0 = np.sqrt( xpla[0]*xpla[0] + ypla[0]*ypla[0] )
        # count how many planets 
        nbplanets = len(fnmatch.filter(os.listdir(directory[j]), 'orbit*.dat'))    
+
        # now, read tqwk0.dat file
        for k in range(nbplanets): 
            f1, it, ot, f4, f5, ip, op, f8, f9, time = np.loadtxt(directory[j]+"/tqwk"+str(k)+".dat",unpack=True)
