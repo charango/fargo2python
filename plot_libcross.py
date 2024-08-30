@@ -14,18 +14,9 @@ def plotlibcross():
     import par
     
     # first prepare figures
-    '''
-    font = {'family' : 'Arial',
-            'size'   : 16}
-    matplotlib.rc('font', **font)
-    '''
-
     fig, axs = plt.subplots(3,1,figsize=(8, 16))
-
     plt.subplots_adjust(left=0.16, right=0.95, top=0.97, bottom=0.06)
-    #ax.tick_params(top='on', right='on', length = 5, width=1.0, direction='out')
-    plt.ticklabel_format(axis='y', style='scientific', scilimits=(0,0))
-
+    
     axs[0].set_ylabel(r'$\omega_{\rm lib} / \omega_{\rm cross}$')
     axs[1].set_ylabel(r'$\omega^{-1}_{\rm lib}$')
     axs[2].set_ylabel(r'$\omega^{-1}_{\rm cross}$')
@@ -43,11 +34,12 @@ def plotlibcross():
     else:
         take_one_point_every = par.take_one_point_every
 
-
+    # ---------------------
     # loop over directories
+    # ---------------------
     for j in range(len(directory)):
 
-        # get density at on=0
+        # get density at on=0 to inherit from Field class objects
         dens = Field(field='dens', fluid='gas', on=0, directory=directory[j], physical_units=par.physical_units, nodiff=par.nodiff, fieldofview=par.fieldofview, onedprofile='No', override_units=par.override_units)
 
         # find how many output numbers were produced for each directory
@@ -131,13 +123,14 @@ def plotlibcross():
 
 
     # finally add legend
-    '''
     legend = plt.legend(loc='upper right',fontsize=15,facecolor='white',edgecolor='white',framealpha=0.85,numpoints=1,bbox_transform=plt.gcf().transFigure)
     for line, text in zip(legend.get_lines(), legend.get_texts()):
         text.set_color(line.get_color())
+
     '''
     for ax in axs.flat:
         ax.set(xlim=(0,mytime.max()))
+    '''
 
     # And save file
     if len(directory) == 1:           
