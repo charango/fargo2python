@@ -50,7 +50,7 @@ def plotlibcross():
         print('number of outputs for directory ',directory[j],': ',nboutputs)
 
         on = range(0,nboutputs,take_one_point_every)
-        
+
         omega_lib   = np.zeros(len(on))
         omega_cross = np.zeros(len(on))
         ratio       = np.zeros(len(on))
@@ -115,7 +115,7 @@ def plotlibcross():
             # ratio of librating and orbit-crossing inverse vortensities
             ratio[k] = omega_lib[k] / omega_cross[k]
 
-            print(on[k], mytime[k], rpla, ipla, 1./omega_lib[k], 1./omega_cross[k], ratio[k])
+            #print(on[k], mytime[k], rpla, ipla, 1./omega_lib[k], 1./omega_cross[k], ratio[k])
 
 
         # display data as scatter plot for each directory
