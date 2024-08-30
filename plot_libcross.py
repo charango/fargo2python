@@ -50,8 +50,7 @@ def plotlibcross():
         print('number of outputs for directory ',directory[j],': ',nboutputs)
 
         on = range(0,nboutputs,take_one_point_every)
-        on = range(0,301,take_one_point_every)  # cuidadin!
-
+        
         omega_lib   = np.zeros(len(on))
         omega_cross = np.zeros(len(on))
         ratio       = np.zeros(len(on))
