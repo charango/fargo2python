@@ -58,7 +58,7 @@ for line in lines_params:
             if(regex.search(value) != None):  # we try with array with several values separated by a comma (,)
                 if name == 'on' or name == 'mmr_integers':
                     value = [int(x) for x in value.split(',')]
-                if name == 'directory' or name == 'plot_planet' or name == 'plot_dust' or name == 'use_legend':
+                if name == 'directory' or name == 'plot_planet' or name == 'plot_dust' or name == 'use_legend' or name == 'filename':
                     value = [str(x) for x in value.split(',')]
             else:
                 value = '"' + value + '"'   # if none of the above tests work, we know value is a string
@@ -105,7 +105,7 @@ else:
 
 # global boolean: if True, then plot 1D or 2D fields
 plot_field = True
-if plot_tqwk != 'No' or plot_planet != 'No' or plot_disccom != 'No' or plot_discmass != 'No':
+if plot_tqwk != 'No' or plot_planet != 'No' or plot_disccom != 'No' or plot_discmass != 'No' or plot_libcross != 'No':
     plot_field = False
     movie = 'No'
     if plot_planet[1] == 'mmr':

@@ -70,6 +70,20 @@ if par.plot_dust != 'No' and par.fargo3d == 'No':
 # =====================
 # 7. DISC'S CENTER OF MASS
 # =====================
-if par.plot_disccom != 'No':
+if ( ('plot_disccom' in open('paramsf2p.dat').read()) and (par.plot_disccom != 'No') ):
     from plot_disccom import *
     plotdisccom()
+
+# =====================
+# 8. DISC MASS (time)
+# =====================
+if ( ('plot_discmass' in open('paramsf2p.dat').read()) and (par.plot_discmass != 'No') ):
+    from plot_discmass import *
+    plotdiscmass()
+
+# =====================
+# 9. ratio of orbit-crossing and librating inverse vortensities (time)
+# =====================
+if ( ('plot_libcross' in open('paramsf2p.dat').read()) and (par.plot_libcross != 'No') ):
+    from plot_libcross import *
+    plotlibcross()
