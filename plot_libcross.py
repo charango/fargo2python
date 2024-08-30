@@ -50,6 +50,7 @@ def plotlibcross():
         print('number of outputs for directory ',directory[j],': ',nboutputs)
 
         on = range(0,nboutputs,take_one_point_every)
+        on = range(0,301,take_one_point_every)  # cuidadin!
 
         omega_lib   = np.zeros(len(on))
         omega_cross = np.zeros(len(on))
@@ -90,6 +91,8 @@ def plotlibcross():
 
             # get 2D gas surface density field (not compatible with 3D yet...)  (nrad,nsec)
             vortensity = Field(field='vortensity', fluid='gas', on=on[k], directory=directory[j], physical_units=par.physical_units, nodiff=par.nodiff, fieldofview=par.fieldofview, onedprofile='No', override_units=par.override_units).data
+            if dens.fargo3d == 'No':
+                vortensity = np.roll(vortensity, shift=int(dens.nsec/2), axis=1)
 
             # time
             mytime[k] = date[take_one_point_every*k]/2.0/np.pi/(apla**1.5)  # orbital periods at apla
@@ -113,7 +116,7 @@ def plotlibcross():
             # ratio of librating and orbit-crossing inverse vortensities
             ratio[k] = omega_lib[k] / omega_cross[k]
 
-            #print(on[k], mytime[k], rpla, ipla, 1./omega_lib[k], 1./omega_cross[k], ratio[k])
+            print(on[k], mytime[k], rpla, ipla, 1./omega_lib[k], 1./omega_cross[k], ratio[k])
 
 
         # display data as scatter plot for each directory
