@@ -113,7 +113,7 @@ def plotlibcross():
             # ratio of librating and orbit-crossing inverse vortensities
             ratio[k] = omega_lib[k] / omega_cross[k]
 
-            print(on[k], mytime[k], rpla, ipla, 1./omega_lib[k], 1./omega_cross[k], ratio[k])
+            #print(on[k], mytime[k], rpla, ipla, 1./omega_lib[k], 1./omega_cross[k], ratio[k])
 
 
         # display data as scatter plot for each directory
@@ -123,7 +123,7 @@ def plotlibcross():
 
 
     # finally add legend
-    legend = plt.legend(loc='upper right',fontsize=15,facecolor='white',edgecolor='white',framealpha=0.85,numpoints=1,bbox_transform=plt.gcf().transFigure)
+    legend = plt.legend(loc='lower right',fontsize=15,facecolor='white',edgecolor='white',framealpha=0.85,numpoints=1,bbox_transform=plt.gcf().transFigure)
     for line, text in zip(legend.get_lines(), legend.get_texts()):
         text.set_color(line.get_color())
 
