@@ -79,7 +79,8 @@ def plotlibcross():
         jpla = dens.nsec//2  # cuidadin, only true if frame is corotating with planet!
 
         # azimuthal index of sector about where librating gas is (about 1 radian ahead of planet)
-        jlib = jpla + int(1.0*dens.nsec/(2.0*np.pi))
+        #jlib = jpla + int(1.0*dens.nsec/(2.0*np.pi))
+        jlib = jpla + int(0.5*dens.nsec/(2.0*np.pi))  # cuidadin, trying 0.5 rad instead of 1.0
         jlib_range = int(np.abs(0.1*(jlib-jpla)))
 
 
@@ -108,7 +109,8 @@ def plotlibcross():
             # average inverse vortensity of orbit-crossing flow, estimated at planet's orbital 
             # radius and in a range of azimuths between that of the planet and 0.2 radians below 
             # the planet (by-eye inspection!)
-            jcross = jpla - int(0.2*dens.nsec/(2.0*np.pi))
+            #jcross = jpla - int(0.2*dens.nsec/(2.0*np.pi))
+            jcross = jpla - int(0.1*dens.nsec/(2.0*np.pi))  # cuidadin, trying 0.1 radian instead of 0.2
             omega_cross[k] = np.mean(vortensity[ipla-1:ipla+1,jcross:jpla])
             omega_cross[k] = 1./omega_cross[k]
 
