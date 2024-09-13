@@ -153,8 +153,8 @@ def plotlibcross():
             nup = alphaviscosity*hp*hp*np.sqrt(rpla) # turbulent kinematic viscosity at planet
             tau_visc = xs*xs/nup                     # viscous timescale across planet's HS region (in code units)
             tau_mig = date[take_one_point_every*k]   # current time in code units
-            #omega0_rp = vortensity0[ipla,0]          # initial vortensity at curent orbital radius
-            omega0_rp = omega_cross[k]
+            omega0_rp = vortensity0[ipla,0]          # initial vortensity at curent orbital radius
+            #omega0_rp = omega_cross[k]
             omega_lib_model[k] = (omega0_r0*tau_visc + omega0_rp*tau_mig)/(tau_visc + tau_mig)   # proposed model for omega_lib!
             ixs = np.argmin(np.abs(dens.rmed-rpla+xs))
             omega_cross_model[k] = vortensity0[ixs,0] 
