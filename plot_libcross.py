@@ -17,7 +17,7 @@ def plotlibcross():
     fig, axs = plt.subplots(3,1,figsize=(8, 16))
     plt.subplots_adjust(left=0.16, right=0.95, top=0.97, bottom=0.06)
     
-    axs[0].set_ylabel(r'${\cal Iv}_{\rm lib} / {\cal Iv}{\rm cross}$')
+    axs[0].set_ylabel(r'${\cal I}_{\nu\rm lib} / {\cal I}_{\nu\rm cross}$')
     axs[1].set_ylabel(r'$\omega_{\rm lib}$')
     axs[2].set_ylabel(r'$\omega_{\rm cross}$')
 
