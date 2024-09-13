@@ -159,7 +159,8 @@ def plotlibcross():
                 rpla_p1 = rpla_p1
                 time_p1 = time_p1
             migrate = np.abs((rpla_p1 - rpla)/(time_p1 - mytime[k]))   # migration rate drp/dt
-            tau_mig = rpla / migrate                 # migration timescale
+            #tau_mig = rpla / migrate                 # migration timescale
+            tau_mig = xs / migrate
             omega0_rp = vortensity0[ipla,0]          # initial vortensity at curent orbital radius
             omega_lib_model[k] = (omega0_r0*tau_visc + omega0_rp*tau_mig)/(tau_visc + tau_mig)   # proposed model for omega_lib!
             ixs = np.argmin(np.abs(dens.rmed-rpla+xs))
@@ -172,11 +173,11 @@ def plotlibcross():
 
         # display data as scatter plot for each directory
         axs[0].scatter(mytime, ratio, s=20, c=par.c20[j], alpha=1.0, label=mylabel)
-        axs[0].scatter(mytime, ratio_model, s=20, c=par.c20[j], alpha=1.0, marker='x', label='model')
+        axs[0].scatter(mytime, ratio_model, s=20, c=par.c20[j], alpha=1.0, marker='x', label=mylabel)
         axs[1].scatter(mytime, omega_lib, s=20, c=par.c20[j], alpha=1.0, label=mylabel)
-        axs[1].scatter(mytime, omega_lib_model, s=20, c=par.c20[j], alpha=1.0, marker='x', label='model')
+        axs[1].scatter(mytime, omega_lib_model, s=20, c=par.c20[j], alpha=1.0, marker='x', label=mylabel)
         axs[2].scatter(mytime, omega_cross, s=20, c=par.c20[j], alpha=1.0, label=mylabel)
-        axs[2].scatter(mytime, omega_cross_model, s=20, c=par.c20[j], alpha=1.0, marker='x', label='model')
+        axs[2].scatter(mytime, omega_cross_model, s=20, c=par.c20[j], alpha=1.0, marker='x', label=mylabel)
 
 
     # finally add legend
