@@ -154,9 +154,10 @@ def plotlibcross():
             tau_visc = 0.5*xs*xs/nup                 # viscous timescale across planet's HS region
             if k < len(on)-1:
                 rpla_p1 = np.sqrt( xpla[take_one_point_every*k+1]*xpla[take_one_point_every*k+1] + ypla[take_one_point_every*k+1]*ypla[take_one_point_every*k+1] )
+                time_p1 = date[take_one_point_every*k+1]/2.0/np.pi/(apla**1.5) 
             else:
                 rpla_p1 = rpla_p1
-            time_p1 = date[take_one_point_every*k+1]/2.0/np.pi/(apla**1.5) 
+                time_p1 = time_p1
             migrate = np.abs((rpla_p1 - rpla)/(time_p1 - mytime[k]))   # migration rate drp/dt
             tau_mig = rpla / migrate                 # migration timescale
             omega0_rp = vortensity0[ipla,0]          # initial vortensity at curent orbital radius
