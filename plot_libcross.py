@@ -162,15 +162,15 @@ def plotlibcross():
             tau_mig = rpla / migrate                 # migration timescale
             omega0_rp = vortensity0[ipla,0]          # initial vortensity at curent orbital radius
             omega_lib_model[k] = (omega0_r0*tau_visc + omega0_rp*tau_mig)/(tau_visc + tau_mig)   # proposed model for omega_lib!
-            print(k,len(on)-1,mp,hp,xs,alphaviscosity,nup,tau_visc,rpla,rpla_p1,time_p1,migrate,tau_mig,omega0_r0,omega0_rp,omega_lib_model[k])
 
+            #print(k,len(on)-1,mp,hp,xs,alphaviscosity,nup,tau_visc,rpla,rpla_p1,time_p1,migrate,tau_mig,omega0_r0,omega0_rp,omega_lib_model[k])
             #print(on[k], mytime[k], rpla, ipla, 1./omega_lib[k], 1./omega_cross[k], ratio[k])
 
 
         # display data as scatter plot for each directory
         axs[0].scatter(mytime, ratio, s=20, c=par.c20[j], alpha=1.0, label=mylabel)
         axs[1].scatter(mytime, 1./omega_lib, s=20, c=par.c20[j], alpha=1.0, label=mylabel)
-        axs[1].scatter(mytime, 1./omega_lib_model, s=20, c=par.c20[j], alpha=1.0, marker='x', label='model')
+        axs[1].scatter(mytime, omega_lib_model, s=20, c=par.c20[j], alpha=1.0, marker='x', label='model')
         axs[2].scatter(mytime, 1./omega_cross, s=20, c=par.c20[j], alpha=1.0, label=mylabel)
 
 
