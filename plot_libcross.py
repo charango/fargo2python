@@ -159,7 +159,7 @@ def plotlibcross():
                 rpla_p1 = rpla_p1
                 time_p1 = time_p1
             migrate = np.abs((rpla_p1 - rpla)/(time_p1 - mytime[k]))   # migration rate drp/dt
-            tau_mig = rpla / migrate                 # migration timescale
+            tau_mig = (1.0-rpla) / migrate                 # migration timescale
             omega0_rp = vortensity0[ipla,0]          # initial vortensity at curent orbital radius
             omega_lib_model[k] = (omega0_r0*tau_visc + omega0_rp*tau_mig)/(tau_visc + tau_mig)   # proposed model for omega_lib!
             ixs = np.argmin(np.abs(dens.rmed-rpla+xs))
