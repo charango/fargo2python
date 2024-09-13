@@ -85,23 +85,22 @@ def plotlibcross():
         jlib_range = int(np.abs(0.1*(jlib-jpla)))
 
         # get the aspect ratio and flaring index used in the numerical simulation
-        command = par.awk_command+' " /^AspectRatio/ " '+directory[j]+'/*.par'
+        command = par.awk_command+' " /^AspectRatio/ " IGNORECASE=1 '+directory[j]+'/*.par'
         # check which version of python we're using
         if sys.version_info[0] < 3:   # python 2.X
             buf = subprocess.check_output(command, shell=True)
         else:                         # python 3.X
             buf = subprocess.getoutput(command)
-        print(command,buf)
         aspectratio = float(buf.split()[1])
         # get the flaring index used in the numerical simulation
-        command = par.awk_command+' " /^FlaringIndex/ " '+directory[j]+'/*.par'
+        command = par.awk_command+' " /^FlaringIndex/ " IGNORECASE=1 '+directory[j]+'/*.par'
         if sys.version_info[0] < 3:
             buf = subprocess.check_output(command, shell=True)
         else:
             buf = subprocess.getoutput(command)
         flaringindex = float(buf.split()[1])
         # get the alpha turbulent viscosity used in the numerical simulation
-        command = par.awk_command+' " /^Alpha/ " '+directory[j]+'/*.par'
+        command = par.awk_command+' " /^Alpha/ " IGNORECASE=1 '+directory[j]+'/*.par'
         if sys.version_info[0] < 3:
             buf = subprocess.check_output(command, shell=True)
         else:
