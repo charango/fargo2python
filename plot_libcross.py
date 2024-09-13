@@ -17,9 +17,9 @@ def plotlibcross():
     fig, axs = plt.subplots(3,1,figsize=(8, 16))
     plt.subplots_adjust(left=0.16, right=0.95, top=0.97, bottom=0.06)
     
-    axs[0].set_ylabel(r'$\omega_{\rm lib} / \omega_{\rm cross}$')
-    axs[1].set_ylabel(r'$\omega^{-1}_{\rm lib}$')
-    axs[2].set_ylabel(r'$\omega^{-1}_{\rm cross}$')
+    axs[0].set_ylabel(r'$\cal{Iv}_{\rm lib} / \cal{Iv}{\rm cross}$')
+    axs[1].set_ylabel(r'$\omega_{\rm lib}$')
+    axs[2].set_ylabel(r'$\omega_{\rm cross}$')
 
     for ax in axs.flat:
         ax.set(xlabel='time [orbits]')
@@ -132,21 +132,19 @@ def plotlibcross():
             rpla = np.sqrt( xpla[take_one_point_every*k]*xpla[take_one_point_every*k] + ypla[take_one_point_every*k]*ypla[take_one_point_every*k] )
             ipla = np.argmin(np.abs(dens.rmed-rpla))
 
-            # average inverse vortensity of librating gas, estimated at planet's orbital radius 
+            # average vortensity of librating gas, estimated at planet's orbital radius 
             # and averaged over a small range of azimuthal angles around theta_pla + 1 radian (by eye inspection!)
             omega_lib[k] = np.mean(vortensity[ipla-1:ipla+1,jlib-jlib_range:jlib+jlib_range])
-            omega_lib[k] = 1./omega_lib[k]
 
-            # average inverse vortensity of orbit-crossing flow, estimated at planet's orbital 
+            # average vortensity of orbit-crossing flow, estimated at planet's orbital 
             # radius and in a range of azimuths between -0.1 and -0.2 rad. behind planet in azimuth
             # the planet (by-eye inspection!)
             jcross_sup = jpla - int(0.1*dens.nsec/(2.0*np.pi))
             jcross_inf = jpla - int(0.2*dens.nsec/(2.0*np.pi)) 
             omega_cross[k] = np.mean(vortensity[ipla-1:ipla+1,jcross_inf:jcross_sup])
-            omega_cross[k] = 1./omega_cross[k]
 
-            # ratio of librating and orbit-crossing inverse vortensities
-            ratio[k] = omega_lib[k] / omega_cross[k]
+            # ratio of librating and orbit-crossing *inverse* vortensities
+            ratio[k] = omega_cross[k] / omega_lib[k]
 
             # model
             mp = mpla[take_one_point_every*k]        # planet mass
@@ -168,16 +166,16 @@ def plotlibcross():
             omega_cross_model[k] = vortensity0[ixs,0] 
             ratio_model[k] = omega_cross_model[k] / omega_lib_model[k]  # proposed model for Ivlib / Ivcross
 
-            #print(k,len(on)-1,mp,hp,xs,alphaviscosity,nup,tau_visc,rpla,rpla_p1,time_p1,migrate,tau_mig,omega0_r0,omega0_rp,omega_lib_model[k])
+            print(k,tau_visc,tau_mig,omega0_r0,omega0_rp,omega_lib_model[k],omega_lib[k])
             #print(on[k], mytime[k], rpla, ipla, 1./omega_lib[k], 1./omega_cross[k], ratio[k])
 
 
         # display data as scatter plot for each directory
         axs[0].scatter(mytime, ratio, s=20, c=par.c20[j], alpha=1.0, label=mylabel)
         axs[0].scatter(mytime, ratio_model, s=20, c=par.c20[j], alpha=1.0, marker='x', label='model')
-        axs[1].scatter(mytime, 1./omega_lib, s=20, c=par.c20[j], alpha=1.0, label=mylabel)
+        axs[1].scatter(mytime, omega_lib, s=20, c=par.c20[j], alpha=1.0, label=mylabel)
         axs[1].scatter(mytime, omega_lib_model, s=20, c=par.c20[j], alpha=1.0, marker='x', label='model')
-        axs[2].scatter(mytime, 1./omega_cross, s=20, c=par.c20[j], alpha=1.0, label=mylabel)
+        axs[2].scatter(mytime, omega_cross, s=20, c=par.c20[j], alpha=1.0, label=mylabel)
         axs[2].scatter(mytime, omega_cross_model, s=20, c=par.c20[j], alpha=1.0, marker='x', label='model')
 
 
