@@ -52,15 +52,16 @@ def plotlibcross():
         on = range(0,nboutputs,take_one_point_every)
 
         omega_lib   = np.zeros(len(on))
+        omega_lib_model = np.zeros(len(on))
         omega_cross = np.zeros(len(on))
         ratio       = np.zeros(len(on))
         mytime      = np.zeros(len(on))
 
         # get time
         if dens.fargo3d == 'Yes':
-            f1, xpla, ypla, f4, f5, f6, f7, f8, date, omega = np.loadtxt(directory[j]+"/planet0.dat",unpack=True)
+            f1, xpla, ypla, f4, f5, f6, f7, mpla, date, omega = np.loadtxt(directory[j]+"/planet0.dat",unpack=True)
         else:
-            f1, xpla, ypla, f4, f5, f6, f7, date, omega, f10, f11 = np.loadtxt(directory[j]+"/planet0.dat",unpack=True)
+            f1, xpla, ypla, f4, f5, mpla, f7, date, omega, f10, f11 = np.loadtxt(directory[j]+"/planet0.dat",unpack=True)
         with open(directory[j]+"/orbit0.dat") as f_in:
             firstline_orbitfile = np.genfromtxt(itertools.islice(f_in, 0, 1, None), dtype=float)
         apla = firstline_orbitfile[2]
@@ -83,6 +84,29 @@ def plotlibcross():
         #jlib = jpla + int(0.5*dens.nsec/(2.0*np.pi))  # cuidadin, trying 0.5 rad instead of 1.0
         jlib_range = int(np.abs(0.1*(jlib-jpla)))
 
+        # get the aspect ratio and flaring index used in the numerical simulation
+        command = par.awk_command+' " /^AspectRatio/ " '+directory[j]+'*.par'
+        # check which version of python we're using
+        if sys.version_info[0] < 3:   # python 2.X
+            buf = subprocess.check_output(command, shell=True)
+        else:                         # python 3.X
+            buf = subprocess.getoutput(command)
+        aspectratio = float(buf.split()[1])
+        # get the flaring index used in the numerical simulation
+        command = par.awk_command+' " /^FlaringIndex/ " '+directory[j]+'*.par'
+        if sys.version_info[0] < 3:
+            buf = subprocess.check_output(command, shell=True)
+        else:
+            buf = subprocess.getoutput(command)
+        flaringindex = float(buf.split()[1])
+        # get the alpha turbulent viscosity used in the numerical simulation
+        command = par.awk_command+' " /^Alpha/ " '+directory[j]+'*.par'
+        if sys.version_info[0] < 3:
+            buf = subprocess.check_output(command, shell=True)
+        else:
+            buf = subprocess.getoutput(command)
+        alphaviscosity = float(buf.split()[1])
+
 
         # loop over output numbers
         for k in range(len(on)):     
@@ -93,6 +117,11 @@ def plotlibcross():
             vortensity = Field(field='vortensity', fluid='gas', on=on[k], directory=directory[j], physical_units=par.physical_units, nodiff=par.nodiff, fieldofview=par.fieldofview, onedprofile='No', override_units=par.override_units).data
             if dens.fargo3d == 'No':
                 vortensity = np.roll(vortensity, shift=int(dens.nsec/2), axis=1)
+
+            # keep track of vortensity at time t=0
+            vortensity0 = Field(field='vortensity', fluid='gas', on=0, directory=directory[j], physical_units=par.physical_units, nodiff=par.nodiff, fieldofview=par.fieldofview, onedprofile='No', override_units=par.override_units).data
+            ipla0 = np.argmin(np.abs(dens.rmed-1.0))
+            omega0_r0 = vortensity0[ipla0,0]     # initial vortensity at planet's initial orbital radius
 
             # time
             mytime[k] = date[take_one_point_every*k]/2.0/np.pi/(apla**1.5)  # orbital periods at apla
@@ -117,12 +146,26 @@ def plotlibcross():
             # ratio of librating and orbit-crossing inverse vortensities
             ratio[k] = omega_lib[k] / omega_cross[k]
 
+            # model
+            mp = mpla[take_one_point_every*k]        # planet mass
+            hp = aspectratio * rpla**flaringindex    # aspect ratio at planet's orbital radius
+            xs = rpla * np.sqrt(mp/hp)               # half-width of planet's horseshoe region
+            nup = alphaviscosity*hp*hp*np.sqrt(rpla) # turbulent kinematic viscosity at planet
+            tau_visc = 0.5*xs*xs/nup                 # viscous timescale across planet's HS region
+            rpla_p1 = np.sqrt( xpla[take_one_point_every*k+1]*xpla[take_one_point_every*k+1] + ypla[take_one_point_every*k+1]*ypla[take_one_point_every*k+1] )
+            time_p1 = date[take_one_point_every*k+1]/2.0/np.pi/(apla**1.5) 
+            migrate = np.abs((rpla_p1 - rpla)/(time_p1 - mytime[k]))   # migration rate drp/dt
+            tau_mig = rpla / migrate                 # migration timescale
+            omega0_rp = vortensity0[ipla,0]          # initial vortensity at curent orbital radius
+            omega_lib_model[k] = (omega0_r0*tau_visc + omega0_rp*tau_mig)/(tau_visc + tau_mig)   # proposed model for omega_lib!
+
             #print(on[k], mytime[k], rpla, ipla, 1./omega_lib[k], 1./omega_cross[k], ratio[k])
 
 
         # display data as scatter plot for each directory
         axs[0].scatter(mytime, ratio, s=20, c=par.c20[j], alpha=1.0, label=mylabel)
         axs[1].scatter(mytime, 1./omega_lib, s=20, c=par.c20[j], alpha=1.0, label=mylabel)
+        axs[1].scatter(mytime, 1./omega_lib_model, s=20, c=par.c20[j], alpha=1.0, marker='x', label='model')
         axs[2].scatter(mytime, 1./omega_cross, s=20, c=par.c20[j], alpha=1.0, label=mylabel)
 
 
