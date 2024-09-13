@@ -172,11 +172,11 @@ def plotlibcross():
 
         # display data as scatter plot for each directory
         axs[0].scatter(mytime, ratio, s=20, c=par.c20[j], alpha=1.0, label=mylabel)
-        #axs[0].scatter(mytime, ratio_model, s=20, c=par.c20[j], alpha=1.0, marker='x', label=mylabel)
+        axs[0].scatter(mytime, ratio_model, s=20, c=par.c20[j], alpha=1.0, marker='x', label=mylabel)
         axs[1].scatter(mytime, omega_lib, s=20, c=par.c20[j], alpha=1.0, label=mylabel)
-        #axs[1].scatter(mytime, omega_lib_model, s=20, c=par.c20[j], alpha=1.0, marker='x', label=mylabel)
+        axs[1].scatter(mytime, omega_lib_model, s=20, c=par.c20[j], alpha=1.0, marker='x', label=mylabel)
         axs[2].scatter(mytime, omega_cross, s=20, c=par.c20[j], alpha=1.0, label=mylabel)
-        #axs[2].scatter(mytime, omega_cross_model, s=20, c=par.c20[j], alpha=1.0, marker='x', label=mylabel)
+        axs[2].scatter(mytime, omega_cross_model, s=20, c=par.c20[j], alpha=1.0, marker='x', label=mylabel)
 
 
     # finally add legend
