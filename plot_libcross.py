@@ -91,6 +91,7 @@ def plotlibcross():
             buf = subprocess.check_output(command, shell=True)
         else:                         # python 3.X
             buf = subprocess.getoutput(command)
+        print(command,buf)
         aspectratio = float(buf.split()[1])
         # get the flaring index used in the numerical simulation
         command = par.awk_command+' " /^FlaringIndex/ " '+directory[j]+'/*.par'
