@@ -51,12 +51,13 @@ def plotlibcross():
 
         on = range(0,nboutputs,take_one_point_every)
 
-        omega_lib   = np.zeros(len(on))
-        omega_lib_model = np.zeros(len(on))
-        omega_cross = np.zeros(len(on))
-        ratio       = np.zeros(len(on))
-        ratio_model = np.zeros(len(on))
-        mytime      = np.zeros(len(on))
+        omega_lib           = np.zeros(len(on))
+        omega_lib_model     = np.zeros(len(on))
+        omega_cross         = np.zeros(len(on))
+        omega_cross_model   = np.zeros(len(on))
+        ratio               = np.zeros(len(on))
+        ratio_model         = np.zeros(len(on))
+        mytime              = np.zeros(len(on))
 
         # get time
         if dens.fargo3d == 'Yes':
@@ -150,7 +151,7 @@ def plotlibcross():
             # model
             mp = mpla[take_one_point_every*k]        # planet mass
             hp = aspectratio * rpla**flaringindex    # aspect ratio at planet's orbital radius
-            xs = rpla * np.sqrt(mp/hp)               # half-width of planet's horseshoe region
+            xs = 1.1* rpla * np.sqrt(mp/hp)          # half-width of planet's horseshoe region
             nup = alphaviscosity*hp*hp*np.sqrt(rpla) # turbulent kinematic viscosity at planet
             tau_visc = 0.5*xs*xs/nup                 # viscous timescale across planet's HS region
             if k < len(on)-1:
@@ -163,7 +164,9 @@ def plotlibcross():
             tau_mig = rpla / migrate                 # migration timescale
             omega0_rp = vortensity0[ipla,0]          # initial vortensity at curent orbital radius
             omega_lib_model[k] = (omega0_r0*tau_visc + omega0_rp*tau_mig)/(tau_visc + tau_mig)   # proposed model for omega_lib!
-            ratio_model[k] = omega0_rp / omega_lib_model[k]  # proposed model for Ivlib / Ivcross
+            ixs = np.argmin(np.abs(dens.rmed-rpla+xs))
+            omega_cross_model[k] = vortensity0[ixs,0] 
+            ratio_model[k] = omega_cross_model[k] / omega_lib_model[k]  # proposed model for Ivlib / Ivcross
 
             #print(k,len(on)-1,mp,hp,xs,alphaviscosity,nup,tau_visc,rpla,rpla_p1,time_p1,migrate,tau_mig,omega0_r0,omega0_rp,omega_lib_model[k])
             #print(on[k], mytime[k], rpla, ipla, 1./omega_lib[k], 1./omega_cross[k], ratio[k])
@@ -175,6 +178,7 @@ def plotlibcross():
         axs[1].scatter(mytime, 1./omega_lib, s=20, c=par.c20[j], alpha=1.0, label=mylabel)
         axs[1].scatter(mytime, omega_lib_model, s=20, c=par.c20[j], alpha=1.0, marker='x', label='model')
         axs[2].scatter(mytime, 1./omega_cross, s=20, c=par.c20[j], alpha=1.0, label=mylabel)
+        axs[2].scatter(mytime, omega_cross_model, s=20, c=par.c20[j], alpha=1.0, marker='x', label='model')
 
 
     # finally add legend
