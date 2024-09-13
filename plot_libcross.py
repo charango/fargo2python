@@ -166,7 +166,7 @@ def plotlibcross():
             omega_cross_model[k] = vortensity0[ixs,0] 
             ratio_model[k] = omega_cross_model[k] / omega_lib_model[k]  # proposed model for Ivlib / Ivcross
 
-            print(k,tau_visc,tau_mig,omega0_r0,omega0_rp,omega_lib_model[k],omega_lib[k])
+            print(k,omega_lib[k],omega_lib_model[k],omega_cross[k],omega_cross_model[k],ratio[k],ratio_model[k])
             #print(on[k], mytime[k], rpla, ipla, 1./omega_lib[k], 1./omega_cross[k], ratio[k])
 
 
