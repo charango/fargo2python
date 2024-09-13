@@ -144,14 +144,7 @@ def plottwodfield():
                     if myfield.fargo3d == 'Yes':
                         f1, xpla, ypla, f4, f5, f6, f7, f8, date, omega = np.loadtxt(directory+"/planet0.dat",unpack=True)
                     else:
-                        f1, xpla, ypla, f4, f5, f6, f7, date, omega, f10, f11 = np.loadtxt(directory+"/planet0.dat",unpack=True)
-                    if par.take_one_point_every == '#':
-                        take_one_point_every = 1
-                    else:
-                        take_one_point_every = par.take_one_point_every
-                    rpla = np.sqrt( xpla[take_one_point_every*k]*xpla[take_one_point_every*k] + ypla[take_one_point_every*k]*ypla[take_one_point_every*k] )
-                    myrmin = rpla-par.rbox
-                    myrmax = rpla+par.rbox
+                        f1, xpla, ypla, f4, f5, f6, f7, date, omega, f10, f11 = np.loadtxt(directory+"/planet0.dat",unpack=True)                    
                 else:
                     if (par.myrmin != '#'):
                         myrmin = par.myrmin
@@ -161,9 +154,8 @@ def plottwodfield():
                         myrmax = par.myrmax
                     else:
                         myrmax = R.max()
-
-                imin = np.argmin(np.abs(R-myrmin))
-                imax = np.argmin(np.abs(R-myrmax))   
+                    imin = np.argmin(np.abs(R-myrmin))
+                    imax = np.argmin(np.abs(R-myrmax))   
 
                 # VISUALISATION IN MIDPLANE: get azimuth 
                 if par.fargo3d == 'No' or (par.fieldofview != 'latitudinal' and par.fieldofview != 'vertical'):
@@ -205,6 +197,21 @@ def plottwodfield():
                 
                 # end of stuff done only at first output number
             
+            # -------------------
+            # case where fields are displayed with a fixed radial range about planet's orbital radius
+            # -------------------
+            if ('rbox' in open('paramsf2p.dat').read()) and (par.rbox != '#'):
+                if par.take_one_point_every == '#':
+                    take_one_point_every = 1
+                else:
+                    take_one_point_every = par.take_one_point_every
+                rpla = np.sqrt( xpla[take_one_point_every*k]*xpla[take_one_point_every*k] + ypla[take_one_point_every*k]*ypla[take_one_point_every*k] )
+                myrmin = rpla-par.rbox
+                myrmax = rpla+par.rbox
+                imin = np.argmin(np.abs(R-myrmin))
+                imax = np.argmin(np.abs(R-myrmax)) 
+
+
             # -------------------
             # read information on the dust particles
             # -------------------
