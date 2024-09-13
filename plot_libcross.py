@@ -195,6 +195,7 @@ def plotlibcross():
     else:
        outfile = 'wlib_over_wcross'
     fileout = outfile+'.pdf'
+    print(fileout)
     if par.saveaspdf == 'Yes':
         plt.savefig('./'+fileout, dpi=160)
     if par.saveaspng == 'Yes':
