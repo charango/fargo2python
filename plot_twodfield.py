@@ -104,6 +104,9 @@ def plottwodfield():
             if par.nodiff == 'No':
                 myfield0 = Field(field=par.whatfield, fluid=par.fluids[f], on=0, directory=directory, physical_units=par.physical_units, nodiff=par.nodiff, fieldofview=par.fieldofview, slice=par.slice, onedprofile='No', override_units=par.override_units)
                 array0 = myfield0.data
+                for i in range(myfield0.nrad):
+                    axisym = np.sum(array0[i,:]) / myfield0.nsec
+                    array0[i,:] = axisym
                 array = (myfield.data-array0)/array0
             else:
                 # conversion in physical units
@@ -136,13 +139,30 @@ def plottwodfield():
                     R *= (myfield.culength / 1.5e11) # in au
             
                 # define visualisation params
-                myrmin = par.myrmin
-                if (par.myrmin == '#'):
-                    myrmin = R.min()
+                if ('rbox' in open('paramsf2p.dat').read()) and (par.rbox != '#'):
+                    # start by finding planet's orbita radius
+                    if myfield.fargo3d == 'Yes':
+                        f1, xpla, ypla, f4, f5, f6, f7, f8, date, omega = np.loadtxt(directory+"/planet0.dat",unpack=True)
+                    else:
+                        f1, xpla, ypla, f4, f5, f6, f7, date, omega, f10, f11 = np.loadtxt(directory+"/planet0.dat",unpack=True)
+                    if par.take_one_point_every == '#':
+                        take_one_point_every = 1
+                    else:
+                        take_one_point_every = par.take_one_point_every
+                    rpla = np.sqrt( xpla[take_one_point_every*k]*xpla[take_one_point_every*k] + ypla[take_one_point_every*k]*ypla[take_one_point_every*k] )
+                    myrmin = rpla-par.rbox
+                    myrmax = rpla+par.rbox
+                else:
+                    if (par.myrmin != '#'):
+                        myrmin = par.myrmin
+                    else:
+                        myrmin = R.min()
+                    if (par.myrmax != '#'):
+                        myrmax = par.myrmax
+                    else:
+                        myrmax = R.max()
+
                 imin = np.argmin(np.abs(R-myrmin))
-                myrmax = par.myrmax
-                if (par.myrmax == '#'):
-                    myrmax = R.max()
                 imax = np.argmin(np.abs(R-myrmax))   
 
                 # VISUALISATION IN MIDPLANE: get azimuth 
@@ -619,7 +639,11 @@ def plottwodfield():
         # ------------------
         # save in pdf or png files
         # ------------------
-        outfile = par.fluid+'_'+par.whatfield+'_'+directory+'_'+par.fieldofview+'_'+par.slice+'_'+str(on[k]).zfill(4)
+
+        if ('filename' in open('paramsf2p.dat').read()) and (par.filename != '#'):
+            outfile = par.filename
+        else:
+            outfile = par.fluid+'_'+par.whatfield+'_'+directory+'_'+par.fieldofview+'_'+par.slice+'_'+str(on[k]).zfill(4)
         if par.movie == 'Yes' and par.take_one_point_every != 1:
             outfile = par.fluid+'_'+par.whatfield+'_'+directory+'_'+par.fieldofview+'_'+par.slice+'_'+str(k).zfill(4)
         if par.showdust == 'Yes':
