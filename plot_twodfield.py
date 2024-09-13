@@ -205,7 +205,7 @@ def plottwodfield():
                     take_one_point_every = 1
                 else:
                     take_one_point_every = par.take_one_point_every
-                rpla = np.sqrt( xpla[take_one_point_every*k]*xpla[take_one_point_every*k] + ypla[take_one_point_every*k]*ypla[take_one_point_every*k] )
+                rpla = np.sqrt( xpla[int(on[k])]*xpla[int(on[k])] + ypla[int(on[k])]*ypla[int(on[k])] )
                 myrmin = rpla-par.rbox
                 myrmax = rpla+par.rbox
                 imin = np.argmin(np.abs(R-myrmin))
