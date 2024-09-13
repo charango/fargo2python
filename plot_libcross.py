@@ -152,13 +152,16 @@ def plotlibcross():
             xs = rpla * np.sqrt(mp/hp)               # half-width of planet's horseshoe region
             nup = alphaviscosity*hp*hp*np.sqrt(rpla) # turbulent kinematic viscosity at planet
             tau_visc = 0.5*xs*xs/nup                 # viscous timescale across planet's HS region
-            rpla_p1 = np.sqrt( xpla[take_one_point_every*k+1]*xpla[take_one_point_every*k+1] + ypla[take_one_point_every*k+1]*ypla[take_one_point_every*k+1] )
+            if k < len(on)-1:
+                rpla_p1 = np.sqrt( xpla[take_one_point_every*k+1]*xpla[take_one_point_every*k+1] + ypla[take_one_point_every*k+1]*ypla[take_one_point_every*k+1] )
+            else:
+                rpla_p1 = rpla_p1
             time_p1 = date[take_one_point_every*k+1]/2.0/np.pi/(apla**1.5) 
             migrate = np.abs((rpla_p1 - rpla)/(time_p1 - mytime[k]))   # migration rate drp/dt
             tau_mig = rpla / migrate                 # migration timescale
             omega0_rp = vortensity0[ipla,0]          # initial vortensity at curent orbital radius
             omega_lib_model[k] = (omega0_r0*tau_visc + omega0_rp*tau_mig)/(tau_visc + tau_mig)   # proposed model for omega_lib!
-            print(mp,hp,xs,alphaviscosity,nup,tau_visc,rpla,rpla_p1,time_p1,migrate,tau_mig,omega0_r0,omega0_rp,omega_lib_model[k])
+            print(k,len(on)-1,mp,hp,xs,alphaviscosity,nup,tau_visc,rpla,rpla_p1,time_p1,migrate,tau_mig,omega0_r0,omega0_rp,omega_lib_model[k])
 
             #print(on[k], mytime[k], rpla, ipla, 1./omega_lib[k], 1./omega_cross[k], ratio[k])
 
