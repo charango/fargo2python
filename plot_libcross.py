@@ -149,7 +149,7 @@ def plotlibcross():
             # model
             mp = mpla[take_one_point_every*k]        # planet mass
             hp = aspectratio * rpla**flaringindex    # aspect ratio at planet's orbital radius
-            xs = rpla * np.sqrt(mp/hp)          # half-width of planet's horseshoe region
+            xs = 1.05 * rpla * np.sqrt(mp/hp)          # half-width of planet's horseshoe region
             nup = alphaviscosity*hp*hp*np.sqrt(rpla) # turbulent kinematic viscosity at planet
             #tau_visc = 0.1*xs*xs/nup                 # viscous timescale across planet's HS region (scaled down here)
             tau_visc = xs*xs/nup                    # viscous timescale across planet's HS region (in code units)
