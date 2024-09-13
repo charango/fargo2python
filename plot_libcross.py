@@ -15,7 +15,7 @@ def plotlibcross():
     
     # first prepare figures
     fig, axs = plt.subplots(3,1,figsize=(8, 16))
-    plt.subplots_adjust(left=0.16, right=0.95, top=0.97, bottom=0.06)
+    plt.subplots_adjust(left=0.18, right=0.95, top=0.97, bottom=0.06)
     
     axs[0].set_ylabel(r'${\cal I}_{\nu\rm lib} / {\cal I}_{\nu\rm cross}$')
     axs[1].set_ylabel(r'$\omega_{\rm lib}$')
@@ -166,7 +166,7 @@ def plotlibcross():
             omega_cross_model[k] = vortensity0[ixs,0] 
             ratio_model[k] = omega_cross_model[k] / omega_lib_model[k]  # proposed model for Ivlib / Ivcross
 
-            #print(k,omega_lib[k],omega_lib_model[k],omega_cross[k],omega_cross_model[k],ratio[k],ratio_model[k])
+            print(k,omega0_r0,omega0_rp,tau_visc,tau_mig,omega_lib_model[k],omega_lib[k])
             #print(on[k], mytime[k], rpla, ipla, 1./omega_lib[k], 1./omega_cross[k], ratio[k])
 
 
