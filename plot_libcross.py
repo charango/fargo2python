@@ -158,6 +158,7 @@ def plotlibcross():
             tau_mig = rpla / migrate                 # migration timescale
             omega0_rp = vortensity0[ipla,0]          # initial vortensity at curent orbital radius
             omega_lib_model[k] = (omega0_r0*tau_visc + omega0_rp*tau_mig)/(tau_visc + tau_mig)   # proposed model for omega_lib!
+            print(mp,hp,xs,nup,tau_visc,rpla,rpla_p1,time_p1,migrate,tau_mig,omega0_r0,omega0_rp,omega_lib_model[k])
 
             #print(on[k], mytime[k], rpla, ipla, 1./omega_lib[k], 1./omega_cross[k], ratio[k])
 
