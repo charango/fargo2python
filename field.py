@@ -244,6 +244,12 @@ class Field(Mesh):
                 mass = self.data*surface
                 # total disc mass 
                 print('disc mass / star mass = ', np.sum(mass)) 
+
+            # ----
+            # PASSIVE SCALAR
+            # ----
+            if field == 'label':
+                self.strname = 'specific concentration'
                     
         else:
             #print('input file ',input_file,' does not exist!')
@@ -394,12 +400,6 @@ class Field(Mesh):
                     for i in range(self.nrad):
                         self.data[i,j] = -2.0*np.pi*self.rmed[i]*vrad[i,j]*dens[i,j]
                 self.strname += r' $\dot{M}$'
-
-            # ----
-            # PASSIVE SCALAR
-            # ----
-            if field == 'label':
-                self.strname = 'specific concentration'
 
             #
             # ----
