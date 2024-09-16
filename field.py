@@ -249,7 +249,7 @@ class Field(Mesh):
             # PASSIVE SCALAR
             # ----
             if field == 'label':
-                self.strname = 'spec. concentration'
+                self.strname = 'concentration'
                     
         else:
             #print('input file ',input_file,' does not exist!')
