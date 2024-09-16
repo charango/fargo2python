@@ -42,6 +42,11 @@ def plotlibcross():
         # get density at on=0 to inherit from Field class objects
         dens = Field(field='dens', fluid='gas', on=0, directory=directory[j], physical_units=par.physical_units, nodiff=par.nodiff, fieldofview=par.fieldofview, onedprofile='No', override_units=par.override_units)
 
+        # keep track of vortensity at time t=0
+        vortensity0 = Field(field='vortensity', fluid='gas', on=0, directory=directory[j], physical_units=par.physical_units, nodiff=par.nodiff, fieldofview=par.fieldofview, onedprofile='No', override_units=par.override_units).data
+        ipla0 = np.argmin(np.abs(dens.rmed-1.0))
+        omega0_r0 = vortensity0[ipla0,0]     # initial vortensity at planet's initial orbital radius
+
         # find how many output numbers were produced for each directory
         if dens.fargo3d == 'No':
             nboutputs = len(fnmatch.filter(os.listdir(directory[j]), 'gasdens*.dat'))
@@ -115,15 +120,10 @@ def plotlibcross():
 
             print('output number =',str(k),'out of', str(len(on)),end='\r')
 
-            # get 2D gas surface density field (not compatible with 3D yet...)  (nrad,nsec)
+            # get 2D gas vortensity
             vortensity = Field(field='vortensity', fluid='gas', on=on[k], directory=directory[j], physical_units=par.physical_units, nodiff=par.nodiff, fieldofview=par.fieldofview, onedprofile='No', override_units=par.override_units).data
             if dens.fargo3d == 'No':
                 vortensity = np.roll(vortensity, shift=int(dens.nsec/2), axis=1)
-
-            # keep track of vortensity at time t=0
-            vortensity0 = Field(field='vortensity', fluid='gas', on=0, directory=directory[j], physical_units=par.physical_units, nodiff=par.nodiff, fieldofview=par.fieldofview, onedprofile='No', override_units=par.override_units).data
-            ipla0 = np.argmin(np.abs(dens.rmed-1.0))
-            omega0_r0 = vortensity0[ipla0,0]     # initial vortensity at planet's initial orbital radius
 
             # time
             mytime[k] = date[take_one_point_every*k]/2.0/np.pi/(apla**1.5)  # orbital periods at apla
@@ -146,7 +146,7 @@ def plotlibcross():
             # ratio of librating and orbit-crossing *inverse* vortensities
             ratio[k] = omega_cross[k] / omega_lib[k]
 
-            # model
+            # simple model
             mp = mpla[take_one_point_every*k]        # planet mass
             hp = aspectratio * rpla**flaringindex    # aspect ratio at planet's orbital radius
             xs = 1.05 * rpla * np.sqrt(mp/hp)        # half-width of planet's horseshoe region
@@ -157,10 +157,11 @@ def plotlibcross():
             #omega0_rp = omega_cross[k]
             omega_lib_model[k] = (omega0_r0*tau_visc + omega0_rp*tau_mig)/(tau_visc + tau_mig)   # proposed model for omega_lib!
             ixs = np.argmin(np.abs(dens.rmed-rpla+xs))
-            omega_cross_model[k] = vortensity0[ixs,0] 
+            omega0_rpminusxs = vortensity0[ixs,0]    # initial vortensity at rp-xs
+            omega_cross_model[k] = (omega0_rp*tau_visc + omega0_rpminusxs*tau_mig)/(tau_visc + tau_mig)   # proposed model for omega_cross!
             ratio_model[k] = omega_cross_model[k] / omega_lib_model[k]  # proposed model for Ivlib / Ivcross
 
-            print(k,omega0_r0,omega0_rp,tau_visc,tau_mig,omega_lib_model[k],omega_lib[k])
+            print(k,omega0_r0,omega0_rpminusxs,omega0_rp,tau_visc,tau_mig,omega_lib_model[k],omega_lib[k],omega_cross_model[k],omega_cross[k])
             #print(on[k], mytime[k], rpla, ipla, 1./omega_lib[k], 1./omega_cross[k], ratio[k])
 
 
