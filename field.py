@@ -395,6 +395,12 @@ class Field(Mesh):
                         self.data[i,j] = -2.0*np.pi*self.rmed[i]*vrad[i,j]*dens[i,j]
                 self.strname += r' $\dot{M}$'
 
+            # ----
+            # PASSIVE SCALAR
+            # ----
+            if field == 'label':
+                self.strname = 'specific concentration'
+
             #
             # ----
             # DISC ECCENTRICITY
