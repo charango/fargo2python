@@ -158,7 +158,7 @@ def plotlibcross():
             omega_lib_model[k] = (omega0_r0*tau_visc + omega0_rp*tau_mig)/(tau_visc + tau_mig)   # proposed model for omega_lib!
             ixs = np.argmin(np.abs(dens.rmed-rpla+xs))
             omega0_rpminusxs = vortensity0[ixs,0]    # initial vortensity at rp-xs
-            omega_cross_model[k] = (omega0_rp*tau_visc + omega0_rpminusxs*tau_mig)/(tau_visc + tau_mig)   # proposed model for omega_cross!
+            omega_cross_model[k] = omega0_rp # (omega0_rp*tau_visc + omega0_rpminusxs*tau_mig)/(tau_visc + tau_mig)   # proposed model for omega_cross!
             ratio_model[k] = omega_cross_model[k] / omega_lib_model[k]  # proposed model for Ivlib / Ivcross
 
             print(k,omega0_r0,omega0_rpminusxs,omega0_rp,tau_visc,tau_mig,omega_lib_model[k],omega_lib[k],omega_cross_model[k],omega_cross[k])
