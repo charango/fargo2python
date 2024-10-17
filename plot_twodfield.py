@@ -176,7 +176,8 @@ def plottwodfield():
                 
                 # VISUALISATION IN VERTICAL (LATITUDINAL) PLANE
                 if par.fargo3d == 'Yes' and par.fieldofview == 'latitudinal':
-                    T = myfield.tmed       # latitude
+                    #T = myfield.tmed       # latitude
+                    T = myfield.tedge       # latitude
                     # number of grid cells in the radial and azimuthal directions
                     jmin = np.argmin(np.abs(T-T.min())) 
                     jmax = np.argmin(np.abs(T-T.max()))
@@ -320,7 +321,8 @@ def plottwodfield():
             if par.fieldofview == 'latitudinal':
                 X = R
                 Y = T
-                array_orig = np.transpose(array)
+                array_orig = array
+                array = np.transpose(array)
 
                 if par.allfluids == 'No':
                     if two_color_bars == True:
@@ -407,7 +409,9 @@ def plottwodfield():
             # -----------------------
             if par.fieldofview == 'vertical':
                 array_orig = array
+                array = np.transpose(array)
                 radius_matrix, theta_matrix = np.meshgrid(R,myfield.tedge)
+                #radius_matrix, theta_matrix = np.meshgrid(myfield.rmed,myfield.tmed)
                 X = radius_matrix * np.cos(theta_matrix)
                 Y = radius_matrix * np.sin(theta_matrix)
 
@@ -460,6 +464,10 @@ def plottwodfield():
                 if par.fieldofview == 'latitudinal':
                     myfieldmax = array_orig[imin:imax+1,jmin:jmax+1].max()
 
+            print('imin, imax = ', imin, imax)
+            print('jmax, jmax = ', jmin, jmax)
+            print('fieldmin, fieldmax = ', myfieldmin, myfieldmax)
+            print('array_orig shape = ', array_orig.shape)
             if par.log_colorscale == 'Yes':
                 if (par.fieldmin == 'auto' or par.fieldmax == 'auto'):
                     minarray = array.min() #1e-3*array.max()?
@@ -485,6 +493,7 @@ def plottwodfield():
             # -----------------------
             # display contour field
             # -----------------------
+            print('shapes = ', X.shape, Y.shape, array.shape)
             CF = ax.pcolormesh(X,Y,array,cmap=mycolormap,norm=mynorm,rasterized=True)
             #CF = ax.imshow(array, origin='lower', cmap=mycolormap, interpolation='bilinear', vmin=myfieldmin, vmax=myfieldmax, aspect='auto', extent=[X.min(),X.max(),Y.min(),Y.max()])
 
@@ -688,7 +697,7 @@ def plottwodfield():
             filempg = re.sub('.mpg', '_dust.mpg', filempg)
         if par.nodiff == 'Yes':
             filempg = re.sub('.mpg', '_nodiff.mpg', filempg)
-        # call to ffmpeg-python
+        # call to ffmpeg-python (you also need to install ffmpeg on your local environement!)
         import ffmpeg
         (
             ffmpeg            

@@ -216,9 +216,9 @@ class Field(Mesh):
         if os.path.isfile(input_file) == True:
             self.data = self.__open_field(input_file,dtype,fieldofview,slice)
             if (field == 'vtheta' or field == 'vx') and self.cartesian_grid == 'No':
-                #print('omegaframe = ', omegaframe)
                 for i in range(self.nrad):
                     self.data[i,:] += (self.rmed)[i]*omegaframe
+                print(self.data.min(), self.data.max())
             '''
             if field == 'dens' and 'cavity_gas' in open('paramsf2p.dat').read() and cavity_gas == 'Yes':
                 imin = np.argmin(np.abs(self.rmed-1.3))
@@ -230,7 +230,7 @@ class Field(Mesh):
             # ----
             # print out disc mass if density field is computed
             # ----
-            if field == 'dens' and par.verbose == 'Yes':
+            if field == 'dens' and par.verbose == 'Yes' and ( par.fieldofview == 'cartesian' or par.fieldofview == 'polar'):
                 mass    = np.zeros((self.nrad,self.nsec))
                 surface = np.zeros((self.nrad,self.nsec))
 
@@ -816,10 +816,10 @@ class Field(Mesh):
             if fieldofview == 'latitudinal' or fieldofview == 'vertical':
                 if slice == 'average':
                     myfield = np.sum(datacube,axis=2)/self.nsec  # azimuthally-averaged field (R vs. latitude)
-                    return myfield [::-1,:]
+                    return np.transpose(myfield [::-1,:])
                 else:
-                    return datacube[:,:,self.nsec//2]  # azimuthal cut at planet's location
-            else:
+                    return np.transpose(datacube[:,:,self.nsec//2])  # azimuthal cut at planet's location
+            else:  # polar or cartesian fields of view
                 if np.abs(self.zmax-1.57) < 0.01:
                     if slice == 'midplane':
                         return datacube[-1,:,:]   # midplane field only if "half-a-disc" is simulated in latitudinal direction!
