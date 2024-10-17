@@ -464,10 +464,6 @@ def plottwodfield():
                 if par.fieldofview == 'latitudinal':
                     myfieldmax = array_orig[imin:imax+1,jmin:jmax+1].max()
 
-            print('imin, imax = ', imin, imax)
-            print('jmax, jmax = ', jmin, jmax)
-            print('fieldmin, fieldmax = ', myfieldmin, myfieldmax)
-            print('array_orig shape = ', array_orig.shape)
             if par.log_colorscale == 'Yes':
                 if (par.fieldmin == 'auto' or par.fieldmax == 'auto'):
                     minarray = array.min() #1e-3*array.max()?
@@ -493,7 +489,6 @@ def plottwodfield():
             # -----------------------
             # display contour field
             # -----------------------
-            print('shapes = ', X.shape, Y.shape, array.shape)
             CF = ax.pcolormesh(X,Y,array,cmap=mycolormap,norm=mynorm,rasterized=True)
             #CF = ax.imshow(array, origin='lower', cmap=mycolormap, interpolation='bilinear', vmin=myfieldmin, vmax=myfieldmax, aspect='auto', extent=[X.min(),X.max(),Y.min(),Y.max()])
 
