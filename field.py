@@ -218,7 +218,6 @@ class Field(Mesh):
             if (field == 'vtheta' or field == 'vx') and self.cartesian_grid == 'No':
                 for i in range(self.nrad):
                     self.data[i,:] += (self.rmed)[i]*omegaframe
-                print(self.data.min(), self.data.max())
             '''
             if field == 'dens' and 'cavity_gas' in open('paramsf2p.dat').read() and cavity_gas == 'Yes':
                 imin = np.argmin(np.abs(self.rmed-1.3))
