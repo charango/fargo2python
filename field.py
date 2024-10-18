@@ -553,8 +553,8 @@ class Field(Mesh):
             # VERTICALLY-INTEGRATED (=surface) DENSITY
             # ----
             if self.fargo3d == 'Yes' and field == 'surfacedens':
-                field = np.fromfile(directory+fluid+'dens'+str(on)+'.dat', dtype)
-                datacube = field.reshape(self.ncol,self.nrad,self.nsec)
+                myfield = np.fromfile(directory+fluid+'dens'+str(on)+'.dat', dtype)
+                datacube = myfield.reshape(self.ncol,self.nrad,self.nsec)
                 datacube_cyl = np.zeros((self.nver,self.nrad,self.nsec))
                 # sweep through the 3D cylindrical grid:
                 for k in range(self.nver):
