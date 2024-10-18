@@ -572,11 +572,8 @@ class Field(Mesh):
                         else:
                             # simple nearest-grid point interpolation...
                             datacube_cyl[k,i,:] = datacube[ksph,isph,:]
-                # vertically-integrated density: \int_0^zmax rhoxdz
-                # dz = Rxdtheta with dtheta uniform
-                buf = np.sum(datacube_cyl,axis=0)  # (nrad,nsec)
-                for i in range(self.nrad):
-                    self.data[i,:] = buf[i,:]*np.abs(self.tmed[1]-self.tmed[0])*self.rmed[i]
+                # vertically-integrated density: \int_zmin^zmax rhoxdz
+                self.data = np.sum(datacube_cyl,axis=0)*np.abs(self.zmed[1]-self.zmed[0])   # (nrad,nsec)
                 self.strname += ' surface density'
                 if physical_units == 'Yes' and nodiff == 'Yes':
                     self.unit = (self.cumass*1e3)/((self.culength*1e2)**2.)

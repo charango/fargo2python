@@ -54,7 +54,7 @@ class Mesh():
         # -----        
         if self.fargo3d == 'Yes' and self.ncol > 1:
             # define number of cells in vertical direction
-            self.nver = self.ncol 
+            self.nver = self.ncol
             # define an array for vertical altitude above midplane
             # (half-disc assumed)
             zbuf = self.redge.max()*np.sin(self.tedge)
