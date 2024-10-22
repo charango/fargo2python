@@ -344,8 +344,9 @@ class Field(Mesh):
                     if self.fargo3d == 'No':
                         self.data = self.__open_field(directory+'Temperature'+str(on)+'.dat',dtype,fieldofview,slice)
                     else:
-                        cs = self.__open_field(directory+fluid+'energy'+str(on)+'.dat',dtype,fieldofview,slice)
-                        self.data = np.sqrt(cs)
+                        e = self.__open_field(directory+fluid+'energy'+str(on)+'.dat',dtype,fieldofview,slice)
+                        rho = self.__open_field(directory+fluid+'dens'+str(on)+'.dat',dtype,fieldofview,slice)
+                        self.data = (gamma-1.0)*e/rho
 
                 # work out pressure then
                 if field == 'pressure':
