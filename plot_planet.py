@@ -110,14 +110,22 @@ def plotplanet():
                     buf = subprocess.check_output(command, shell=True)
                 else:                         # python 3.X
                     buf = subprocess.getoutput(command)
-                culength = float(buf.split()[1])*1.5e11  #from au to meters
+                if buf:
+                    culength = float(buf.split()[1])*1.5e11  #from au to meters
+                else:
+                    print('UNITOFLENGTHAU is absent in variables.par, I will assume it is equal to unity, meaning that your code unit of length was 1 au!')
+                    culength = 1.5e11 # 1 au in meters
                 command = par.awk_command+' " /^UNITOFMASSMSUN/ " '+directory[j]+'/variables.par'
                 # check which version of python we're using
                 if sys.version_info[0] < 3:   # python 2.X
                     buf = subprocess.check_output(command, shell=True)
                 else:                         # python 3.X
                     buf = subprocess.getoutput(command)
-                cumass = float(buf.split()[1])*2e30  #from Msol to kg
+                if buf:
+                    cumass = float(buf.split()[1])*2e30  #from Msol to kg
+                else:
+                    print('UNITOFMASSMSUN is absent in variables.par, I will assume it is equal to unity, meaning that your code unit of mass was 1 Solar mass!')
+                    cumass = 2.0e30 # 1 Solar mass in kg
                 # unit of time = sqrt( pow(L,3.) / 6.673e-11 / M );
                 cutime = np.sqrt( culength**3.0 / 6.673e-11 / cumass)
             # case we overrride code units

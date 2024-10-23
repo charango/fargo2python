@@ -116,14 +116,22 @@ class Field(Mesh):
                     buf = subprocess.check_output(command, shell=True)
                 else:                         # python 3.X
                     buf = subprocess.getoutput(command)
-                self.culength = float(buf.split()[1])*1.5e11  #from au to meters
+                if buf:
+                    self.culength = float(buf.split()[1])*1.5e11  #from au to meters
+                else:
+                    print('UNITOFLENGTHAU is absent in variables.par, I will assume it is equal to unity, meaning that your code unit of length was 1 au!')
+                    self.culength = 1.5e11  # 1 au in meters
                 command = par.awk_command+' " /^UNITOFMASSMSUN/ " '+directory+'variables.par'
                 # check which version of python we're using
                 if sys.version_info[0] < 3:   # python 2.X
                     buf = subprocess.check_output(command, shell=True)
                 else:                         # python 3.X
                     buf = subprocess.getoutput(command)
-                self.cumass = float(buf.split()[1])*2e30  #from Msol to kg
+                if buf:
+                    self.cumass = float(buf.split()[1])*2e30  #from Msol to kg
+                else:
+                    print('UNITOFMASSMSUN is absent in variables.par, I will assume it is equal to unity, meaning that your code unit of mass was 1 Solar mass!')
+                    self.cumass = 2e30  # 1 Msol in kg
                 # unit of time = sqrt( pow(L,3.) / 6.673e-11 / M );
                 self.cutime = np.sqrt( self.culength**3.0 / 6.673e-11 / self.cumass)
                 # unit of temperature = mean molecular weight * 8.0841643e-15 * M / L;
@@ -258,11 +266,13 @@ class Field(Mesh):
             # TEMPERATURE or PRESSURE or TOOMRE Q-parameter = c_s Omega / pi G Sigma
             # checked by CB on January 2022
             # ----
-            if field == 'temp' or field == 'pressure' or field == 'toomre':
+            if field == 'temp' or field == 'pressure' or field == 'entropy' or field == 'toomre':
                 if field == 'pressure':
                     self.strname += ' pressure'
                 if field == 'toomre':
                     self.strname += ' Toomre parameter'
+                if field == 'entropy':
+                    self.strname += ' specific entropy'
                     
                 # check that no energy equation was employed
                 if self.fargo3d == 'No':
@@ -339,19 +349,24 @@ class Field(Mesh):
                     gamma = 1.0  # reset gamma to 1
                     # expression below valid both for Fargo-3D and Dusty FARGO-ADSG:
                     for i in range(self.nrad):
-                        self.data[i,:] = aspectratio*aspectratio*(((self.rmed)[i])**(-1.0+2.0*flaringindex))
+                        self.data[i,:] = aspectratio*aspectratio*(((self.rmed)[i])**(-1.0+2.0*flaringindex))   # temp
                 else:
                     if self.fargo3d == 'No':
                         self.data = self.__open_field(directory+'Temperature'+str(on)+'.dat',dtype,fieldofview,slice)
                     else:
-                        e = self.__open_field(directory+fluid+'energy'+str(on)+'.dat',dtype,fieldofview,slice)
+                        energy = self.__open_field(directory+fluid+'energy'+str(on)+'.dat',dtype,fieldofview,slice)
                         rho = self.__open_field(directory+fluid+'dens'+str(on)+'.dat',dtype,fieldofview,slice)
-                        self.data = (gamma-1.0)*e/rho
+                        self.data = (gamma-1.0)*energy/rho
 
                 # work out pressure then
                 if field == 'pressure':
                     dens = self.__open_field(directory+fluid+'dens'+str(on)+'.dat',dtype,fieldofview,slice)
-                    self.data *= dens
+                    self.data *= dens   # pressure
+                
+                # work out specific entropy then S = P rho^-gamma = T x rho^(1-gamma)
+                if field == 'entropy':
+                    dens = self.__open_field(directory+fluid+'dens'+str(on)+'.dat',dtype,fieldofview,slice)
+                    self.data *= (dens**(1.-gamma))  # specific entropy
 
                 # finally work out Toomre Q-parameter
                 if field == 'toomre':
@@ -370,23 +385,6 @@ class Field(Mesh):
 
                     self.data *= omega
 
-            #
-            # ----
-            # SPECIFIC ENTROPY Sigma^{1-gamma} x Temp
-            # ----
-            if field == 'entropy':
-                # get the adiabatic index index used in the numerical simulation
-                command = par.awk_command+' " /^AdiabaticIndex/ " '+directory+'*.par'
-                # check which version of python we're using
-                if sys.version_info[0] < 3:   # python 2.X
-                    buf = subprocess.check_output(command, shell=True)
-                else:                         # python 3.X
-                    buf = subprocess.getoutput(command)
-                gamma = float(buf.split()[1])
-                dens = self.__open_field(directory+fluid+'dens'+str(on)+'.dat',dtype,fieldofview,slice)
-                temp = self.__open_field(directory+'Temperature'+str(on)+'.dat',dtype,fieldofview,slice)
-                self.data = temp*(dens**(1.0-gamma))
-                self.strname += ' specific entropy'
             # ----
             # MASS ACCRETION RATE Mdot = abs(2pi R v_R Sigma)
             # ----
