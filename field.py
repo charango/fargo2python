@@ -347,6 +347,10 @@ class Field(Mesh):
                 # work out temperature first: self.data contains the gas temperature
                 if energyequation == 'No':
                     gamma = 1.0  # reset gamma to 1
+                    if ( (fieldofview == 'polar') or (fieldofview == 'cart') ):
+                        self.data = np.zeros((self.nrad,self.nsec)) 
+                    else:
+                        self.data = np.zeros((self.nrad,self.ncol)) 
                     # expression below valid both for Fargo-3D and Dusty FARGO-ADSG:
                     for i in range(self.nrad):
                         self.data[i,:] = aspectratio*aspectratio*(((self.rmed)[i])**(-1.0+2.0*flaringindex))   # temp
