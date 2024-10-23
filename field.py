@@ -586,8 +586,8 @@ class Field(Mesh):
             if field == 'stokes':
                 # gas mass surface (2D run) or volume density (3D run)
                 if self.ncol > 1:  # 3D
-                    field = np.fromfile(directory+'gasdens'+str(on)+'.dat', dtype)
-                    rho_gas = field.reshape(self.ncol,self.nrad,self.nsec)
+                    myfield = np.fromfile(directory+'gasdens'+str(on)+'.dat', dtype)
+                    rho_gas = myfield.reshape(self.ncol,self.nrad,self.nsec)   # ncol, nrad, nsec
                 else:
                     sigma_gas = self.__open_field(directory+'gasdens'+str(on)+'.dat',dtype,fieldofview,slice)
                 
@@ -611,7 +611,10 @@ class Field(Mesh):
                 if self.fargo3d == 'Yes':
                     dust_id, dust_size, dust_gas_ratio = np.loadtxt(directory+'/dustsizes.dat',unpack=True)
                     if fluid != 'gas':
-                        s = dust_size[int(fluid[-1])-1] # fluid[-1] = index of dust fluid
+                        if isinstance(dust_size, float) == False:
+                            s = dust_size[int(fluid[-1])-1] # fluid[-1] = index of dust fluid
+                        else:
+                            s = dust_size
                     else:
                         s = 1e-10  # arbitrarily small
                 else:
@@ -648,12 +651,12 @@ class Field(Mesh):
                     for i in range(self.nrad):
                         cs[:,i,:] = aspectratio*(((self.rmed)[i])**(-0.5+flaringindex))
                         omega[:,i,:] = self.rmed[i]**(-1.5)
-                    buf = np.sqrt(np.pi/8.0) * (s*rho_dust_int) * omega / (cs*rho_gas) # 3D cube
+                    buf = np.sqrt(np.pi/8.0) * (s*rho_dust_int) * omega / (cs*rho_gas) # 3D cube  ncol, nrad, nsec
                     if fieldofview == 'latitudinal' or fieldofview == 'vertical':
                         myfield = np.sum(buf,axis=2)/self.nsec  # azimuthally-averaged field (R vs. latitude)
-                        self.data = myfield [::-1,:]
+                        self.data = np.transpose(myfield [::-1,:])   # nrad, ncol
                     else:
-                        self.data = buf[-1,:,:]   # midplane field
+                        self.data = buf[self.ncol//2-1,:,:]   # midplane field  nrad, nsec
                 else:  # 2D
                     self.data = 0.5*np.pi*s*rho_dust_int/sigma_gas
                 self.strname += ' Stokes number'
