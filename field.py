@@ -347,13 +347,17 @@ class Field(Mesh):
                 # work out temperature first: self.data contains the gas temperature
                 if energyequation == 'No':
                     gamma = 1.0  # reset gamma to 1
-                    if ( (fieldofview == 'polar') or (fieldofview == 'cart') ):
-                        self.data = np.zeros((self.nrad,self.nsec)) 
+                    if self.fargo3d == 'No':
+                        if ( (fieldofview == 'polar') or (fieldofview == 'cart') ):
+                            self.data = np.zeros((self.nrad,self.nsec)) 
+                        else:
+                            self.data = np.zeros((self.nrad,self.ncol)) 
+                        # expression below valid both for Fargo-3D and Dusty FARGO-ADSG:
+                        for i in range(self.nrad):
+                            self.data[i,:] = aspectratio*aspectratio*(((self.rmed)[i])**(-1.0+2.0*flaringindex))   # temp
                     else:
-                        self.data = np.zeros((self.nrad,self.ncol)) 
-                    # expression below valid both for Fargo-3D and Dusty FARGO-ADSG:
-                    for i in range(self.nrad):
-                        self.data[i,:] = aspectratio*aspectratio*(((self.rmed)[i])**(-1.0+2.0*flaringindex))   # temp
+                        energy = self.__open_field(directory+fluid+'energy'+str(on)+'.dat',dtype,fieldofview,slice)
+                        self.data = energy*energy  # as gasenergy contains sound speed!
                 else:
                     if self.fargo3d == 'No':
                         self.data = self.__open_field(directory+'Temperature'+str(on)+'.dat',dtype,fieldofview,slice)
@@ -461,7 +465,7 @@ class Field(Mesh):
             # ----
             # VORTICITY or VORTENSITY
             # ----
-            if (field == 'vorticity' or field == 'drl' or field == 'vortensity' or field == 'invvortensity'):
+            if (field == 'vorticity' or field == 'drl' or field == 'vortensity' or field == 'invvortensity' or field == 'normvorticity'):
 
                 if self.fargo3d == 'No':
                     vrad = self.__open_field(directory+fluid+'vrad'+str(on)+'.dat',dtype,fieldofview,slice)
@@ -492,6 +496,13 @@ class Field(Mesh):
                 for j in range(self.nsec):
                     for i in range(self.nrad):
                         self.data[i,j] = (drrvphi[i,j] - dphivr[i,j]) / (self.redge)[i]
+
+                # this is the radial derivative of the specific angular momentum
+                if field == 'normvorticity':
+                    for j in range(self.nsec):
+                        for i in range(self.nrad):
+                            self.data[i,j] = 2.0*self.data[i,j] / ( vphi[i,j]/(self.redge)[i] )   # divide by Omega = vphi / R
+                    self.strname = r'$\kappa^2 / \Omega^2$'
 
                 # this is the radial derivative of the specific angular momentum
                 if field == 'drl':

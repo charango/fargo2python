@@ -693,10 +693,14 @@ def plottwodfield():
         if par.nodiff == 'Yes':
             filempg = re.sub('.mpg', '_nodiff.mpg', filempg)
         # call to ffmpeg-python (you also need to install ffmpeg on your local environement!)
+        if len(on) <= 201:
+            myframerate = 10
+        else:
+            myframerate = 20
         import ffmpeg
         (
             ffmpeg            
-            .input(input_files, framerate=10, start_number=str_on_start_number)
+            .input(input_files, framerate=myframerate, start_number=str_on_start_number)
             # framerate=10 means the video will play at 10 of the original images per second
             .output(filempg, r=30, pix_fmt='yuv420p', **{'qscale:v': 3})
             # r=30 means the video will play at 30 frames per second
