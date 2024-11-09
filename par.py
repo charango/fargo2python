@@ -36,6 +36,11 @@ params = open("paramsf2p.dat",'r')
 lines_params = params.readlines()
 params.close()                 
 
+# Global booleans set to No by default
+plot_disccom = 'No'
+plot_discmass = 'No'
+plot_libcross = 'No'
+
 par = []                       # allocating a dictionary
 var = []                       # allocating a dictionary
 regex = re.compile(',')
@@ -105,7 +110,8 @@ else:
 
 # global boolean: if True, then plot 1D or 2D fields
 plot_field = True
-if plot_tqwk != 'No' or plot_planet != 'No' or plot_disccom != 'No' or plot_discmass != 'No' or plot_libcross != 'No':
+
+if ( (plot_tqwk != 'No') or (plot_planet != 'No') or (plot_disccom != 'No') or (plot_discmass != 'No') or (plot_libcross != 'No') ):
     plot_field = False
     movie = 'No'
     if plot_planet[1] == 'mmr':
