@@ -407,6 +407,21 @@ class Field(Mesh):
                         self.data[i,j] = -2.0*np.pi*self.rmed[i]*vrad[i,j]*dens[i,j]
                 self.strname += r' $\dot{M}$'
 
+            # ----
+            # DUST TO GAS DENSITY RATIO ('dgratio')
+            # ----
+            if field == 'dgratio':
+                # first read dust density
+                if self.fargo3d == 'No':
+                    dust_density = self.__open_field(directory+'dustdens'+str(on)+'.dat',dtype,fieldofview,slice) 
+                else:
+                    dust_density = self.__open_field(directory+fluid+'dens'+str(on)+'.dat',dtype,fieldofview,slice)
+                # then read gas density
+                gas_density  = self.__open_field(directory+'gasdens'+str(on)+'.dat',dtype,fieldofview,slice)
+                # infer dust-to-gas density ratio
+                self.data = dust_density / gas_density
+                self.strname += r' dust-to-gas density ratio'
+
             #
             # ----
             # DISC ECCENTRICITY
@@ -629,7 +644,7 @@ class Field(Mesh):
                         else:
                             s = dust_size
                     else:
-                        s = 1e-10  # arbitrarily small
+                        s = 1e-50  # arbitrarily small
                 else:
                     command = par.awk_command+' " /^Sizepart/ " '+directory+'*.par'
                     if sys.version_info[0] < 3:   # python 2.X
