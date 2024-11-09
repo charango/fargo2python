@@ -2,16 +2,16 @@
 ### Simulation parameters ###
 #############################
 
-directory	      out1		# directory's name
-physical_units	Yes			# convert field in physical units? (Yes or No)
-override_units	No			# do we change code units? If so, the two lines below must be specified
-new_unit_length	4.5e12	# new unit of length in meters
-new_unit_mass	  4e30		# new unit of mass in kg
+directory	        out1		# directory's name
+physical_units	    Yes			# convert field in physical units? (Yes or No)
+override_units	    No			# do we change code units? If so, the two lines below must be specified
+new_unit_length	    4.5e12	    # new unit of length in meters
+new_unit_mass	    4e30		# new unit of mass in kg
 
 movie		        No			# make a movie? requires on to take the form onmin,onmax (eg: 1,10)
-on	   	        0,20		# fargo's output number(s), separated by a comma (,) if several
+on	   	            20		    # fargo's output number(s), separated by a comma (,) if several
 
-verbose         Yes
+verbose             Yes         # displays more information on screen
 
 
 ###############
@@ -23,7 +23,6 @@ verbose         Yes
 # rta means running-time average
 plot_tqwk	    No			
 
-
 ### plot planets orbital elements?
 # type x,y to plot y vs. x: x can be t (time) or a (semi-major axis);
 # y can be a, e (eccentricity), r (orbital radius), m (planet mass),
@@ -34,79 +33,110 @@ plot_planet  	No
 # type fo,fi to compute the fo:fi mean-motion resonant angles (eg, 3,2 or 2,1)
 mmr_integers	5,3
 
-
 ### plot dust quantities for Lagrangian particles (Dusty FARGO-ADSG only)?
 # type x,y to plot y vs. x: x can be r (radius) or phi (azimuth);
 # y can be phi, size (dust size), Stokes (Stokes number), vr (radial velocity) or vphi (azimuthal velocity)
 plot_dust	    No
 
 
-### plot disc's centre-of-mass? (new -- Aug. 2023)
-# type 'xy' to plot x vs. y (time in colour) or 'tr' to show time evolution of radial distance
-# of centre-of-mass from frame's origin (ie the central star)
-plot_disccom	No
-
-
-### plot time evolution of disc mass? (new -- April 2024)
-plot_discmass	No
-
-
-### plot time evolution of librating, orbit-crossing flow vortensities? (new -- Sept. 2024)
-plot_libcross No
-
-
 ### if all above plot booleans are set to No, gas quantities are displayed:
 
-fluid		      gas			# what fluid? gas, dust or all (FARGO3D only)
-whatfield	    dens		# dens,vrad,vtheta,vcol,pressure,temp,toomre,entropy,vorticity,vortensity,ecc,stokes...
-onedprofile	  Yes			# plot azimuthally-averaged radial profile (1D)?
-nodiff	      Yes			# relative difference wrt initial field? (Yes or No)
+fluid		    gas			# what fluid? gas, dust or all (FARGO3D only)
+whatfield	    dens		# full list of available fields to be displayed at the bottom of this file
+onedprofile	    No			# plot azimuthally-averaged radial profile (1D)?
+nodiff	        Yes			# relative difference wrt initial field? (Yes or No)
 
-fieldmin        		  # if specified, minimum value of field to display (for color bar)
-fieldmax				      # if specified, maximum value of field to display (for color bar)
+fieldmin        		    # if specified, minimum value of field to display (for color bar)
+fieldmax				    # if specified, maximum value of field to display (for color bar)
 
-fieldofview	  polar		# field of view: cartesian (cart), polar (polar, default: phi vs. r), vertical or latitudinal?
+fieldofview	    polar		# field of view: cartesian (cart), polar (polar, default: phi vs. r), vertical or latitudinal?
 rvsphi		    No			# if field of view is polar, do we plot radius vs phi instead?
-slice         average # can be: 'midplane', 'upper' or 'lower' if field of view is polar or cart
-                      # or can be 'average' or simply left undefined if field of view is vertical or latitudinal
+slice           midplane    # can be: 'midplane', 'upper' or 'lower' if field of view is polar or cart
+                            # or can be 'average' or simply left undefined if field of view is vertical or latitudinal
+
 rotate_angle			    # if set, rotate 2D field by angle specified in degrees
-flip_xaxis	  No	    # if Yes, flip x axis to -x axis
+flip_xaxis	    No	        # if Yes, flip x axis to -x axis
 
 showdust	    No			# show Lagrangian dust particles? (Dusty FARGO-ADSG only)
 sizemin		    1e-5		# if specified, minimum particle size (in meters)
 sizemax		    1e-2		# if specified, maximum particle size (in meters)
 
-showplanet	  No			# spot planet position with a filled circle
+showplanet	    No			# spot planet position with a filled circle
 
-streamlines	  No			# show gas streamlines?
-nstreamlines	20		  # number of streamlines to show
+streamlines	    No			# show gas streamlines?
+nstreamlines	20		    # number of streamlines to show
 
 
 ######################
 ### Common options ###
 ######################
 
-log_colorscale  Yes			# logarithmic color scale for 2D plots?
-log_xyplots_y	  No			# logarithmic y-scale for y=f(x) plots?
-log_xyplots_x	  Yes			# logarithmic x-scale for y=f(x) plots?
+log_colorscale    Yes	    # logarithmic color scale for 2D plots?
+log_xyplots_y	  No		# logarithmic y-scale for y=f(x) plots?
+log_xyplots_x	  No		# logarithmic x-scale for y=f(x) plots?
 
-use_legend				      # manually enter legend to be used for 1D profiles if plot_tqwk set to Yes
+use_legend				    # manually enter legend to be used for 1D profiles if plot_tqwk set to Yes
 
-myrmin					      # if specified, minimum radius to display field
+myrmin					    # if specified, minimum radius to display field
 myrmax	        			# if specified, maximum radius to display field
-rbox                  # if specified, radius range about planet's orbital radius to display
-myphimin				      # if specified, minimum azimuth to display field (between 0 and 2pi)
-myphimax				      # if specified, maximum azimuth to display field (between 0 and 2pi)
+rbox                        # if specified, radius range about planet's orbital radius to display
+myphimin				    # if specified, minimum azimuth to display field (between 0 and 2pi)
+myphimax				    # if specified, maximum azimuth to display field (between 0 and 2pi)
 
-mytmin					      # if specified, minimum time for y=f(time) plots
-mytmax					      # if specified, maximum time for y=f(time) plots
-myymin					      # if specified, minimum y-value for torque plots
-myymax	        			# if specified, maximum y-value for torque plots
+mytmin					    # if specified, minimum time for y=f(time) plots
+mytmax					    # if specified, maximum time for y=f(time) plots
+myymin					    # if specified, minimum y-value for y=f(time or x) plots
+myymax	        			# if specified, maximum y-value for y=f(time or x) plots
 
-take_one_point_every  # if specified, take one point every Nth in y=f(x) plots
+take_one_point_every        # if specified, take one point every N in y=f(x) plots
 
-saveaspdf	No			    # save image as pdf file? (Yes or No)
-saveaspng	Yes			    # save image as png file? (Yes or No)
-mycolormap	nipy_spectral 	# nipy_spectral # gray
+saveaspdf	     No			# save image as pdf file? (Yes or No)
+saveaspng	     Yes	    # save image as png file? (Yes or No)
+mycolormap	     nipy_spectral 	    # color scale for 2D contour plots
 
 display_label               # add user-defined label in top-right corner of 2D plots
+
+
+################################
+### Other options in roadmap ###
+################################
+
+### plot disc's centre-of-mass?
+# type 'xy' to plot x vs. y (time in colour) or 'tr' to show time evolution of radial distance
+# of centre-of-mass from frame's origin (ie the central star)
+#plot_disccom	No
+
+### plot time evolution of disc mass?
+#plot_discmass	No
+
+### plot time evolution of librating, orbit-crossing flow vortensities? (new -- Sept. 2024)
+plot_libcross   No
+
+
+################################
+### List of available fields ###
+################################
+
+# dens: surface density (2D runs) or volume density (3D runs)
+# surfacedens: vertically-integrated volume density (3D runs)
+# naodens: non-axisymmetric component of the gas density (2D runs)
+# rtadens: running-time averaged particle density (2D runs with Lagrangian particles)
+# vrad: radial velocity
+# vtheta: azimuthal velocity
+# vcol: latitudinal velocity
+# pressure: thermal pressure
+# temp: temperature
+# toomre: Toomre-Q parameter (2D runs)
+# entropy: specific entropy
+# vorticity: vertical component of velocity curl (2D runs only so far!)
+# vortensity: vorticity divided by gas density (2D runs only so far!)
+# invvortensity: inverse vortensity
+# normvorticity: ratio of horizontal epicyclic frequency squared over angular frequency squared
+# drl: radial derivative of specific angular momentum
+# ecc: disc eccentricity assuming each grid cell interacts with the star as a two-body problem (2D)
+# stokes: dust Stokes number (2D like 3D)
+# label: passive scalar (original 2D)
+# mdot: mass accretion rate (2D)
+# dgratio: dust-to-gas density ratio
+# sgaccr: radial self-gravitating acceleration
+# sgacctheta: azimuthal self-gravitating acceleration
