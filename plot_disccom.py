@@ -19,8 +19,8 @@ def plotdisccom():
     ax = fig.gca()
     
     if par.plot_disccom == 'xy':
-        xtitle = 'centre-of-mass y'
-        ytitle = 'centre-of-mass x'
+        xtitle = 'centre-of-mass x'
+        ytitle = 'centre-of-mass y'
     if par.plot_disccom == 'tr' or par.plot_disccom == 'tlogr' or par.plot_disccom == 'logtlogr':
         xtitle = 'time [orbits]'
         ytitle = 'centre-of-mass radius'
@@ -80,14 +80,17 @@ def plotdisccom():
                 runwas3d = 'Yes'
 
 
-        # DEFAULT CASE (= NO FARGO2D1D simulations): we obtain the position of the center-of-mass 
+        # DEFAULT CASE (= 2D simulations): we obtain the position of the disc's center-of-mass 
         # by inspecting at the gas density fields obtained in simulations run in a fixed reference 
         # frame centred on the star
-        if fargo2d1d == 'No' and runwas3d == 'No':
+        if runwas3d == 'No':
 
             # find how many output numbers were produced for each directory
             if par.fargo3d == 'No':
-                nboutputs = len(fnmatch.filter(os.listdir(directory[j]), 'gasdens*.dat'))
+                if fargo2d1d == 'No':
+                    nboutputs = len(fnmatch.filter(os.listdir(directory[j]), 'gasdens*.dat'))
+                else:
+                    nboutputs = len(fnmatch.filter(os.listdir(directory[j]), 'gasdens1D*.dat'))
             else:
                 nboutputs = len(fnmatch.filter(os.listdir(directory[j]), 'summary*.dat'))
             print('number of outputs for directory ',directory[j],': ',nboutputs)
@@ -149,7 +152,8 @@ def plotdisccom():
                 mass = dens.data*surface   
                 mass = np.transpose(mass)  # (nsec,nrad)
 
-                # is there a planet?
+                # is there a planet? 
+                # Fargo2D1D case: get star position
                 mp = mpla[int(on[k])]
                 xp = xpla[int(on[k])]
                 yp = ypla[int(on[k])]
@@ -260,6 +264,7 @@ def plotdisccom():
 
         # SPECIAL CASE OF FARGO2D1D simulations run in a fixed frame centred on the {star+disc+planets} barycentre: 
         # the position of the centre of mass is simply inferred from that of the star!
+        '''
         if fargo2d1d == 'Yes':
             print('FARGO2D1D simulation detected!')
             f1, xs, ys, f4, f5, ms, f7, date, f9 = np.loadtxt(directory[j]+"/planet0.dat",unpack=True)
@@ -267,6 +272,7 @@ def plotdisccom():
             y_com = -ys
             r_com = np.sqrt( x_com*x_com + y_com*y_com )
             t_com = date/2./np.pi
+        '''
 
 
         # find minimum anx maximum time over directories

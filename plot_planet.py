@@ -94,7 +94,7 @@ def plotplanet():
                 # Simulations were carried out with the original FARGO code or with FARGO-2D1D
                 if os.path.isfile(directory[j]+'/gasdens1D0.dat') == True:
                     fargo2d1d = 'Yes'
-                    fargo_orig = 'No'
+                    fargo_orig = 'Yes'
                 
 
         # work out physical units
@@ -179,6 +179,11 @@ def plotplanet():
        
         # count how many planets 
         nbplanets = len(fnmatch.filter(os.listdir(directory[j]), 'orbit*.dat'))
+
+        # CUIDADIN!!
+        if fargo2d1d == 'Yes':
+            nbplanets = 1
+
         if (nbplanets <= 1 and par.plot_planet[1] == 'p'):
             sys.exit('ERROR: you requested to plot orbital period ratio, but there is only one planet simulated in directory: ', directory[j])
            
@@ -279,6 +284,12 @@ def plotplanet():
                     y = mpla[umin:umax+1]
                     if par.physical_units == 'Yes':
                         y *= (cumass / 2e30 / 3e-6) # in Earth masses
+                # new (Nov. 2023): display in y-axis log scale (indirect term
+                # project)
+                if par.log_xyplots_y == 'Yes':
+                    y = np.abs(y)
+                    ax.set_yscale('log')
+                    ytitle = str('|')+ytitle+str('|')
                         
             if par.plot_planet[1] == 'p':
                 if k == 0:
