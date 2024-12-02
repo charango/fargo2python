@@ -154,26 +154,36 @@ def plotdisccom():
                 mass = dens.data*surface   
                 mass = np.transpose(mass)  # (nsec,nrad)
 
-                # is there a planet? 
                 # Fargo2D1D case: get star's mass and position
-                mp = mpla[int(on[k])]
-                xp = xpla[int(on[k])]
-                yp = ypla[int(on[k])]
-
-                # get x- and y-coordinates of centre-of-mass by double for loop
-                if fargo2d1d == 'No':
-                    x_com[k] = (np.sum(mass*X) + mp*xp) / (mp + np.sum(mass))
-                    y_com[k] = (np.sum(mass*Y) + mp*yp) / (mp + np.sum(mass))
+                if fargo2d1d == 'Yes':
+                    mstar = mpla[int(on[k])]
+                    xstar = xpla[int(on[k])]
+                    ystar = ypla[int(on[k])]
                 else:
-                    # FARGO2D1D: subtract star's x- and y-coordinates
-                    x_com[k] = (np.sum(mass*X)) / (np.sum(mass)) - xp
-                    y_com[k] = (np.sum(mass*Y)) / (np.sum(mass)) - yp
+                    mstar = 1.0
+                    xstar = 0.0
+                    ystar = 0.0
+
+                if fargo2d1d == 'No':
+                    # x_com and y_com are the coordinates of the centre-of-mass 
+                    # of the {disc+star} system in the stellocentric frame
+                    x_com[k] = np.sum(mass*X) / (mstar + np.sum(mass))
+                    y_com[k] = np.sum(mass*Y) / (mstar + np.sum(mass))
+                else:
+                    # FARGO2D1D: x_com and y_com are ALSO the coordinates of the centre-of-mass 
+                    # of the {disc+star} system in the stellocentric frame. In practice here 
+                    # x_com ~ -xstar and y_com ~ -ystar (checked)
+                    x_com[k] = ((mstar*xstar + np.sum(mass*X)) / (mstar + np.sum(mass))) - xstar
+                    y_com[k] = ((mstar*ystar + np.sum(mass*Y)) / (mstar + np.sum(mass))) - ystar
+
+                # r_com is the distance between the star and the centre-of-mass of the {star+disc} system
                 r_com[k] = np.sqrt( x_com[k]*x_com[k] + y_com[k]*y_com[k] )
+                # time
                 t_com[k] = round(date[k*take_one_point_every]/2./np.pi/apla/np.sqrt(apla),1)
 
                 #print(mp*xp, np.sum(mass*X), mp*xp+np.sum(mass*X))
                 #print(mp*yp, np.sum(mass*Y), mp*yp+np.sum(mass*Y))
-                print(x_com[k],y_com[k],r_com[k])
+                #print(x_com[k],y_com[k],r_com[k])
 
 
         # CASE OF 3D SIMULATIONS WITH FARGO3D: we obtain again the position of the center-of-mass 
@@ -252,19 +262,25 @@ def plotdisccom():
                 mass = np.transpose(mass)     # nrad, nsec, ncol
                 #print('np.sum(mass) = ', np.sum(mass))
 
+                '''
                 # is there a planet?
                 mp = mpla[int(on[k])]
                 xp = xpla[int(on[k])]
                 yp = ypla[int(on[k])]
                 zp = zpla[int(on[k])]
+                '''
+                mstar = 1.0
+                xstar = 0.0
+                ystar = 0.0
+                zstar = 0.0
 
                 # get x-, y- and z-coordinates of centre-of-mass
-                x_com[k] = (np.sum(mass*X) + mp*xp) / (mp + np.sum(mass))
-                y_com[k] = (np.sum(mass*Y) + mp*yp) / (mp + np.sum(mass))
-                z_com[k] = (np.sum(mass*Z) + mp*zp) / (mp + np.sum(mass))
-                #r_com[k] = np.sqrt( x_com[k]*x_com[k] + y_com[k]*y_com[k] + z_com[k]*z_com[k] )
+                x_com[k] = np.sum(mass*X) / (mstar + np.sum(mass))
+                y_com[k] = np.sum(mass*Y) / (mstar + np.sum(mass))
+                z_com[k] = np.sum(mass*Z) / (mstar + np.sum(mass))
+                r_com[k] = np.sqrt( x_com[k]*x_com[k] + y_com[k]*y_com[k] + z_com[k]*z_com[k] )
                 # test:
-                r_com[k] = np.sqrt( x_com[k]*x_com[k] + y_com[k]*y_com[k] )
+                #r_com[k] = np.sqrt( x_com[k]*x_com[k] + y_com[k]*y_com[k] )
                 #print('xcom, ycom, zcom, rcom = ', x_com[k], y_com[k], z_com[k], r_com[k])
                 t_com[k] = round(date[k*take_one_point_every]/2./np.pi/apla/np.sqrt(apla),1)
 
