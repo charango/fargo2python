@@ -81,8 +81,10 @@ def plotdisccom():
 
 
         # DEFAULT CASE (= 2D simulations): we obtain the position of the disc's center-of-mass 
-        # by inspecting at the gas density fields obtained in simulations run in a fixed reference 
-        # frame centred on the star
+        # by inspecting at the gas density fields. When the code is not FARGO-2D1D, the disc's 
+        # center-of-mass is plotted in the reference frame centred on the star. Otherwise, we 
+        # plot the distance between the star and the disc's center-of-mass (well, it is actually
+        # the same quantity regardless of the version of FARGO code used!)
         if runwas3d == 'No':
 
             # find how many output numbers were produced for each directory
@@ -153,14 +155,19 @@ def plotdisccom():
                 mass = np.transpose(mass)  # (nsec,nrad)
 
                 # is there a planet? 
-                # Fargo2D1D case: get star position
+                # Fargo2D1D case: get star's mass and position
                 mp = mpla[int(on[k])]
                 xp = xpla[int(on[k])]
                 yp = ypla[int(on[k])]
 
                 # get x- and y-coordinates of centre-of-mass by double for loop
-                x_com[k] = (np.sum(mass*X) + mp*xp) / (mp + np.sum(mass))
-                y_com[k] = (np.sum(mass*Y) + mp*yp) / (mp + np.sum(mass))
+                if fargo2d1d == 'No':
+                    x_com[k] = (np.sum(mass*X) + mp*xp) / (mp + np.sum(mass))
+                    y_com[k] = (np.sum(mass*Y) + mp*yp) / (mp + np.sum(mass))
+                else:
+                    # FARGO2D1D: subtract star's x- and y-coordinates
+                    x_com[k] = (np.sum(mass*X)) / (np.sum(mass)) - xp
+                    y_com[k] = (np.sum(mass*Y)) / (np.sum(mass)) - yp
                 r_com[k] = np.sqrt( x_com[k]*x_com[k] + y_com[k]*y_com[k] )
                 t_com[k] = round(date[k*take_one_point_every]/2./np.pi/apla/np.sqrt(apla),1)
 
@@ -172,7 +179,7 @@ def plotdisccom():
         # CASE OF 3D SIMULATIONS WITH FARGO3D: we obtain again the position of the center-of-mass 
         # by inspecting at the 3D gas density fields obtained in simulations run in a fixed reference 
         # frame centred on the star
-        if fargo2d1d == 'No' and runwas3d == 'Yes':
+        if runwas3d == 'Yes':
             print('3D FARGO3D simulation detected!')
 
             # find how many output numbers were produced for each directory
@@ -261,18 +268,6 @@ def plotdisccom():
                 #print('xcom, ycom, zcom, rcom = ', x_com[k], y_com[k], z_com[k], r_com[k])
                 t_com[k] = round(date[k*take_one_point_every]/2./np.pi/apla/np.sqrt(apla),1)
 
-
-        # SPECIAL CASE OF FARGO2D1D simulations run in a fixed frame centred on the {star+disc+planets} barycentre: 
-        # the position of the centre of mass is simply inferred from that of the star!
-        '''
-        if fargo2d1d == 'Yes':
-            print('FARGO2D1D simulation detected!')
-            f1, xs, ys, f4, f5, ms, f7, date, f9 = np.loadtxt(directory[j]+"/planet0.dat",unpack=True)
-            x_com = -xs
-            y_com = -ys
-            r_com = np.sqrt( x_com*x_com + y_com*y_com )
-            t_com = date/2./np.pi
-        '''
 
 
         # find minimum anx maximum time over directories
