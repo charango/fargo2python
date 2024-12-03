@@ -864,7 +864,7 @@ class Field(Mesh):
                         return datacube[-1,:,:]   # field at upper surface only if "half-a-disc" is simulated in latitudinal direction!
 
 
-    def compute_streamline(self, dtype='float64',niterations=100000,R0=0,T0=0,rmin=0,rmax=1e4,pmin=0,pmax=6.28,forward=True,fieldofview='polar',slice='midplane'):
+    def compute_streamline(self, dtype='float64',niterations=100,R0=0,T0=0,rmin=0,rmax=1e4,pmin=0,pmax=6.28,forward=True,fieldofview='polar',slice='midplane'):
         
         # first import global variables
         import par
@@ -879,6 +879,7 @@ class Field(Mesh):
         else:
             on = par.on
             
+
         # vrad should be subtracted by the instantaneous planet's migration rate da/dt ...
         
         if self.fargo3d == 'No':
@@ -886,6 +887,7 @@ class Field(Mesh):
             vrad = np.roll(vrad, shift=int(self.nsec/2), axis=1)
             vphi = self.__open_field(mydirectory+par.fluid+'vtheta'+str(on)+'.dat',dtype,fieldofview,slice)
             vphi = np.roll(vphi, shift=int(self.nsec/2), axis=1)
+            # fields are rolled to reflect planet's azimuthal position
         else:
             vrad = self.__open_field(mydirectory+par.fluid+'vy'+str(on)+'.dat',dtype,fieldofview,slice)
             vphi = self.__open_field(mydirectory+par.fluid+'vx'+str(on)+'.dat',dtype,fieldofview,slice)
@@ -903,8 +905,10 @@ class Field(Mesh):
             R0 /= (self.culength/1.5e11)  
             R = self.redge/((self.culength/1.5e11))
         
-        # Euler-first order integration step
-        stepstrl = (pmax-pmin)/self.nsec  # could be refined?
+        # here epsilon is a small parameter that contrains streamlines calculation:
+        # epsilon = sqrt(dr^2 + r^2 dphi^2) (see below)
+        # arbitrarily take epsilon = quarter azimuthal extent of a cell
+        epsilon = (pmax-pmin)/4./self.nsec  # value could be refined?
         
         # XS and YS are lists with the X- and Y-coordinates of points along a given streamline
         XS = []; YS = []
@@ -912,18 +916,53 @@ class Field(Mesh):
         nloop = 0
 
         while( myR > R.min() and myR < R.max() and myT > T.min() and myT < T.max() and nloop < niterations ):
+
             imin = np.argmin(np.abs(R-myR))
+            if myR < R[imin]:
+                imin -= 1
             jmin = np.argmin(np.abs(T-myT))
+            if myT < T[jmin]:
+                jmin -= 1
             if jmin >= self.nsec:
                 jmin = self.nsec-1
             if jmin < 0:
                 jmin = 0
-            vrnew = vrad[imin,jmin]  # a bilinear interpolate would be better...
-            vpnew = vphi[imin,jmin]  # a bilinear interpolate would be better...
-            dr = stepstrl * myR*vrnew / np.sqrt ( vpnew*vpnew + myR*myR*vrnew*vrnew )
-            dt = stepstrl * vpnew     / np.sqrt ( vpnew*vpnew + myR*myR*vrnew*vrnew )
+
+            '''
+            # No bilinear interpolation: we simply take the in-cell value 
+            vrnew = vrad[imin,jmin]  # a bilinear interpolate could be used instead...
+            vpnew = vphi[imin,jmin]  # a bilinear interpolate could be used instead...
+            '''
+            
+            dij     = (R[imin+1]-myR)*(T[jmin+1]-myT)/(R[imin+1]-R[imin])/(T[jmin+1]-T[jmin])
+            dip1j   = (myR-R[imin])  *(T[jmin+1]-myT)/(R[imin+1]-R[imin])/(T[jmin+1]-T[jmin])
+            dijp1   = (R[imin+1]-myR)*(myT-T[jmin])  /(R[imin+1]-R[imin])/(T[jmin+1]-T[jmin])
+            dip1jp1 = (myR-R[imin])  *(myT-T[jmin])  /(R[imin+1]-R[imin])/(T[jmin+1]-T[jmin])
+
+            '''
+            # Testing purposes
+            if (dij < 0) or (dij > 1):
+                print('didj = ', dij)
+            if (dip1j < 0) or (dip1j > 1):
+                print('dip1j = ', dip1j)            
+            if (dijp1 < 0) or (dijp1 > 1):
+                print('dijp1 = ', dijp1)  
+            if (dip1jp1 < 0) or (dip1jp1 > 1):
+                print('dip1djp1 = ', dip1jp1)  
+            '''
+
+            vrnew = vrad[imin,jmin]*dij + vrad[imin,jmin+1]*dijp1 + vrad[imin+1,jmin]*dip1j + vrad[imin+1,jmin+1]*dip1jp1
+            vpnew = vphi[imin,jmin]*dij + vphi[imin,jmin+1]*dijp1 + vphi[imin+1,jmin]*dip1j + vphi[imin+1,jmin+1]*dip1jp1
+            #print(vrnew,vrad[imin,jmin],vpnew,vphi[imin,jmin])
+
+            # combine v_phi dr = r v_r dphi and constraint that epsilon = sqrt(dr^2 + r^2 dphi^2)
+            dr = epsilon * vrnew / np.sqrt(vrnew*vrnew + vpnew*vpnew)
+            dt = (epsilon/myR) * vpnew / np.sqrt(vrnew*vrnew + vpnew*vpnew)
+
+            # First-order Euler integration
             myR = myR + dr
             myT = myT + dt
+
             if par.fieldofview == 'polar' and par.rvsphi == 'No':
                 if par.physical_units == 'Yes':
                     XS.append(myR*self.culength/1.5e11)

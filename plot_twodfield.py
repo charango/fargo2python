@@ -498,14 +498,15 @@ def plottwodfield():
             if par.streamlines == 'Yes':
                 for s in range(par.nstreamlines):
                     # initial radius and azimuth of streamlines
-                    myR0 = myrmin   + np.random.rand()*(myrmax-myrmin)
+                    #myR0 = myrmin   + np.random.rand()*(myrmax-myrmin)
+                    myR0 = myrmin + s*(myrmax-myrmin)/par.nstreamlines
                     myT0 = myphimin + np.random.rand()*(myphimax-myphimin)
                     # forward integration of streamlines
                     xstr,ystr = myfield.compute_streamline(niterations=10000,R0=myR0,T0=myT0,rmin=myrmin,rmax=myrmax,pmin=myphimin,pmax=myphimax,forward=True,fieldofview=par.fieldofview,slice=par.slice)
-                    ax.scatter(xstr,ystr,s=3,marker='o',color='white')
+                    ax.scatter(xstr,ystr,s=1,marker='.',color='white')
                     # backward integration of streamlines
                     xstr,ystr = myfield.compute_streamline(niterations=10000,R0=myR0,T0=myT0,rmin=myrmin,rmax=myrmax,pmin=myphimin,pmax=myphimax,forward=False,fieldofview=par.fieldofview,slice=par.slice)
-                    ax.scatter(xstr,ystr,s=3,marker='o',color='white')
+                    ax.scatter(xstr,ystr,s=1,marker='.',color='white')
             
             # ------------------
             # overlay particles
