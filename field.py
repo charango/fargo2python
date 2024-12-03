@@ -202,6 +202,10 @@ class Field(Mesh):
             #time_in_code_units = round(date/2./np.pi/rpla_0/np.sqrt(rpla_0),1)
             time_in_code_units = round(date/2./np.pi/apla/np.sqrt(apla),1)
         self.strtime = str(time_in_code_units)+' orbits'
+
+        # keep track of omegaframe and rpla for streamlines calculation...
+        self.omegaframe = omegaframe
+        self.rpla = np.sqrt( xpla[on]*xpla[on] + ypla[on]*ypla[on] )
         
         # --------- NB: it can take WAY more time to read orbit0.dat
         # than planet0.dat since the former file can contain many more
@@ -878,10 +882,8 @@ class Field(Mesh):
             on = par.on[0]
         else:
             on = par.on
-            
 
         # vrad should be subtracted by the instantaneous planet's migration rate da/dt ...
-        
         if self.fargo3d == 'No':
             vrad = self.__open_field(mydirectory+par.fluid+'vrad'+str(on)+'.dat',dtype,fieldofview,slice)
             vrad = np.roll(vrad, shift=int(self.nsec/2), axis=1)
@@ -891,7 +893,13 @@ class Field(Mesh):
         else:
             vrad = self.__open_field(mydirectory+par.fluid+'vy'+str(on)+'.dat',dtype,fieldofview,slice)
             vphi = self.__open_field(mydirectory+par.fluid+'vx'+str(on)+'.dat',dtype,fieldofview,slice)
-           
+
+        # case where simulation has been carried out in a stellocentric frame, in which case we need to compute 
+        # the azimuthal velocity in the frame corotating with the planet
+        if self.omegaframe == 0.0:
+            for i in range(self.nrad):
+                vphi[i,:] -= (self.rmed)[i]*(self.rpla**(-1.5))
+
         # forward or backward integration of streamlines
         if forward == False:
             vrad = -vrad
