@@ -1,15 +1,18 @@
 import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
+import subprocess
 import fnmatch
 import os
 import re
+
+from field import *
 
 def plottqwk():
 
     # first import global variables
     import par
-    
+
     # first prepare figure
     fig = plt.figure(figsize=(8.,8.))
     plt.subplots_adjust(left=0.17, right=0.94, top=0.94, bottom=0.12)
@@ -17,6 +20,8 @@ def plottqwk():
     ax.set_xlabel('time [orbits]')
     if par.plot_tqwk == 'torque':
         ytitle = 'Specific torque on planet'
+    if par.plot_tqwk == 'normtorque':
+        ytitle = r'$\Gamma / \Gamma_0$'
     if par.plot_tqwk == 'rtatorque':
         ytitle = 'Specific r.t.a. torque on planet'
     if par.plot_tqwk == 'power':
@@ -52,12 +57,39 @@ def plottqwk():
 
         # start by reading planet0.dat file to get the initial radial position of the planet
         if fargo3d == 'Yes':
-            f1, xpla, ypla, f4, f5, f6, f7, f8, date, omega = np.loadtxt(directory[j]+"/planet0.dat",unpack=True)
+            f1, xpla, ypla, f4, f5, f6, f7, mpla, date, omega = np.loadtxt(directory[j]+"/planet0.dat",unpack=True)
         else:
-            f1, xpla, ypla, f4, f5, f6, f7, date, omega, f10, f11 = np.loadtxt(directory[j]+"/planet0.dat",unpack=True)
+            f1, xpla, ypla, f4, f5, mpla, f7, date, omega, f10, f11 = np.loadtxt(directory[j]+"/planet0.dat",unpack=True)
         rpla_0 = np.sqrt( xpla[0]*xpla[0] + ypla[0]*ypla[0] )
+        rpla_0 = 1.0  # CUIDADIN!
         # count how many planets 
-        nbplanets = len(fnmatch.filter(os.listdir(directory[j]), 'orbit*.dat'))    
+        nbplanets = len(fnmatch.filter(os.listdir(directory[j]), 'orbit*.dat'))  
+
+        # Normalized torque by Gamma_0 = q/h^2 x Sigma(r_p) r_p^4 Omega^2(r_p)
+        if par.plot_tqwk == 'normtorque':
+            # get planet-to-star mass ratio q
+            q = mpla[len(mpla)-1]   # time-varying array
+            # get local disc's aspect ratio
+            if fargo3d == 'Yes':
+                command  = par.awk_command+' " /^ASPECTRATIO/ " '+directory[j]+'/*.par'
+                command2 = par.awk_command+' " /^FLARINGINDEX/ " '+directory[j]+'/*.par'
+            else:
+                command  = par.awk_command+' " /^AspectRatio/ " '+directory[j]+'/*.par'
+                command2 = par.awk_command+' " /^FlaringIndex/ " '+directory[j]+'/*.par'
+            buf = subprocess.getoutput(command)
+            aspectratio = float(buf.split()[1])
+            buf2 = subprocess.getoutput(command2)
+            fli = float(buf2.split()[1])
+            rpla0_normtq = np.sqrt( xpla[0]*xpla[0] + ypla[0]*ypla[0] )
+            h = aspectratio*(rpla0_normtq**fli)  # constant in time
+            # get local azimuthally averaged surface density
+            myfield0 = Field(field='dens', fluid='gas', on=0, directory=directory[j], physical_units='No', nodiff='Yes', fieldofview=par.fieldofview, slice=par.slice, onedprofile='Yes', override_units=par.override_units)
+            dens = np.sum(myfield0.data,axis=1) / myfield0.nsec
+            imin = np.argmin(np.abs(myfield0.rmed-rpla0_normtq))
+            sigmap = dens[imin]
+            # Finally infer Gamma_0
+            Gamma_0 = (q/h/h)*sigmap*rpla0_normtq
+            #print(q,h,rpla0_normtq,sigmap,Gamma_0)
 
         # now, read tqwk0.dat file
         for k in range(nbplanets): 
@@ -65,7 +97,7 @@ def plottqwk():
             time /= (2.0*np.pi*rpla_0*np.sqrt(rpla_0))  # time in orbital periods at inner planet's initial location
             tq = it+ot
             pw = ip+op
-            if par.plot_tqwk == 'torque' or par.plot_tqwk == 'rtatorque':
+            if par.plot_tqwk == 'torque' or par.plot_tqwk == 'rtatorque' or par.plot_tqwk == 'normtorque':
                 y = tq
             if par.plot_tqwk == 'power' or par.plot_tqwk == 'rtapower':
                 y = pw
@@ -74,20 +106,28 @@ def plottqwk():
                     y[i] = (i*y[i-1] + tq[i])/(i+1.0)
             if (par.mytmin == '#'):
                 xmin = time.min()
+                imin = 0.0
             else:
                 xmin = par.mytmin
+                imin = np.argmin(np.abs(time-xmin))
             if (par.mytmax == '#'):
                 xmax = time.max()
+                imax = len(time)-1
             else:
                 xmax = par.mytmax
+                imax = np.argmin(np.abs(time-xmax))
             ax.set_xlim(xmin,xmax)
 
             ymin = 0.0
             ymax = 0.0
             if ('myymin' in open('paramsf2p.dat').read()) and (par.myymin != '#'):
                 ymin = par.myymin
+            #else:
+            #    ymin = y[imin:imax].min()
             if ('myymax' in open('paramsf2p.dat').read()) and (par.myymax != '#'):
                 ymax = par.myymax
+            #else:
+            #    ymax = y[imin:imax].max()
             if ymin != 0.0 or ymax != 0.0:
                 ax.set_ylim(ymin,ymax)
                
@@ -97,6 +137,9 @@ def plottqwk():
                 y = np.abs(y)
                 ax.set_yscale('log')
                 ytitle = str('|')+ytitle+str('|')
+
+            if par.plot_tqwk == 'normtorque':
+                y /= Gamma_0
                
             ax.plot(time[::par.take_one_point_every], y[::par.take_one_point_every], color=par.c20[k*len(directory)+j], lw=2., linestyle = 'solid', label=mylabel)
             ax.legend(frameon=False,fontsize=15)
