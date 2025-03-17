@@ -82,6 +82,8 @@ myrmax	        			# if specified, maximum radius to display field
 rbox                        # if specified, radius range about planet's orbital radius to display
 myphimin				    # if specified, minimum azimuth to display field (between 0 and 2pi)
 myphimax				    # if specified, maximum azimuth to display field (between 0 and 2pi)
+myzmin                      # if specified, minimum z to display field
+myzmax                      # if specified, maximum z to display field
 
 mytmin					    # if specified, minimum time for y=f(time) plots
 mytmax					    # if specified, maximum time for y=f(time) plots
@@ -140,3 +142,4 @@ plot_libcross   No
 # dgratio: dust-to-gas density ratio
 # sgaccr: radial self-gravitating acceleration
 # sgacctheta: azimuthal self-gravitating acceleration
+# bettacooling: cooling-timescale-to-orbital-period ratio

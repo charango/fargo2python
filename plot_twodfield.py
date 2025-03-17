@@ -98,20 +98,31 @@ def plottwodfield():
                     fig.delaxes(axes[1,int(np.ceil(par.nbfluids/2))-1])
 
             myfield = Field(field=par.whatfield, fluid=par.fluids[f], on=on[k], directory=directory, physical_units=par.physical_units, nodiff=par.nodiff, fieldofview=par.fieldofview, slice=par.slice, onedprofile='No', override_units=par.override_units)
-            array = myfield.data
             
+            # case we plot the relative difference of a same field between two different directories
+            if ('subtract_directory' in open('paramsf2p.dat').read()) and (par.subtract_directory != '#'):
+                print('subtract_directory set in params.dat file: I understand you want to compare a same field from two different directories')
+                myfield2 = Field(field=par.whatfield, fluid=par.fluids[f], on=on[k], directory=par.subtract_directory, physical_units=par.physical_units, nodiff=par.nodiff, fieldofview=par.fieldofview, slice=par.slice, onedprofile='No', override_units=par.override_units)
+                array2 = myfield2.data
+                array = (myfield.data-myfield2.data)/myfield2.data
+                par.log_colorscale = 'No'
+            else:
+                array = myfield.data
+
             # plot relative difference wrt initial field 
             if par.nodiff == 'No':
                 myfield0 = Field(field=par.whatfield, fluid=par.fluids[f], on=0, directory=directory, physical_units=par.physical_units, nodiff=par.nodiff, fieldofview=par.fieldofview, slice=par.slice, onedprofile='No', override_units=par.override_units)
                 array0 = myfield0.data
+                '''
                 for i in range(myfield0.nrad):
                     axisym = np.sum(array0[i,:]) / myfield0.nsec
                     array0[i,:] = axisym
+                '''
                 array = (myfield.data-array0)/array0
             else:
                 # conversion in physical units
                 if par.physical_units == 'Yes':
-                    array = myfield.data * myfield.unit
+                    array *= myfield.unit
             
             # rotate field by user-defined angle specified in degree in .dat file
             if ('rotate_angle' in open('paramsf2p.dat').read()) and (par.rotate_angle != '#'):
@@ -295,7 +306,7 @@ def plottwodfield():
                     if par.physical_units == 'Yes':
                         ax.set_ylabel('Radius [au]')
                     else:
-                        ax.set_ylabel('Radius [code units]')
+                        ax.set_ylabel(r'Radius [$R_0$]')
                     xlim_min = myphimin
                     xlim_max = myphimax
                     ylim_min = myrmin
@@ -307,7 +318,7 @@ def plottwodfield():
                     if par.physical_units == 'Yes':
                         ax.set_xlabel('Radius [au]')
                     else:
-                        ax.set_xlabel('Radius [code units]')
+                        ax.set_xlabel(r'Radius [$R_0$]')
                     xlim_min = myrmin
                     xlim_max = myrmax
                     ylim_min = myphimin
@@ -337,7 +348,7 @@ def plottwodfield():
                     ax.xaxis.set_minor_locator(MultipleLocator(0.1))
                     ax.yaxis.set_minor_locator(MultipleLocator(0.1))
                     ax.set_ylabel('Latitude [rad]')
-                    ax.set_xlabel('Radius [code units]')                                
+                    ax.set_xlabel(r'Radius [$R_0$]')                                
                 else:
                     ax.set_xlabel('Radius [au]')
                     ax.set_ylabel('Latitude [rad]')
@@ -401,8 +412,8 @@ def plottwodfield():
                     ax.set_xlabel('x [au]')
                     ax.set_ylabel('y [au]')
                 else:
-                    ax.set_xlabel('x [code units]')
-                    ax.set_ylabel('y [code units]')
+                    ax.set_xlabel(r'x [$R_0$]')
+                    ax.set_ylabel(r'y [$R_0$]')
             #
             # -----------------------
             # VERTICAL FIELD OF VIEW
@@ -422,20 +433,24 @@ def plottwodfield():
                         plt.subplots_adjust(left=0.15, right=0.86, top=0.88, bottom=0.11)
                     else:
                         fig = plt.figure(figsize=(8.,8.))
-                        plt.subplots_adjust(left=0.15, right=0.94, top=0.88, bottom=0.11)
+                        plt.subplots_adjust(left=0.18, right=0.96, top=0.88, bottom=0.11)
                     ax = plt.gca()
                     
                 xlim_min = myrmin #X.min()
                 xlim_max = myrmax #X.max()
-                ylim_min = Y.min()
-                ylim_max = Y.max()
-                #ax.set_ylim(Y.min(),Y.max())
-                #ax.set_xlim(X.min(),X.max())
+                if (par.myzmin != '#'):
+                    ylim_min = par.myzmin
+                else:
+                    ylim_min = Y.min()
+                if (par.myzmax != '#'):
+                    ylim_max = par.myzmax
+                else:
+                    ylim_max = Y.max()
                 if par.physical_units == 'No':
                     ax.xaxis.set_minor_locator(MultipleLocator(0.1))
                     ax.yaxis.set_minor_locator(MultipleLocator(0.1))
-                    ax.set_ylabel('Altitude [code units]')
-                    ax.set_xlabel('Radius [code units]')                                
+                    ax.set_ylabel(r'Altitude [$R_0$]')
+                    ax.set_xlabel(r'Radius [$R_0$]')                                
                 else:
                     ax.set_xlabel('Radius [au]')
                     ax.set_ylabel('Altitude [au]')
@@ -579,16 +594,62 @@ def plottwodfield():
             # overlay CPU
             # ------------------
             if ('showcpus' in open('paramsf2p.dat').read()) and par.showcpus == 'Yes':
-                cpunb, cpurmin, cpurmax = np.loadtxt(directory+"/minmaxradii.dat",unpack=True)
+                if par.fargo3d == 'No':
+                    cpunb, cpurmin, cpurmax = np.loadtxt(directory+"/minmaxradii.dat",unpack=True)
+                    if par.physical_units == 'Yes':
+                        cpurmin *= (myfield.culength / 1.5e11) # in au  
+                        cpurmax *= (myfield.culength / 1.5e11) # in au              
+                    for i in range(len(cpurmin)):
+                        if par.fieldofview == 'polar':
+                            if par.rvsphi == 'No':
+                                ax.plot([cpurmin[i],cpurmin[i]],[Y.min(),Y.max()],'-',linewidth=1,color='grey')
+                            else:
+                                ax.plot([X.min(),X.max()],[cpurmin[i],cpurmin[i]],'-',linewidth=1,color='grey')
+
+
+            # ------------------
+            # overlay wave-killing zones
+            # ------------------
+            if ('showwkzones' in open('paramsf2p.dat').read()) and par.showwkzones == 'Yes':
+
+                buf = subprocess.getoutput(par.awk_command+' " /^Rmin / " '+directory+'/*.par')
+                grid_rmin = float(buf.split()[1])
+                buf = subprocess.getoutput(par.awk_command+' " /^WKZRmin/ " '+directory+'/*.par')
+                grid_wkzrmin = float(buf.split()[1])
+                buf = subprocess.getoutput(par.awk_command+' " /^Rmax / " '+directory+'/*.par')
+                grid_rmax = float(buf.split()[1])
+                buf = subprocess.getoutput(par.awk_command+' " /^WKZRmax/ " '+directory+'/*.par')
+                grid_wkzrmax = float(buf.split()[1])
+
                 if par.physical_units == 'Yes':
-                    cpurmin *= (myfield.culength / 1.5e11) # in au  
-                    cpurmax *= (myfield.culength / 1.5e11) # in au              
-                for i in range(len(cpurmin)):
-                    if par.fieldofview == 'polar':
-                        if par.rvsphi == 'No':
-                            ax.plot([cpurmin[i],cpurmin[i]],[Y.min(),Y.max()],'-',linewidth=1,color='grey')
-                        else:
-                            ax.plot([X.min(),X.max()],[cpurmin[i],cpurmin[i]],'-',linewidth=1,color='grey')
+                    grid_rmin *= (myfield.culength / 1.5e11) # in au  
+                    grid_wkzrmin *= (myfield.culength / 1.5e11) # in au
+                    grid_rmax *= (myfield.culength / 1.5e11) # in au  
+                    grid_wkzrmax *= (myfield.culength / 1.5e11) # in au        
+
+                from matplotlib.patches import Ellipse, Polygon, Rectangle
+
+                if par.fieldofview == 'polar':
+                    if par.rvsphi == 'No':
+                        ax.plot([grid_wkzrmin,grid_wkzrmin],[Y.min(),Y.max()],'-',linewidth=1,color='grey')
+                        ax.fill_between([grid_rmin,grid_wkzrmin],[Y.min(),Y.min()], [Y.max(),Y.max()], hatch="/", linewidth=0.0, alpha=0.0, color='grey')
+                        ax.plot([grid_wkzrmax,grid_wkzrmax],[Y.min(),Y.max()],'-',linewidth=1,color='grey')
+                        ax.fill_between([grid_wkzrmax,grid_rmax],[Y.min(),Y.min()], [Y.max(),Y.max()], hatch="/", linewidth=0.0, alpha=0.0, color='grey')
+                    else:
+                        ax.plot([X.min(),X.max()],[grid_wkzrmin,grid_wkzrmin],'-',linewidth=1,color='grey')
+                        ax.fill_between([X.min(),X.max()],[grid_rmin,grid_rmin], [grid_wkzrmin,grid_wkzrmin], hatch="/", linewidth=0.0, alpha=0.0, color='grey')
+                        ax.plot([X.min(),X.max()],[grid_wkzrmax,grid_wkzrmax],'-',linewidth=1,color='grey')
+                        ax.fill_between([X.min(),X.max()],[grid_wkzrmax,grid_wkzrmax], [grid_rmax,grid_rmax], hatch="/", linewidth=0.0, alpha=0.0, color='grey')
+                else:
+                    circle_rmin = plt.Circle(xy=(0,0), radius=grid_rmin, color='gray', fill=False, linestyle='-')
+                    ax.add_patch(circle_rmin)
+                    circle_wkrmin = plt.Circle(xy=(0,0), radius=grid_wkzrmin, color='gray', fill=False, linestyle='--')
+                    ax.add_patch(circle_wkrmin)
+                    circle_wkrrmaz = plt.Circle(xy=(0,0), radius=grid_wkzrmax, color='gray', fill=False, linestyle='--')
+                    ax.add_patch(circle_wkrrmaz)
+                    circle_rmax = plt.Circle(xy=(0,0), radius=grid_rmax, color='gray', fill=False, linestyle='-')
+                    ax.add_patch(circle_rmax)
+
 
             # ------------------        
             # Add user-defined string in top right corner
@@ -598,7 +659,11 @@ def plottwodfield():
                 xlabel = xlim_max - 0.05*(xlim_max-xlim_min)
                 ylabel = ylim_max - 0.05*(ylim_max-ylim_min)
                 #print('xlabel=',xlabel, ' ylabel=', ylabel)
-                ax.text(xlabel, ylabel, mylabel, fontsize=15, color = 'white',weight='bold', horizontalalignment='right')
+                if par.mycolormap == 'RdBu_r' or par.mycolormap == 'seismic':
+                    color_label = 'black'
+                else:
+                    color_label = 'white'
+                ax.text(xlabel, ylabel, mylabel, fontsize=15, color = color_label,weight='bold', horizontalalignment='right')
 
             # ----------------
             # special case all fluids 
@@ -608,9 +673,13 @@ def plottwodfield():
                 xmin,xmax = ax.get_xlim()
                 ymin,ymax = ax.get_ylim()
                 if f > 0:
-                    strsize = str_fmt(par.dust_size[f-1])
-                    strsize += ' m'
-                    ax.text(xmax,ymin,strsize,fontsize=20,color=colorstr,horizontalalignment='right',verticalalignment='bottom')
+                    if par.dust_size[f-1] > 0.0:
+                        strsize = str_fmt(par.dust_size[f-1])
+                        strsize += ' m'
+                        ax.text(xmax,ymin,strsize,fontsize=20,color=colorstr,horizontalalignment='right',verticalalignment='bottom')
+                    elif par.dust_stokes[f-1] > 0.0:
+                        strstnb = 'St = '+str_fmt(par.dust_stokes[f-1])
+                        ax.text(xmax,ymin,strstnb,fontsize=20,color=colorstr,horizontalalignment='right',verticalalignment='bottom')
                 else:
                     ax.text(xmax,ymin,'gas',fontsize=20,color=colorstr,horizontalalignment='right',verticalalignment='bottom')
 

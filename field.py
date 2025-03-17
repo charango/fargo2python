@@ -191,22 +191,23 @@ class Field(Mesh):
             apla = 1.0
             
         # check if planet0.dat file has only one line or more!
+        # also keep track of omegaframe and rpla for streamlines calculation...
         if isinstance(xpla, (list, tuple, np.ndarray)) == True:
             omegaframe = omega[on]
+            self.omegaframe = omegaframe
+            self.rpla = np.sqrt( xpla[on]*xpla[on] + ypla[on]*ypla[on] )
             #rpla_0 = np.sqrt( xpla[0]*xpla[0] + ypla[0]*ypla[0] )        
             #time_in_code_units = round(date[on]/2./np.pi/rpla_0/np.sqrt(rpla_0),1)
             time_in_code_units = round(date[on]/2./np.pi/apla/np.sqrt(apla),1)
         else:
             omegaframe = omega
+            self.omegaframe = omegaframe
+            self.rpla = np.sqrt( xpla*xpla + ypla*ypla )
             #rpla_0 = np.sqrt( xpla*xpla + ypla*ypla )        
             #time_in_code_units = round(date/2./np.pi/rpla_0/np.sqrt(rpla_0),1)
             time_in_code_units = round(date/2./np.pi/apla/np.sqrt(apla),1)
-        self.strtime = str(time_in_code_units)+' orbits'
+        self.strtime = str(time_in_code_units)+r'$\,T_0$'
 
-        # keep track of omegaframe and rpla for streamlines calculation...
-        self.omegaframe = omegaframe
-        self.rpla = np.sqrt( xpla[on]*xpla[on] + ypla[on]*ypla[on] )
-        
         # --------- NB: it can take WAY more time to read orbit0.dat
         # than planet0.dat since the former file can contain many more
         # lines! Also, if the planet has no eccentricity to start
@@ -224,6 +225,32 @@ class Field(Mesh):
 
         if field == 'temp' and self.fargo3d == 'No':
             input_file = directory+'Temperature'+str(on)+'.dat'
+
+        if field == 'bc' and self.fargo3d == 'Yes':
+            input_file = directory+'BetaCooling'+str(on)+'.dat'
+            #self.strname += r' $\beta = \tau_{\rm cool} / T_{\rm orb}$'
+            self.strname += r' $\beta = \tau_{\rm cool} \Omega$'
+            self.unit = 1.0
+
+        if field == 'tauupper' and self.fargo3d == 'Yes':
+            input_file = directory+'TauUpper'+str(on)+'.dat'
+            self.strname += r' $\tau_{\rm upper}$'
+            self.unit = 1.0
+        
+        if field == 'taulower' and self.fargo3d == 'Yes':
+            input_file = directory+'TauLower'+str(on)+'.dat'
+            self.strname += r' $\tau_{\rm lower}$'
+            self.unit = 1.0
+
+        if field == 'kappa' and self.fargo3d == 'Yes':
+            input_file = directory+'Kappa'+str(on)+'.dat'
+            if physical_units == 'Yes':
+                self.strname += r' $\kappa_{\rm Ross}\;[{\rm cm}^2\,{\rm g}^{-1}]$'
+                self.unit = 10.0*self.culength*self.culength/self.cumass  # factor 10: conversion m^2/kg -> cm^2/g
+            else:
+                self.strname += r' $\kappa_{\rm Ross}$'
+                self.unit = 1.0
+            
 
         if os.path.isfile(input_file) == True:
             self.data = self.__open_field(input_file,dtype,fieldofview,slice)
@@ -267,17 +294,19 @@ class Field(Mesh):
             self.data = np.zeros((self.nrad,self.nsec))  # default
             self.unit = 1.0                              # default
             # ----
-            # TEMPERATURE or PRESSURE or TOOMRE Q-parameter = c_s Omega / pi G Sigma
-            # checked by CB on January 2022
+            # TEMPERATURE or PRESSURE or ENTROPY or TOOMRE Q-parameter = c_s Omega / pi G Sigma
+            # or BETA_COOLING parameter beta = Sigma tau_eff Omega / 4 pi / (gamma-1) / sigma_SB / T^3
             # ----
-            if field == 'temp' or field == 'pressure' or field == 'entropy' or field == 'toomre':
+            if field == 'temp' or field == 'pressure' or field == 'entropy' or field == 'toomre' or field == 'betacooling' or field == 'stokes':
                 if field == 'pressure':
                     self.strname += ' pressure'
                 if field == 'toomre':
                     self.strname += ' Toomre parameter'
                 if field == 'entropy':
                     self.strname += ' specific entropy'
-                    
+                if field == 'betacooling':
+                    self.strname += r' $\beta = \tau_{\rm cool} / T_{\rm orb}$'
+
                 # check that no energy equation was employed
                 if self.fargo3d == 'No':
                     command = par.awk_command+' " /^EnergyEquation/ " '+directory+'*.par'
@@ -319,7 +348,7 @@ class Field(Mesh):
                     
                 # case we're running with Fargo3D    
                 else:
-                    if "ISOTHERMAL" in open(directory+'summary'+str(on)+'.dat',"r").read():
+                    if "ISOTHERMAL" in open(directory+'summary0.dat',"r").read():
                         energyequation = "No"
                         if energyequation == 'No':
                             command = par.awk_command+' " /^ASPECTRATIO/ " '+directory+'*.par'
@@ -360,13 +389,13 @@ class Field(Mesh):
                         for i in range(self.nrad):
                             self.data[i,:] = aspectratio*aspectratio*(((self.rmed)[i])**(-1.0+2.0*flaringindex))   # temp
                     else:
-                        energy = self.__open_field(directory+fluid+'energy'+str(on)+'.dat',dtype,fieldofview,slice)
+                        energy = self.__open_field(directory+'gasenergy'+str(on)+'.dat',dtype,fieldofview,slice)
                         self.data = energy*energy  # as gasenergy contains sound speed!
                 else:
                     if self.fargo3d == 'No':
                         self.data = self.__open_field(directory+'Temperature'+str(on)+'.dat',dtype,fieldofview,slice)
                     else:
-                        energy = self.__open_field(directory+fluid+'energy'+str(on)+'.dat',dtype,fieldofview,slice)
+                        energy = self.__open_field(directory+'gasenergy'+str(on)+'.dat',dtype,fieldofview,slice)
                         rho = self.__open_field(directory+fluid+'dens'+str(on)+'.dat',dtype,fieldofview,slice)
                         self.data = (gamma-1.0)*energy/rho
 
@@ -397,8 +426,179 @@ class Field(Mesh):
 
                     self.data *= omega
 
+                # BETA_COOLING parameter: beta = Sigma tau_eff Omega / 4 pi / (gamma-1) / sigma_SB / T^3
+                if field == 'betacooling':
+                    # surface density
+                    dens = self.__open_field(directory+fluid+'dens'+str(on)+'.dat',dtype,fieldofview,slice)
+
+                    # temperature
+                    temp = self.data
+
+                    # angular frequency
+                    omega = np.zeros((self.nrad,self.nsec))
+                    vphi = self.__open_field(directory+fluid+'vx'+str(on)+'.dat',dtype,fieldofview,slice)
+                    # vphi, read above, is in the corotating frame!
+                    for i in range(self.nrad):
+                        vphi[i,:] += (self.rmed)[i]*omegaframe
+                    axivphi = np.sum(vphi,axis=1)/self.nsec  # just in case...
+                    for i in range(self.nrad):
+                        omega[i,:] = vphi[i,:] / self.rmed[i]
+
+                    # stefan-boltzmann constant in code units
+                    sigma_SB = 5.6704e-8 * (self.cumass**(-1.0)) * (self.cutime**3) * (self.cutemp**4)
+                    
+                    # ------------------
+                    # Rossland opacities
+                    # ------------------
+                    # 1. Convert code temperature into Kelvins
+                    phys_temp = temp * self.cutemp  # in K
+
+                    # 2. Convert 3D volume density into g.cm^-3
+                    cs = np.sqrt(gamma*self.data)
+                    H  = cs / omega
+                    rho3D = dens / np.sqrt(2.0*np.pi) / H
+                    phys_dens = rho3D * self.cumass * (self.culength**(-3.0))
+                    phys_dens *= 1e-3  # in g cm^(-3)
+
+                    # 3. Opacities are calculated in cm^2/g from Bell and Lin (94) tables
+                    opacity = np.zeros((self.nrad,self.nsec))
+                    for i in range(self.nrad):
+                        for j in range(self.nsec):
+                            if ( phys_temp[i,j] < 167.0 ):
+                                opacity[i,j] = 2e-4*(phys_temp[i,j]**2)
+                            else:
+                                if ( phys_temp[i,j] < 203.0 ):
+                                    opacity[i,j] = 2e16*(phys_temp[i,j]**(-7.))
+                                else:
+                                    temp_transition_34 = (2e82*phys_dens[i,j])**(2./49)
+                                    if ( phys_temp[i,j] < temp_transition_34 ):
+                                        opacity[i,j] = 0.1*(phys_temp[i,j]**0.5)
+                                    else:
+                                        temp_transition_45 = (2e89*(phys_dens[i,j]**(1./3)))**(1./27)
+                                        if ( phys_temp[i,j] < temp_transition_45 ):
+                                            opacity[i,j] = 2e81*(phys_dens[i,j]**1.0)*(phys_temp[i,j]**(-24.))
+                                        else:
+                                            temp_transition_56 = (1e28*(phys_dens[i,j]**(1./3)))**(1./7)
+                                            if ( phys_temp[i,j] < temp_transition_56 ):
+                                                opacity[i,j] = 1e-8*(phys_dens[i,j]**(2./3))*(phys_temp[i,j]**3)
+                                            else:
+                                                temp_transition_67 = (1.5e56*(phys_dens[i,j]**(2./3)))**(0.08)
+                                                if ( phys_temp[i,j] < temp_transition_67 ):
+                                                    opacity[i,j] = 1e-36*(phys_dens[i,j]**(1./3))*(phys_temp[i,j]**10)
+                                                else:
+                                                    temp_transition_78 = (4.31e20*phys_dens[i,j])**(2./5)
+                                                    if ( phys_temp[i,j] < temp_transition_78 ):
+                                                        opacity[i,j] = 1.5e20*(phys_dens[i,j]**(1.0))*(phys_temp[i,j]**(-2.5))
+                                                    else:
+                                                        opacity[i,j] = 0.348
+                
+                    #self.data = opacity 
+
+                    # 4. convert opacity in code units
+                    opacity *= (0.1 * self.culength**(-2.0) * self.cumass)
+
+                    # effective optical depth
+                    tau = 0.5*opacity*dens     
+                    tau_eff = 0.375*tau + 0.25*np.sqrt(3.0) + 0.25/tau 
+
+                    # beta cooling timescale: beta = tau_cool / Torb
+                    # beta = Sigma tau_eff Omega / 4 pi / (gamma-1) / sigma_SB / T^3
+                    num = dens*tau_eff*omega
+
+                    # check gamma is not unity...
+                    if gamma == 1.0:
+                        gamma = 5./3
+
+                    den = 4.0*np.pi*(gamma-1.0)*sigma_SB*(temp**3)
+                    self.data = num/den
+
+
+
+                # ----
+                # DUST STOKES NUMBER St = sqrt(pi/8) x (s rho_dust_int) / (H rho_gas)
+                # ----
+                if field == 'stokes':
+
+                    # gas mass surface (2D run) or volume density (3D run)
+                    if self.ncol > 1:  # 3D
+                        myfield = np.fromfile(directory+'gasdens'+str(on)+'.dat', dtype)
+                        rho_gas = myfield.reshape(self.ncol,self.nrad,self.nsec)   # ncol, nrad, nsec
+                    else:
+                        sigma_gas = self.__open_field(directory+'gasdens'+str(on)+'.dat',dtype,fieldofview,slice)
+                    
+                    # get dust internal density
+                    if self.fargo3d == 'Yes':
+                        command = par.awk_command+' " /^DUSTINTERNALRHO/ " '+directory+'variables.par'
+                    else:
+                        command = par.awk_command+' " /^Rhopart/ " '+directory+'*.par'
+
+                    if sys.version_info[0] < 3:   # python 2.X
+                        buf = subprocess.check_output(command, shell=True)
+                    else:                         # python 3.X
+                        buf = subprocess.getoutput(command)
+
+                    rho_dust_int = float(buf.split()[1])   # in g/cm^3
+                    rho_dust_int *= 1e3 # in kg/m^3
+                    rho_dust_int /= (self.cumass)
+                    rho_dust_int *= (self.culength**3.)  # in code units
+
+                    # get dust size
+                    if self.fargo3d == 'Yes':
+                        dust_id, dust_size, dust_gas_ratio = np.loadtxt(directory+'/dustsizes.dat',unpack=True)
+                        if fluid != 'gas':
+                            if isinstance(dust_size, float) == False:
+                                s = dust_size[int(fluid[-1])-1] # fluid[-1] = index of dust fluid
+                            else:
+                                s = dust_size
+                        else:
+                            s = 1e-50  # arbitrarily small
+                    else:
+                        command = par.awk_command+' " /^Sizepart/ " '+directory+'*.par'
+                        if sys.version_info[0] < 3:   # python 2.X
+                            buf = subprocess.check_output(command, shell=True)
+                        else:                         # python 3.X
+                            buf = subprocess.getoutput(command)
+                        s = float(buf.split()[1])     # in meters
+
+                    s /= self.culength  # in code units
+
+                    # get angular frequency and sound speed, assuming
+                    # locally isothermal equation of state: first get the
+                    # aspect ratio and flaring index used in the numerical
+                    # simulation
+                    if self.ncol > 1:  # 3D
+
+                        if energyequation == 'No':
+                            cs = np.zeros((self.ncol,self.nrad,self.nsec))
+                            for i in range(self.nrad):
+                                cs[:,i,:] = aspectratio*(((self.rmed)[i])**(-0.5+flaringindex))
+
+                        else:
+                            myfield = np.fromfile(directory+'gasenergy'+str(on)+'.dat', dtype)
+                            e = myfield.reshape(self.ncol,self.nrad,self.nsec)   # ncol, nrad, nsec
+                            p = (gamma-1.0)*e
+                            cs = np.sqrt(p/rho_gas)
+
+                        omega = np.zeros((self.ncol,self.nrad,self.nsec))
+                        buf = np.zeros((self.ncol,self.nrad,self.nsec))
+                        for i in range(self.nrad):
+                            omega[:,i,:] = self.rmed[i]**(-1.5)
+                        buf = np.sqrt(np.pi/8.0) * (s*rho_dust_int) * omega / (cs*rho_gas) # 3D cube  ncol, nrad, nsec
+
+                        if fieldofview == 'latitudinal' or fieldofview == 'vertical':
+                            myfield = np.sum(buf,axis=2)/self.nsec  # azimuthally-averaged field (R vs. latitude)
+                            self.data = np.transpose(myfield [::-1,:])   # nrad, ncol
+                        else:
+                            self.data = buf[self.ncol//2-1,:,:]   # midplane field  nrad, nsec
+
+                    else:  # 2D
+                        self.data = 0.5*np.pi*s*rho_dust_int/sigma_gas
+
+                    self.strname += ' Stokes number'
+
+
             # ----
-            # MASS ACCRETION RATE Mdot = abs(2pi R v_R Sigma)
+            # MASS ACCRETION RATE Mdot = = -2pi R v_R Sigma
             # ----
             if field == 'mdot':
                 dens = self.__open_field(directory+fluid+'dens'+str(on)+'.dat',dtype,fieldofview,slice)
@@ -612,86 +812,6 @@ class Field(Mesh):
                     self.unit = (self.cumass*1e3)/((self.culength*1e2)**2.)
                     self.strname += r' [g cm$^{-2}$]'
 
-            # ----
-            # DUST STOKES NUMBER St = sqrt(pi/8) x (s rho_dust_int) / (H rho_gas)
-            # ----
-            if field == 'stokes':
-                # gas mass surface (2D run) or volume density (3D run)
-                if self.ncol > 1:  # 3D
-                    myfield = np.fromfile(directory+'gasdens'+str(on)+'.dat', dtype)
-                    rho_gas = myfield.reshape(self.ncol,self.nrad,self.nsec)   # ncol, nrad, nsec
-                else:
-                    sigma_gas = self.__open_field(directory+'gasdens'+str(on)+'.dat',dtype,fieldofview,slice)
-                
-                # get dust internal density
-                if self.fargo3d == 'Yes':
-                    command = par.awk_command+' " /^DUSTINTERNALRHO/ " '+directory+'variables.par'
-                else:
-                    command = par.awk_command+' " /^Rhopart/ " '+directory+'*.par'
-
-                if sys.version_info[0] < 3:   # python 2.X
-                    buf = subprocess.check_output(command, shell=True)
-                else:                         # python 3.X
-                    buf = subprocess.getoutput(command)
-
-                rho_dust_int = float(buf.split()[1])   # in g/cm^3
-                rho_dust_int *= 1e3 # in kg/m^3
-                rho_dust_int /= (self.cumass)
-                rho_dust_int *= (self.culength**3.)  # in code units
-
-                # get dust size
-                if self.fargo3d == 'Yes':
-                    dust_id, dust_size, dust_gas_ratio = np.loadtxt(directory+'/dustsizes.dat',unpack=True)
-                    if fluid != 'gas':
-                        if isinstance(dust_size, float) == False:
-                            s = dust_size[int(fluid[-1])-1] # fluid[-1] = index of dust fluid
-                        else:
-                            s = dust_size
-                    else:
-                        s = 1e-50  # arbitrarily small
-                else:
-                    command = par.awk_command+' " /^Sizepart/ " '+directory+'*.par'
-                    if sys.version_info[0] < 3:   # python 2.X
-                        buf = subprocess.check_output(command, shell=True)
-                    else:                         # python 3.X
-                        buf = subprocess.getoutput(command)
-                    s = float(buf.split()[1])     # in meters
-
-                s /= self.culength  # in code units
-
-                # get angular frequency and sound speed, assuming
-                # locally isothermal equation of state: first get the
-                # aspect ratio and flaring index used in the numerical
-                # simulation
-                if self.ncol > 1:  # 3D
-                    command = par.awk_command+' " /^ASPECTRATIO/ " '+directory+'*.par'
-                    if sys.version_info[0] < 3:   # python 2.X
-                        buf = subprocess.check_output(command, shell=True)
-                    else:                         # python 3.X
-                        buf = subprocess.getoutput(command)
-                    aspectratio = float(buf.split()[1])                
-                    # then get the flaring index used in the numerical simulation
-                    command = par.awk_command+' " /^FLARINGINDEX/ " '+directory+'*.par'
-                    if sys.version_info[0] < 3:
-                        buf = subprocess.check_output(command, shell=True)
-                    else:
-                        buf = subprocess.getoutput(command)
-                    flaringindex = float(buf.split()[1])
-                    cs = np.zeros((self.ncol,self.nrad,self.nsec))
-                    omega = np.zeros((self.ncol,self.nrad,self.nsec))
-                    buf = np.zeros((self.ncol,self.nrad,self.nsec))
-                    for i in range(self.nrad):
-                        cs[:,i,:] = aspectratio*(((self.rmed)[i])**(-0.5+flaringindex))
-                        omega[:,i,:] = self.rmed[i]**(-1.5)
-                    buf = np.sqrt(np.pi/8.0) * (s*rho_dust_int) * omega / (cs*rho_gas) # 3D cube  ncol, nrad, nsec
-                    if fieldofview == 'latitudinal' or fieldofview == 'vertical':
-                        myfield = np.sum(buf,axis=2)/self.nsec  # azimuthally-averaged field (R vs. latitude)
-                        self.data = np.transpose(myfield [::-1,:])   # nrad, ncol
-                    else:
-                        self.data = buf[self.ncol//2-1,:,:]   # midplane field  nrad, nsec
-                else:  # 2D
-                    self.data = 0.5*np.pi*s*rho_dust_int/sigma_gas
-                self.strname += ' Stokes number'
                 
             # ----
             # VRAD AND VTHETA for 2D CARTESIAN RUNS WITH FARGO3D
@@ -848,7 +968,7 @@ class Field(Mesh):
             if fieldofview == 'latitudinal' or fieldofview == 'vertical':
                 if slice == 'average':
                     myfield = np.sum(datacube,axis=2)/self.nsec  # azimuthally-averaged field (R vs. latitude)
-                    return np.transpose(myfield [::-1,:])
+                    return np.transpose(myfield [::-1,:])   
                 else:
                     return np.transpose(datacube[:,:,self.nsec//2])  # azimuthal cut at planet's location
             else:  # polar or cartesian fields of view

@@ -64,6 +64,7 @@ def plottqwk():
         rpla_0 = 1.0  # CUIDADIN!
         # count how many planets 
         nbplanets = len(fnmatch.filter(os.listdir(directory[j]), 'orbit*.dat'))  
+        print('nbplanets = ',nbplanets)
 
         # Normalized torque by Gamma_0 = q/h^2 x Sigma(r_p) r_p^4 Omega^2(r_p)
         if par.plot_tqwk == 'normtorque':
@@ -89,7 +90,12 @@ def plottqwk():
             sigmap = dens[imin]
             # Finally infer Gamma_0
             Gamma_0 = (q/h/h)*sigmap*rpla0_normtq
-            #print(q,h,rpla0_normtq,sigmap,Gamma_0)
+            print('q = ', q)
+            print('h = ', h)
+            print('rpla0_normtq = ', rpla0_normtq)
+            print('sigmap = ', sigmap)
+            print('Gamma_0 = ', Gamma_0)
+
 
         # now, read tqwk0.dat file
         for k in range(nbplanets): 

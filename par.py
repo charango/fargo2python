@@ -132,7 +132,7 @@ if movie == 'Yes':
         sys.exit("ERROR: you requested an animation but specified a single output number: on needs to be specified as min,max -- eg: 1,10 for output numbers from 1 to 10")
 
 # units
-if whatfield == 'stokes':
+if whatfield == 'stokes' or whatfield == 'betacooling':
     physical_units = 'Yes'
 if override_units == 'Yes':
     if new_unit_length == 0.0:
@@ -152,9 +152,23 @@ if fluid == 'all':
     allfluids = 'Yes'
     if isinstance(directory, str) == False:
         input_file = directory[0]+'/dustsizes.dat'
+        if os.path.isfile(input_file):
+            dust_id, dust_size, dust_gas_ratio = np.loadtxt(input_file,unpack=True)
+        else:
+            input_file = directory[0]+'/duststokesnb.dat'
+            if os.path.isfile(input_file):
+                dust_id, dust_stokes = np.loadtxt(input_file,unpack=True)
+                dust_size = np.zeros(len(dust_id))
     else:
         input_file = directory+'/dustsizes.dat'
-    dust_id, dust_size, dust_gas_ratio = np.loadtxt(input_file,unpack=True)
+        if os.path.isfile(input_file):
+            dust_id, dust_size, dust_gas_ratio = np.loadtxt(input_file,unpack=True)
+        else:
+            input_file = directory+'/duststokesnb.dat'
+            if os.path.isfile(input_file):
+                dust_id, dust_stokes = np.loadtxt(input_file,unpack=True)
+                dust_size = np.zeros(len(dust_id))
+        
     nbfluids = 1+len(dust_id)  # +1 = gas
     # redefine fluid
     fluids = [str(x) for x in range(nbfluids)]
