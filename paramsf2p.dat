@@ -19,9 +19,10 @@ verbose             Yes         # displays more information on screen
 ###############
 
 ### plot time evolution of disc torque or power on planets?
-# type No, torque, rtatorque, power or rtapower
-# rta means running-time average
-plot_tqwk	    No			
+# type No, torque, indtorque or power
+plot_tqwk	           torque
+running_time_average   No
+normalize_torque       Yes		# normalize by reference Gamma_0 torque?	
 
 ### plot planets orbital elements?
 # type x,y to plot y vs. x: x can be t (time) or a (semi-major axis);
