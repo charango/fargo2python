@@ -22,12 +22,12 @@ def plottqwk():
     if par.plot_tqwk == 'torque':
         ytitle = 'Specific torque on planet'
         if par.normalize_torque == 'Yes':
-            ytitle = r'$\Gamma / \Gamma_0$'
+            ytitle = r'$\gamma \Gamma / \Gamma_0$'
 
     if par.plot_tqwk == 'indtorque':
         ytitle = 'Specific indirect torque on planet'
         if par.normalize_torque == 'Yes':
-            ytitle = r'$\Gamma_{\rm ind} / \Gamma_0$'
+            ytitle = r'$\gamma \Gamma_{\rm ind} / \Gamma_0$'
 
     if par.plot_tqwk == 'power':
         ytitle = 'Specific power on planet'
@@ -76,32 +76,56 @@ def plottqwk():
 
         # Normalized torque by Gamma_0 = q/h^2 x Sigma(r_p) r_p^4 Omega^2(r_p)
         if par.normalize_torque == 'Yes':
+
             # get planet-to-star mass ratio q
             q = mpla[len(mpla)-1]   # time-varying array
-            # get local disc's aspect ratio
+            
+            # get planet's orbital radius, local disc's aspect ratio + check if energy equation was used
             if fargo3d == 'Yes':
                 command  = par.awk_command+' " /^ASPECTRATIO/ " '+directory[j]+'/*.par'
                 command2 = par.awk_command+' " /^FLARINGINDEX/ " '+directory[j]+'/*.par'
+                if "ISOTHERMAL" in open(directory[j]+'/summary0.dat',"r").read():
+                    energyequation = "No"
+                else:
+                    energyequation = "Yes"
             else:
                 command  = par.awk_command+' " /^AspectRatio/ " '+directory[j]+'/*.par'
                 command2 = par.awk_command+' " /^FlaringIndex/ " '+directory[j]+'/*.par'
+                command3 = par.awk_command+' " /^EnergyEquation/ " '+directory[j]+'/*.par'
+                buf3 = subprocess.getoutput(command3)
+                energyequation = str(buf3.split()[1])
+    
             buf = subprocess.getoutput(command)
             aspectratio = float(buf.split()[1])
             buf2 = subprocess.getoutput(command2)
             fli = float(buf2.split()[1])
             rpla0_normtq = np.sqrt( xpla[0]*xpla[0] + ypla[0]*ypla[0] )
             h = aspectratio*(rpla0_normtq**fli)  # constant in time
+            
+            # get adiabatic index
+            if energyequation == 'Yes':
+                if fargo3d == 'Yes':
+                    command4 = par.awk_command+' " /^GAMMA/ " '+directory[j]+'/*.par'
+                else:
+                    command4 = par.awk_command+' " /^AdiabaticIndex/ " '+directory[j]+'/*.par'
+                buf4 = subprocess.getoutput(command4)
+                adiabatic_index = float(buf4.split()[1])
+            else:
+                adiabatic_index = 1.0
+
             # get local azimuthally averaged surface density
             myfield0 = Field(field='dens', fluid='gas', on=0, directory=directory[j], physical_units='No', nodiff='Yes', fieldofview=par.fieldofview, slice=par.slice, onedprofile='Yes', override_units=par.override_units)
             dens = np.sum(myfield0.data,axis=1) / myfield0.nsec
             imin = np.argmin(np.abs(myfield0.rmed-rpla0_normtq))
             sigmap = dens[imin]
+
             # Finally infer Gamma_0
-            Gamma_0 = (q/h/h)*sigmap*rpla0_normtq
+            Gamma_0 = (q/h/h)*sigmap*rpla0_normtq/adiabatic_index
             print('q = ', q)
             print('h = ', h)
             print('rpla0_normtq = ', rpla0_normtq)
             print('sigmap = ', sigmap)
+            print('adiabatic index = ', adiabatic_index)
             print('Gamma_0 = ', Gamma_0)
 
 
@@ -163,9 +187,6 @@ def plottqwk():
                 ax.set_yscale('log')
                 ytitle = str('|')+ytitle+str('|')
 
-            if par.plot_tqwk == 'normtorque':
-                y /= Gamma_0
-               
             ax.plot(time[::par.take_one_point_every], y[::par.take_one_point_every], color=par.c20[k*len(directory)+j], lw=2., linestyle = 'solid', label=mylabel)
             ax.legend(frameon=False,fontsize=15)
             fig.add_subplot(ax)
