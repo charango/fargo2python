@@ -40,6 +40,7 @@ params.close()
 plot_disccom = 'No'
 plot_discmass = 'No'
 plot_libcross = 'No'
+plot_turb = 'No'
 
 par = []                       # allocating a dictionary
 var = []                       # allocating a dictionary
@@ -111,7 +112,7 @@ else:
 # global boolean: if True, then plot 1D or 2D fields
 plot_field = True
 
-if ( (plot_tqwk != 'No') or (plot_planet != 'No') or (plot_disccom != 'No') or (plot_discmass != 'No') or (plot_libcross != 'No') ):
+if ( (plot_tqwk != 'No') or (plot_planet != 'No') or (plot_disccom != 'No') or (plot_discmass != 'No') or (plot_libcross != 'No') or (plot_turb != 'No') ):
     plot_field = False
     movie = 'No'
     if plot_planet[1] == 'mmr':
@@ -145,6 +146,11 @@ if (take_one_point_every == '#'):
 
 if (nodiff == 'No'):
     log_colorscale = 'No'
+
+# case magnetic field is displayed in FARGO3D runs: convert fluid to '' as 
+# fieldnames are simply, eg, bx123.dat and not gasbx123.dat
+if whatfield == 'bx' or whatfield == 'by' or whatfield == 'bz':
+    fluid = ''
 
 # case where all fluids should be displayed!
 if fluid == 'all':

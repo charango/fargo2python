@@ -112,8 +112,12 @@ display_label               # add user-defined label in top-right corner of 2D p
 ### plot time evolution of disc mass?
 #plot_discmass	No
 
-### plot time evolution of librating, orbit-crossing flow vortensities? (new -- Sept. 2024)
+### plot time evolution of librating, orbit-crossing flow vortensities?
 plot_libcross   No
+
+### plot gas quantities for turbulent disc simulations (eg MRI-driven MHD turbulence 
+# with FARGO3D) -- plot_turb can be set to: No, power_spectrum
+plot_turb      power_spectrum
 
 
 ################################

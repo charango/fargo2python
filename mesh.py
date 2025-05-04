@@ -25,16 +25,25 @@ class Mesh():
         # -----
         if self.fargo3d == 'No':
             if self.fargo_orig == 'No':
+                self.pedge = np.linspace(0.,2.*np.pi,self.nsec+1)
+                # CUIDADIN!!
+                '''
                 domain_azi = np.loadtxt(directory+"used_azi.dat")  # azimuthal interfaces of grid cells
                 if self.nsec > 1:
                     self.pedge = np.append(domain_azi[:,1],domain_azi[-1:,2][0])
                 else:
                     self.pedge = np.linspace(0.,2.*np.pi,self.nsec+1)
+                '''
             else:
                 # case used_azi.dat does not exist, for instance with original FARGO code:
                 self.pedge = np.linspace(0.,2.*np.pi,self.nsec+1)  # phi-edge   
         else:
-            self.pedge = np.linspace(0.,2.*np.pi,self.nsec+1)  # phi-edge         
+            try:
+                domain_azi = np.loadtxt(directory+"domain_x.dat")  # radial interfaces of grid cells
+            except IOError:
+                print('IOError')
+            self.pedge = domain_azi
+            #self.pedge = np.linspace(0.,2.*np.pi,self.nsec+1)  # phi-edge         
         self.pmed = 0.5*(self.pedge[:-1] + self.pedge[1:]) # phi-center
 
         # -----

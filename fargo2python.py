@@ -87,3 +87,11 @@ if ( ('plot_discmass' in open('paramsf2p.dat').read()) and (par.plot_discmass !=
 if ( ('plot_libcross' in open('paramsf2p.dat').read()) and (par.plot_libcross != 'No') ):
     from plot_libcross import *
     plotlibcross()
+
+# =====================
+# 10. disc turbulent properties 
+# =====================
+if ( ('plot_turb' in open('paramsf2p.dat').read()) and (par.plot_turb != 'No') ):
+    from plot_turb import *
+    if par.plot_turb == 'power_spectrum':
+        plotpowerspectrum()
