@@ -80,8 +80,6 @@ def plotpowerspectrum():
 
             # amplitude
             cn[m] += np.sqrt( an[m]*an[m] + bn[m]*bn[m] )
-            if azi_wavenb[m] == 2:
-                print('cn[2] = ',  np.sqrt( an[m]*an[m] + bn[m]*bn[m] ) )
     
     # final amplitude - divide by len(on) in case of average over multiple output numbers
     for m in range(len(azi_wavenb)):
