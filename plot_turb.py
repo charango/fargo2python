@@ -73,16 +73,19 @@ def plotpowerspectrum():
         for m in range(len(azi_wavenb)):
 
             # real part of Fourier decomposition
-            an[m] += (np.sum(dens*surface*np.cos(azi_wavenb[m]*pmed2d))/mass)
+            an[m] = (np.sum(dens*surface*np.cos(azi_wavenb[m]*pmed2d))/mass)
 
             # imaginary part of Fourier decomposition
-            bn[m] += (np.sum(dens*surface*np.sin(azi_wavenb[m]*pmed2d))/mass)
+            bn[m] = (np.sum(dens*surface*np.sin(azi_wavenb[m]*pmed2d))/mass)
+
+            # amplitude
+            cn[m] += np.sqrt( an[m]*an[m] + bn[m]*bn[m] )
+            if azi_wavenb[m] == 2:
+                print('cn[2] = ',  np.sqrt( an[m]*an[m] + bn[m]*bn[m] ) )
     
     # final amplitude - divide by len(on) in case of average over multiple output numbers
     for m in range(len(azi_wavenb)):
-        an[m] /= len(on)
-        bn[m] /= len(on)
-        cn[m] = np.sqrt( an[m]*an[m] + bn[m]*bn[m] ) 
+        cn[m] /= len(on)
         #print(azi_wavenb[m],cn[m])
 
     # prepare figure
