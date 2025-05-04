@@ -99,7 +99,7 @@ def plotpowerspectrum():
     if ('use_legend' in open('paramsf2p.dat').read()) and (par.use_legend != '#'):
         mylabel = str(par.use_legend)
     else:
-        mylabel = str(directory)
+        mylabel = str(par.directory)
 
     ax.set_yscale('log')
     ax.scatter(azi_wavenb, cn, color=par.c20[0], s=10, label=mylabel)

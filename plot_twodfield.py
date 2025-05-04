@@ -408,12 +408,25 @@ def plottwodfield():
                 ylim_max = myrmax
                 #ax.set_xlim(-myrmax,myrmax)
                 #ax.set_ylim(-myrmax,myrmax)
+
+                # special case where a disc wedge is simulated (=not full 2pi in azimuth)
+                if np.abs(myfield.pmed[-1]-myfield.pmed[0]) < 3.2:
+                    ylim_min = 0.0
+                    fig = plt.figure(figsize=(16.,8.))
+                    # do not edit subplot position below!
+                    plt.subplots_adjust(left=0.17, right=0.92, top=0.88, bottom=0.1)
+                    ax = plt.gca()
+
                 if par.physical_units == 'Yes':
                     ax.set_xlabel('x [au]')
                     ax.set_ylabel('y [au]')
                 else:
                     ax.set_xlabel(r'x [$R_0$]')
                     ax.set_ylabel(r'y [$R_0$]')
+
+                
+                
+                
             #
             # -----------------------
             # VERTICAL FIELD OF VIEW
@@ -461,8 +474,10 @@ def plottwodfield():
             ax.tick_params(top='on', right='on', length = 5, width=1.0, direction='out')
             ax.tick_params(axis='x', which='minor', top=True)
             ax.tick_params(axis='y', which='minor', right=True)
-            ax.xaxis.set_major_locator(plt.MaxNLocator(5))
-            ax.yaxis.set_major_locator(plt.MaxNLocator(5))
+            ax.xaxis.set_major_locator(plt.MaxNLocator(7))
+            ax.yaxis.set_major_locator(plt.MaxNLocator(7))
+            #ax.xaxis.set_major_locator(plt.MaxNLocator(5))
+            #ax.yaxis.set_major_locator(plt.MaxNLocator(5))
 
             # -------------------
             # adjust min and max in color bar according to field of view
@@ -691,6 +706,7 @@ def plottwodfield():
             cb = plt.colorbar(CF, cax=cax, orientation='horizontal')
             cax.xaxis.tick_top()
             cax.xaxis.set_tick_params(direction='out')
+            #cax.xaxis.set_major_locator(plt.MaxNLocator(3))
             cax.xaxis.set_major_locator(plt.MaxNLocator(4))
             # title on top
             cax.xaxis.set_label_position('top')
