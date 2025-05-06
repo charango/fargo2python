@@ -58,6 +58,7 @@ class Field(Mesh):
                 self.fargo_orig = 'Yes'
             
         self.cartesian_grid = 'No'
+        self.cylindrical_grid = 'No'
         if self.fargo3d == 'Yes':
             command = par.awk_command+' " /^COORDINATES/ " '+directory+'/variables.par'
             if sys.version_info[0] < 3:   # python 2.X
@@ -67,6 +68,8 @@ class Field(Mesh):
             if buf.split()[1] == 'cartesian':
                 self.cartesian_grid = 'Yes'
                 #print('A cartesian grid has been used in the simulation')
+            if buf.split()[1] == 'cylindrical':
+                self.cylindrical_grid = 'Yes'
             if field == 'vrad' and self.cartesian_grid == 'No':
                 field = 'vy'
             if field == 'vtheta' and self.cartesian_grid == 'No':
@@ -93,9 +96,9 @@ class Field(Mesh):
                 buf = subprocess.check_output(command, shell=True)
             else:                         # python 3.X
                 buf = subprocess.getoutput(command)
-            self.ncol = int(buf.split()[1])
+            self.nz = int(buf.split()[1])
         else:
-            self.ncol = 1
+            self.nz = 1
             
         # all Mesh attributes
         Mesh.__init__(self, directory)    
@@ -384,7 +387,7 @@ class Field(Mesh):
                         if ( (fieldofview == 'polar') or (fieldofview == 'cart') ):
                             self.data = np.zeros((self.nrad,self.nsec)) 
                         else:
-                            self.data = np.zeros((self.nrad,self.ncol)) 
+                            self.data = np.zeros((self.nrad,self.nz)) 
                         # expression below valid both for Fargo-3D and Dusty FARGO-ADSG:
                         for i in range(self.nrad):
                             self.data[i,:] = aspectratio*aspectratio*(((self.rmed)[i])**(-1.0+2.0*flaringindex))   # temp
@@ -520,9 +523,9 @@ class Field(Mesh):
                 if field == 'stokes':
 
                     # gas mass surface (2D run) or volume density (3D run)
-                    if self.ncol > 1:  # 3D
+                    if self.nz > 1:  # 3D
                         myfield = np.fromfile(directory+'gasdens'+str(on)+'.dat', dtype)
-                        rho_gas = myfield.reshape(self.ncol,self.nrad,self.nsec)   # ncol, nrad, nsec
+                        rho_gas = myfield.reshape(self.nz,self.nrad,self.nsec)   # nz, nrad, nsec
                     else:
                         sigma_gas = self.__open_field(directory+'gasdens'+str(on)+'.dat',dtype,fieldofview,slice)
                     
@@ -566,30 +569,30 @@ class Field(Mesh):
                     # locally isothermal equation of state: first get the
                     # aspect ratio and flaring index used in the numerical
                     # simulation
-                    if self.ncol > 1:  # 3D
+                    if self.nz > 1:  # 3D
 
                         if energyequation == 'No':
-                            cs = np.zeros((self.ncol,self.nrad,self.nsec))
+                            cs = np.zeros((self.nz,self.nrad,self.nsec))
                             for i in range(self.nrad):
                                 cs[:,i,:] = aspectratio*(((self.rmed)[i])**(-0.5+flaringindex))
 
                         else:
                             myfield = np.fromfile(directory+'gasenergy'+str(on)+'.dat', dtype)
-                            e = myfield.reshape(self.ncol,self.nrad,self.nsec)   # ncol, nrad, nsec
+                            e = myfield.reshape(self.nz,self.nrad,self.nsec)   # nz, nrad, nsec
                             p = (gamma-1.0)*e
                             cs = np.sqrt(p/rho_gas)
 
-                        omega = np.zeros((self.ncol,self.nrad,self.nsec))
-                        buf = np.zeros((self.ncol,self.nrad,self.nsec))
+                        omega = np.zeros((self.nz,self.nrad,self.nsec))
+                        buf = np.zeros((self.nz,self.nrad,self.nsec))
                         for i in range(self.nrad):
                             omega[:,i,:] = self.rmed[i]**(-1.5)
-                        buf = np.sqrt(np.pi/8.0) * (s*rho_dust_int) * omega / (cs*rho_gas) # 3D cube  ncol, nrad, nsec
+                        buf = np.sqrt(np.pi/8.0) * (s*rho_dust_int) * omega / (cs*rho_gas) # 3D cube  nz, nrad, nsec
 
                         if fieldofview == 'latitudinal' or fieldofview == 'vertical':
                             myfield = np.sum(buf,axis=2)/self.nsec  # azimuthally-averaged field (R vs. latitude)
-                            self.data = np.transpose(myfield [::-1,:])   # nrad, ncol
+                            self.data = np.transpose(myfield [::-1,:])   # nrad, nz
                         else:
-                            self.data = buf[self.ncol//2-1,:,:]   # midplane field  nrad, nsec
+                            self.data = buf[self.nz//2-1,:,:]   # midplane field  nrad, nsec
 
                     else:  # 2D
                         self.data = 0.5*np.pi*s*rho_dust_int/sigma_gas
@@ -787,7 +790,7 @@ class Field(Mesh):
             # ----
             if self.fargo3d == 'Yes' and field == 'surfacedens':
                 myfield = np.fromfile(directory+fluid+'dens'+str(on)+'.dat', dtype)
-                datacube = myfield.reshape(self.ncol,self.nrad,self.nsec)
+                datacube = myfield.reshape(self.nz,self.nrad,self.nsec)
                 datacube_cyl = np.zeros((self.nver,self.nrad,self.nsec))
                 # sweep through the 3D cylindrical grid:
                 for k in range(self.nver):
@@ -800,7 +803,7 @@ class Field(Mesh):
                         ksph = np.argmin(np.abs(self.tmed-theta))
                         if theta < self.tmed[ksph] and ksph > 0:
                             ksph-=1
-                        if (isph < self.nrad-1 and ksph < self.ncol-1):
+                        if (isph < self.nrad-1 and ksph < self.nz-1):
                             datacube_cyl[k,i,:] = ( datacube[ksph,isph,:]*(self.rmed[isph+1]-r)*(self.tmed[ksph+1]-theta) + datacube[ksph+1,isph,:]*(self.rmed[isph+1]-r)*(theta-self.tmed[ksph]) + datacube[ksph,isph+1,:]*(r-self.rmed[isph])*(self.tmed[ksph+1]-theta) + datacube[ksph+1,isph+1,:]*(r-self.rmed[isph])*(theta-self.tmed[ksph]) ) / ( (self.rmed[isph+1]-self.rmed[isph]) * (self.tmed[ksph+1]-self.tmed[ksph]) )
                         else:
                             # simple nearest-grid point interpolation...
@@ -899,7 +902,7 @@ class Field(Mesh):
             else:
                 #self.strname += ' midplane density'
                 if physical_units == 'Yes' and nodiff == 'Yes':
-                    if self.ncol > 1:  # 3D
+                    if self.nz > 1:  # 3D
                         self.unit = (self.cumass*1e3)/((self.culength*1e2)**3.)
                         self.strname += r' [g cm$^{-3}$]'
                     else:  # 2D
@@ -961,10 +964,10 @@ class Field(Mesh):
         where_are_NaNs = np.isnan(field)
         field[where_are_NaNs] = 0.0
         
-        if self.ncol == 1: # 2D
+        if self.nz == 1: # 2D
             return field.reshape(self.nrad,self.nsec)
         else: # 3D
-            datacube = field.reshape(self.ncol,self.nrad,self.nsec)
+            datacube = field.reshape(self.nz,self.nrad,self.nsec)
             if fieldofview == 'latitudinal' or fieldofview == 'vertical':
                 if slice == 'average':
                     myfield = np.sum(datacube,axis=2)/self.nsec  # azimuthally-averaged field (R vs. latitude)
@@ -978,10 +981,10 @@ class Field(Mesh):
                     if (slice == 'upper' or slice == '#'):
                         return datacube[1,:,:]   # field at disc surface only if "half-a-disc" is simulated in latitudinal direction!
                     if slice == 'intermediate':
-                        return datacube[self.ncol//2,:,:]   # field at disc surface only if "half-a-disc" is simulated in latitudinal direction!
+                        return datacube[self.nz//2,:,:]   # field at disc surface only if "half-a-disc" is simulated in latitudinal direction!
                 else:
                     if slice == 'midplane':
-                        return datacube[self.ncol//2,:,:]   # midplane field only if "full" disc is simulated in latitudinal direction!
+                        return datacube[self.nz//2,:,:]   # midplane field only if "full" disc is simulated in latitudinal direction!
                     if slice == 'lower':
                         return datacube[1,:,:]   # field at lower surface only if "half-a-disc" is simulated in latitudinal direction!
                     if slice == 'upper':

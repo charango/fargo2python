@@ -422,11 +422,7 @@ def plottwodfield():
                     ax.set_ylabel('y [au]')
                 else:
                     ax.set_xlabel(r'x [$R_0$]')
-                    ax.set_ylabel(r'y [$R_0$]')
-
-                
-                
-                
+                    ax.set_ylabel(r'y [$R_0$]')                
             #
             # -----------------------
             # VERTICAL FIELD OF VIEW
@@ -434,10 +430,15 @@ def plottwodfield():
             if par.fieldofview == 'vertical':
                 array_orig = array
                 array = np.transpose(array)
-                radius_matrix, theta_matrix = np.meshgrid(R,myfield.tedge)
-                #radius_matrix, theta_matrix = np.meshgrid(myfield.rmed,myfield.tmed)
-                X = radius_matrix * np.cos(theta_matrix)
-                Y = radius_matrix * np.sin(theta_matrix)
+
+                if myfield.cylindrical_grid == 'No':
+                    radius_matrix, theta_matrix = np.meshgrid(R,myfield.tedge)
+                    #radius_matrix, theta_matrix = np.meshgrid(myfield.rmed,myfield.tmed)
+                    X = radius_matrix * np.cos(theta_matrix)
+                    Y = radius_matrix * np.sin(theta_matrix)
+                else:
+                    X = R
+                    Y = T
 
                 # figure
                 if par.allfluids == 'No':

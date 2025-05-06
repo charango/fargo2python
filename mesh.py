@@ -49,7 +49,7 @@ class Mesh():
         # -----
         # colatitude / latitude
         # -----
-        if self.ncol > 1:
+        if self.cylindrical_grid == 'No' and self.nz > 1:
             try:
                 domain_col = np.loadtxt(directory+"domain_z.dat")  # radial interfaces of grid cells
             except IOError:
@@ -57,18 +57,27 @@ class Mesh():
             self.tedge = 0.5*np.pi - domain_col[3:-3]           # lat-edge
             self.tedge = self.tedge[::-1]
             self.tmed  = 0.5*(self.tedge[:-1] + self.tedge[1:]) # lat-center
-
-        # -----
-        # cylindrical grid for 3D FARGO3D runs using spherical grid
-        # -----        
-        if self.fargo3d == 'Yes' and self.ncol > 1:
+            #
+            # cylindrical grid for 3D FARGO3D runs using spherical grid
+            #
             # define number of cells in vertical direction
-            self.nver = self.ncol
+            self.nver = self.nz
             # define an array for vertical altitude above midplane
             # (half-disc assumed)
             zbuf = self.redge.max()*np.sin(self.tedge)
             self.zedge = np.linspace(0.0,zbuf.max(),self.nver+1)
             self.zmed  = 0.5*(self.zedge[:-1] + self.zedge[1:]) # z-center
+
+        # -----
+        # altitude in 3D cylindrical runs
+        # -----        
+        if self.cylindrical_grid == 'Yes' and self.nz > 1:
+            try:
+                domain_col = np.loadtxt(directory+"domain_z.dat")  # radial interfaces of grid cells
+            except IOError:
+                print('IOError')
+            self.zedge = domain_col[3:-3]           # altitude-edge
+            self.zmed  = 0.5*(self.zedge[:-1] + self.zedge[1:]) # altitude-center
 
         # -----
         # cartesian grid for FARGO3D runs using cartesian coordinates

@@ -218,7 +218,7 @@ def plotdisccom():
                 f = directory[j]+'/gasdens'+str(int(on[k]))+'.dat'
                 #print('file = ', f)
                 dens = np.fromfile(f, dtype='float64')
-                dens = dens.reshape(buf.ncol,buf.nrad,buf.nsec)  # 3D ncol, nrad, nsec
+                dens = dens.reshape(buf.nz,buf.nrad,buf.nsec)  # 3D nz, nrad, nsec
 
                 # things we do only when entering for loop
                 if first_time == 0:
@@ -226,7 +226,7 @@ def plotdisccom():
                     first_time = 1
                 
                     # get volume of every cell
-                    Redge,Cedge,Aedge = np.meshgrid(buf.redge, buf.tedge, buf.pedge)   # ncol+1, nrad+1, Nsec+1
+                    Redge,Cedge,Aedge = np.meshgrid(buf.redge, buf.tedge, buf.pedge)   # nz+1, nrad+1, Nsec+1
                     if par.physical_units == 'Yes':
                         Redge *= (buf.culength / 1.5e11) # in au
                     r2 = Redge*Redge
@@ -235,7 +235,7 @@ def plotdisccom():
                     dphi   = Aedge[:-1,:-1,1:] - Aedge[:-1,:-1,:-1]     # same as 2pi/nsec
                     dr     = Redge[:-1,1:,:-1] - Redge[:-1,:-1,:-1]     # same as Rsup-Rinf
                     dtheta = Cedge[1:,:-1,:-1] - Cedge[:-1,:-1,:-1]
-                    volume = jacob * dr * dphi * dtheta     # ncol, nrad, nsec
+                    volume = jacob * dr * dphi * dtheta     # nz, nrad, nsec
 
                     # get radius and azimuth arrays, infer X and Y for cell centres
                     R = buf.rmed
@@ -244,7 +244,7 @@ def plotdisccom():
                     P = buf.pmed
                     T = buf.tmed
 
-                    radius_matrix, phi_matrix, theta_matrix = np.meshgrid(R,P,T, indexing='ij')   # nrad nsec ncol
+                    radius_matrix, phi_matrix, theta_matrix = np.meshgrid(R,P,T, indexing='ij')   # nrad nsec nz
                     X = radius_matrix * np.cos(theta_matrix) * np.cos(phi_matrix)  
                     Y = radius_matrix * np.cos(theta_matrix) * np.sin(phi_matrix)
                     Z = radius_matrix * np.sin(theta_matrix)
@@ -257,9 +257,9 @@ def plotdisccom():
                 
 
                 # mass of each grid cell (3D array)
-                mass = dens*volume            # ncol, nrad, nsec
-                mass = np.swapaxes(mass,1,2)  # ncol, nsec, nrad
-                mass = np.transpose(mass)     # nrad, nsec, ncol
+                mass = dens*volume            # nz, nrad, nsec
+                mass = np.swapaxes(mass,1,2)  # nz, nsec, nrad
+                mass = np.transpose(mass)     # nrad, nsec, nz
                 #print('np.sum(mass) = ', np.sum(mass))
 
                 '''
