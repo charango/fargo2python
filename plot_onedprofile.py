@@ -230,6 +230,8 @@ def plotonedprofile():
             str_on_start_number = str(on[0])
         if par.nodiff == 'Yes':
             filempg = re.sub('.mpg', '_nodiff.mpg', filempg)
+        if par.z_average == 'Yes':
+            filempg = re.sub('.mpg', '_zave.mpg', filempg)
         # call to python-ffmpeg
         import ffmpeg
         (
