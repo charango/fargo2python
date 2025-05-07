@@ -29,7 +29,7 @@ def plotpowerspectrum():
     #print('output numbers = ', on)
 
     # 2D arrays with radius and azimuth
-    dens = Field(field='dens', fluid='gas', on=0, directory=par.directory, physical_units=par.physical_units, nodiff='Yes', fieldofview=par.fieldofview, onedprofile='No', slice='midplane', override_units=par.override_units)
+    dens = Field(field='dens', fluid='gas', on=0, directory=par.directory, physical_units=par.physical_units, nodiff='Yes', fieldofview=par.fieldofview, onedprofile='No', slice='midplane', z_average=par.z_average, override_units=par.override_units)
     pmed2d  = np.zeros((dens.nrad,dens.nsec))
     surface = np.zeros((dens.nrad,dens.nsec))
 
@@ -62,7 +62,7 @@ def plotpowerspectrum():
     for k in range(len(on)):
 
         # get disc midplane density: array of size (nrad, nsec)
-        dens = Field(field='dens', fluid='gas', on=on[k], directory=par.directory, physical_units=par.physical_units, nodiff='Yes', fieldofview=par.fieldofview, onedprofile='No', slice='midplane', override_units=par.override_units).data
+        dens = Field(field='dens', fluid='gas', on=on[k], directory=par.directory, physical_units=par.physical_units, nodiff='Yes', fieldofview=par.fieldofview, onedprofile='No', slice='midplane', z_average=par.z_average, override_units=par.override_units).data
 
         # total mass
         mass = np.sum(dens*surface)
@@ -103,6 +103,7 @@ def plotpowerspectrum():
         mylabel = str(par.directory)
 
     ax.set_yscale('log')
+    ax.set_xscale('log')
     ax.scatter(azi_wavenb, cn, color=par.c20[0], s=10, label=mylabel)
 
     # And save file

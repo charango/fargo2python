@@ -27,7 +27,7 @@ class Field(Mesh):
            dtype='float64' (numpy dtype) -> 'float64', 'float32', 
                                              depends if FARGO_OPT+=-DFLOAT is activated
     """
-    def __init__(self, field, fluid='gas', staggered='c', directory='', on=0, dtype='float64', physical_units='Yes', nodiff='Yes', fieldofview='polar', slice='midplane', onedprofile='No', override_units='No'):
+    def __init__(self, field, fluid='gas', staggered='c', directory='', on=0, dtype='float64', physical_units='Yes', nodiff='Yes', fieldofview='polar', slice='midplane', z_average='No', onedprofile='No', override_units='No'):
         if len(directory) > 1:
             if directory[-1] != '/':
                 directory += '/'
@@ -256,7 +256,7 @@ class Field(Mesh):
             
 
         if os.path.isfile(input_file) == True:
-            self.data = self.__open_field(input_file,dtype,fieldofview,slice)
+            self.data = self.__open_field(input_file,dtype,fieldofview,slice,z_average)
             if (field == 'vtheta' or field == 'vx') and self.cartesian_grid == 'No':
                 for i in range(self.nrad):
                     self.data[i,:] += (self.rmed)[i]*omegaframe
@@ -347,7 +347,7 @@ class Field(Mesh):
                     gamma = float(buf.split()[1])
 
                     if field == 'toomre':
-                        vphi = self.__open_field(directory+fluid+'vtheta'+str(on)+'.dat',dtype,fieldofview,slice)
+                        vphi = self.__open_field(directory+fluid+'vtheta'+str(on)+'.dat',dtype,fieldofview,slice,z_average)
                     
                 # case we're running with Fargo3D    
                 else:
@@ -378,7 +378,7 @@ class Field(Mesh):
                     gamma = float(buf.split()[1])          
 
                     if field == 'toomre':
-                        vphi = self.__open_field(directory+fluid+'vx'+str(on)+'.dat',dtype,fieldofview,slice)
+                        vphi = self.__open_field(directory+fluid+'vx'+str(on)+'.dat',dtype,fieldofview,slice,z_average)
                         
                 # work out temperature first: self.data contains the gas temperature
                 if energyequation == 'No':
@@ -392,29 +392,29 @@ class Field(Mesh):
                         for i in range(self.nrad):
                             self.data[i,:] = aspectratio*aspectratio*(((self.rmed)[i])**(-1.0+2.0*flaringindex))   # temp
                     else:
-                        energy = self.__open_field(directory+'gasenergy'+str(on)+'.dat',dtype,fieldofview,slice)
+                        energy = self.__open_field(directory+'gasenergy'+str(on)+'.dat',dtype,fieldofview,slice,z_average)
                         self.data = energy*energy  # as gasenergy contains sound speed!
                 else:
                     if self.fargo3d == 'No':
-                        self.data = self.__open_field(directory+'Temperature'+str(on)+'.dat',dtype,fieldofview,slice)
+                        self.data = self.__open_field(directory+'Temperature'+str(on)+'.dat',dtype,fieldofview,slice,z_average)
                     else:
-                        energy = self.__open_field(directory+'gasenergy'+str(on)+'.dat',dtype,fieldofview,slice)
-                        rho = self.__open_field(directory+fluid+'dens'+str(on)+'.dat',dtype,fieldofview,slice)
+                        energy = self.__open_field(directory+'gasenergy'+str(on)+'.dat',dtype,fieldofview,slice,z_average)
+                        rho = self.__open_field(directory+fluid+'dens'+str(on)+'.dat',dtype,fieldofview,slice,z_average)
                         self.data = (gamma-1.0)*energy/rho
 
                 # work out pressure then
                 if field == 'pressure':
-                    dens = self.__open_field(directory+fluid+'dens'+str(on)+'.dat',dtype,fieldofview,slice)
+                    dens = self.__open_field(directory+fluid+'dens'+str(on)+'.dat',dtype,fieldofview,slice,z_average)
                     self.data *= dens   # pressure
                 
                 # work out specific entropy then S = P rho^-gamma = T x rho^(1-gamma)
                 if field == 'entropy':
-                    dens = self.__open_field(directory+fluid+'dens'+str(on)+'.dat',dtype,fieldofview,slice)
+                    dens = self.__open_field(directory+fluid+'dens'+str(on)+'.dat',dtype,fieldofview,slice,z_average)
                     self.data *= (dens**(1.-gamma))  # specific entropy
 
                 # finally work out Toomre Q-parameter
                 if field == 'toomre':
-                    dens = self.__open_field(directory+fluid+'dens'+str(on)+'.dat',dtype,fieldofview,slice)
+                    dens = self.__open_field(directory+fluid+'dens'+str(on)+'.dat',dtype,fieldofview,slice,z_average)
                     cs = np.sqrt(gamma*self.data)
                     self.data = cs/np.pi/dens  # (nrad,nsec)
                     
@@ -432,14 +432,14 @@ class Field(Mesh):
                 # BETA_COOLING parameter: beta = Sigma tau_eff Omega / 4 pi / (gamma-1) / sigma_SB / T^3
                 if field == 'betacooling':
                     # surface density
-                    dens = self.__open_field(directory+fluid+'dens'+str(on)+'.dat',dtype,fieldofview,slice)
+                    dens = self.__open_field(directory+fluid+'dens'+str(on)+'.dat',dtype,fieldofview,slice,z_average)
 
                     # temperature
                     temp = self.data
 
                     # angular frequency
                     omega = np.zeros((self.nrad,self.nsec))
-                    vphi = self.__open_field(directory+fluid+'vx'+str(on)+'.dat',dtype,fieldofview,slice)
+                    vphi = self.__open_field(directory+fluid+'vx'+str(on)+'.dat',dtype,fieldofview,slice,z_average)
                     # vphi, read above, is in the corotating frame!
                     for i in range(self.nrad):
                         vphi[i,:] += (self.rmed)[i]*omegaframe
@@ -527,7 +527,7 @@ class Field(Mesh):
                         myfield = np.fromfile(directory+'gasdens'+str(on)+'.dat', dtype)
                         rho_gas = myfield.reshape(self.nz,self.nrad,self.nsec)   # nz, nrad, nsec
                     else:
-                        sigma_gas = self.__open_field(directory+'gasdens'+str(on)+'.dat',dtype,fieldofview,slice)
+                        sigma_gas = self.__open_field(directory+'gasdens'+str(on)+'.dat',dtype,fieldofview,slice,z_average)
                     
                     # get dust internal density
                     if self.fargo3d == 'Yes':
@@ -604,11 +604,11 @@ class Field(Mesh):
             # MASS ACCRETION RATE Mdot = = -2pi R v_R Sigma
             # ----
             if field == 'mdot':
-                dens = self.__open_field(directory+fluid+'dens'+str(on)+'.dat',dtype,fieldofview,slice)
+                dens = self.__open_field(directory+fluid+'dens'+str(on)+'.dat',dtype,fieldofview,slice,z_average)
                 if self.fargo3d == 'No':
-                    vrad = self.__open_field(directory+fluid+'vrad'+str(on)+'.dat',dtype,fieldofview,slice)
+                    vrad = self.__open_field(directory+fluid+'vrad'+str(on)+'.dat',dtype,fieldofview,slice,z_average)
                 else:
-                    vrad = self.__open_field(directory+fluid+'vy'+str(on)+'.dat',dtype,fieldofview,slice)
+                    vrad = self.__open_field(directory+fluid+'vy'+str(on)+'.dat',dtype,fieldofview,slice,z_average)
                 for j in range(self.nsec):
                     for i in range(self.nrad):
                         self.data[i,j] = -2.0*np.pi*self.rmed[i]*vrad[i,j]*dens[i,j]
@@ -620,11 +620,11 @@ class Field(Mesh):
             if field == 'dgratio':
                 # first read dust density
                 if self.fargo3d == 'No':
-                    dust_density = self.__open_field(directory+'dustdens'+str(on)+'.dat',dtype,fieldofview,slice) 
+                    dust_density = self.__open_field(directory+'dustdens'+str(on)+'.dat',dtype,fieldofview,slice,z_average) 
                 else:
-                    dust_density = self.__open_field(directory+fluid+'dens'+str(on)+'.dat',dtype,fieldofview,slice)
+                    dust_density = self.__open_field(directory+fluid+'dens'+str(on)+'.dat',dtype,fieldofview,slice,z_average)
                 # then read gas density
-                gas_density  = self.__open_field(directory+'gasdens'+str(on)+'.dat',dtype,fieldofview,slice)
+                gas_density  = self.__open_field(directory+'gasdens'+str(on)+'.dat',dtype,fieldofview,slice,z_average)
                 # infer dust-to-gas density ratio
                 self.data = dust_density / gas_density
                 self.strname += r' dust-to-gas density ratio'
@@ -634,13 +634,13 @@ class Field(Mesh):
             # DISC ECCENTRICITY
             # ----
             if field == 'ecc':
-                dens = self.__open_field(directory+fluid+'dens'+str(on)+'.dat',dtype,fieldofview,slice)
+                dens = self.__open_field(directory+fluid+'dens'+str(on)+'.dat',dtype,fieldofview,slice,z_average)
                 if self.fargo3d == 'No':
-                    vrad = self.__open_field(directory+fluid+'vrad'+str(on)+'.dat',dtype,fieldofview,slice)
-                    vphi = self.__open_field(directory+fluid+'vtheta'+str(on)+'.dat',dtype,fieldofview,slice)
+                    vrad = self.__open_field(directory+fluid+'vrad'+str(on)+'.dat',dtype,fieldofview,slice,z_average)
+                    vphi = self.__open_field(directory+fluid+'vtheta'+str(on)+'.dat',dtype,fieldofview,slice,z_average)
                 else:
-                    vrad = self.__open_field(directory+fluid+'vy'+str(on)+'.dat',dtype,fieldofview,slice)
-                    vphi = self.__open_field(directory+fluid+'vx'+str(on)+'.dat',dtype,fieldofview,slice)
+                    vrad = self.__open_field(directory+fluid+'vy'+str(on)+'.dat',dtype,fieldofview,slice,z_average)
+                    vphi = self.__open_field(directory+fluid+'vx'+str(on)+'.dat',dtype,fieldofview,slice,z_average)
 
                 # vphi is in the corotating frame!
                 for i in range(self.nrad):
@@ -690,11 +690,11 @@ class Field(Mesh):
             if (field == 'vorticity' or field == 'drl' or field == 'vortensity' or field == 'invvortensity' or field == 'normvorticity'):
 
                 if self.fargo3d == 'No':
-                    vrad = self.__open_field(directory+fluid+'vrad'+str(on)+'.dat',dtype,fieldofview,slice)
-                    vphi = self.__open_field(directory+fluid+'vtheta'+str(on)+'.dat',dtype,fieldofview,slice)
+                    vrad = self.__open_field(directory+fluid+'vrad'+str(on)+'.dat',dtype,fieldofview,slice,z_average)
+                    vphi = self.__open_field(directory+fluid+'vtheta'+str(on)+'.dat',dtype,fieldofview,slice,z_average)
                 else:
-                    vrad = self.__open_field(directory+fluid+'vy'+str(on)+'.dat',dtype,fieldofview,slice)
-                    vphi = self.__open_field(directory+fluid+'vx'+str(on)+'.dat',dtype,fieldofview,slice)
+                    vrad = self.__open_field(directory+fluid+'vy'+str(on)+'.dat',dtype,fieldofview,slice,z_average)
+                    vphi = self.__open_field(directory+fluid+'vx'+str(on)+'.dat',dtype,fieldofview,slice,z_average)
                 
                 # vphi is in the corotating frame!
                 for i in range(self.nrad):
@@ -735,7 +735,7 @@ class Field(Mesh):
                     
                 # vortensity or inverse vortensity
                 if field == 'vortensity' or field == 'invvortensity':
-                    dens = self.__open_field(directory+fluid+'dens'+str(on)+'.dat',dtype,fieldofview,slice)
+                    dens = self.__open_field(directory+fluid+'dens'+str(on)+'.dat',dtype,fieldofview,slice,z_average)
                     self.data /= dens
                     if field == 'invvortensity':
                         self.data = (1.0/self.data)
@@ -750,14 +750,14 @@ class Field(Mesh):
             # ----
             if (field == 'sgacctheta'):
                 input_file = directory+'sgacctheta'+str(on)+'.dat'
-                self.data = self.__open_field(input_file,dtype,fieldofview,slice)
+                self.data = self.__open_field(input_file,dtype,fieldofview,slice,z_average)
                 self.strname += r' SG $a_{\varphi}$'
                 if physical_units == 'Yes' and nodiff == 'Yes':
                     self.unit = 1e-3*(self.culength)/(self.cutime)/(self.cutime)
                     self.strname += r' [km s$^{-2}$]'
             if (field == 'sgaccr'):
                 input_file = directory+'sgaccr'+str(on)+'.dat'
-                self.data = self.__open_field(input_file,dtype,fieldofview,slice)
+                self.data = self.__open_field(input_file,dtype,fieldofview,slice,z_average)
                 if par.log_xyplots_y == 'Yes':
                     self.data = np.abs(self.data)
                 self.strname += r' SG $a_{r}$'
@@ -771,14 +771,14 @@ class Field(Mesh):
             # ----
             if (field == 'torquesg'):
                 input_file = directory+'torquesg'+str(on)+'.dat'
-                self.data = self.__open_field(input_file,dtype,fieldofview,slice)
+                self.data = self.__open_field(input_file,dtype,fieldofview,slice,z_average)
                 self.strname += r' SG spec. torque'
                 if physical_units == 'Yes' and nodiff == 'Yes':
                     self.unit = (self.culength)*(self.culength)/(self.cutime)
                     self.strname += r' [m$^{2}$ s$^{-1}$]'
             if (field == 'torquesumdisc'):
                 input_file = directory+'torquesumdisc'+str(on)+'.dat'
-                self.data = self.__open_field(input_file,dtype,fieldofview,slice)
+                self.data = self.__open_field(input_file,dtype,fieldofview,slice,z_average)
                 self.strname += r' spec. torque via summation'
                 if physical_units == 'Yes' and nodiff == 'Yes':
                     self.unit = (self.culength)*(self.culength)/(self.cutime)
@@ -820,8 +820,8 @@ class Field(Mesh):
             # VRAD AND VTHETA for 2D CARTESIAN RUNS WITH FARGO3D
             # ----
             if self.fargo3d == 'Yes' and self.cartesian_grid == 'Yes':
-                vx = self.__open_field(directory+fluid+'vx'+str(on)+'.dat',dtype,fieldofview,slice)
-                vy = self.__open_field(directory+fluid+'vy'+str(on)+'.dat',dtype,fieldofview,slice)
+                vx = self.__open_field(directory+fluid+'vx'+str(on)+'.dat',dtype,fieldofview,slice,z_average)
+                vy = self.__open_field(directory+fluid+'vy'+str(on)+'.dat',dtype,fieldofview,slice,z_average)
                 vrad_cart = np.zeros((self.nx,self.ny))
                 vphi_cart = np.zeros((self.nx,self.ny))
                 for i in range(self.nx-1):
@@ -848,7 +848,7 @@ class Field(Mesh):
             # Non-axisymmetric part of gas density
             # ----        
             if field == 'naodens':
-                dens = self.__open_field(directory+fluid+'dens'+str(on)+'.dat',dtype,fieldofview,slice)
+                dens = self.__open_field(directory+fluid+'dens'+str(on)+'.dat',dtype,fieldofview,slice,z_average)
                 axidens = np.sum(dens,axis=1)/self.nsec
                 self.data = dens-axidens.repeat(self.nsec).reshape(self.nrad,self.nsec)
                 if par.verbose == 'Yes':
@@ -868,12 +868,12 @@ class Field(Mesh):
                     on = range(par.on[0],par.on[1]+1,par.take_one_point_every)
                     for z in on:
                         print('reading pcdens'+str(z)+'.dat file',end='\r')
-                        self.data += self.__open_field(directory+fluid+'dens'+str(z)+'.dat',dtype,fieldofview,slice)
+                        self.data += self.__open_field(directory+fluid+'dens'+str(z)+'.dat',dtype,fieldofview,slice,z_average)
                     self.data /= len(on)
                 else:
                     for z in np.arange(on+1):
                         print('reading pcdens'+str(z)+'.dat file',end='\r')
-                        self.data += self.__open_field(directory+fluid+'dens'+str(z)+'.dat',dtype,fieldofview,slice)
+                        self.data += self.__open_field(directory+fluid+'dens'+str(z)+'.dat',dtype,fieldofview,slice,z_average)
                     self.data /= len(np.arange(on))
                 self.strname = 'r.t.a. particle density'
                 if physical_units == 'Yes' and nodiff == 'Yes':
@@ -886,7 +886,7 @@ class Field(Mesh):
             # number 'on' and we time-average arrays
             # ----        
             if field == 'densoveraxi':
-                dens = self.__open_field(directory+fluid+'dens'+str(on)+'.dat',dtype,fieldofview,slice)
+                dens = self.__open_field(directory+fluid+'dens'+str(on)+'.dat',dtype,fieldofview,slice,z_average)
                 axidens = np.sum(dens,axis=1)/self.nsec
                 self.data = dens/(axidens.repeat(self.nsec).reshape(self.nrad,self.nsec))
                 self.strname = r'$\Sigma / \langle\Sigma\rangle_\varphi$'
@@ -954,7 +954,7 @@ class Field(Mesh):
             self.strname += ' at '+self.strtime
        
 
-    def __open_field(self, f, dtype, fieldofview, slice):
+    def __open_field(self, f, dtype, fieldofview, slice, z_average):
         """
         Reading the data
         """
@@ -974,21 +974,26 @@ class Field(Mesh):
                     return np.transpose(myfield [::-1,:])   
                 else:
                     return np.transpose(datacube[:,:,self.nsec//2])  # azimuthal cut at planet's location
-            else:  # polar or cartesian fields of view
-                if np.abs(self.zmax-1.57) < 0.01:
-                    if slice == 'midplane':
-                        return datacube[-1,:,:]   # midplane field only if "half-a-disc" is simulated in latitudinal direction!
-                    if (slice == 'upper' or slice == '#'):
-                        return datacube[1,:,:]   # field at disc surface only if "half-a-disc" is simulated in latitudinal direction!
-                    if slice == 'intermediate':
-                        return datacube[self.nz//2,:,:]   # field at disc surface only if "half-a-disc" is simulated in latitudinal direction!
+            else:  
+                if z_average == 'Yes':
+                    myfield = np.sum(datacube,axis=0)/self.nz  # vertically-averaged field (R vs. azimuth)
+                    return myfield
                 else:
-                    if slice == 'midplane':
-                        return datacube[self.nz//2,:,:]   # midplane field only if "full" disc is simulated in latitudinal direction!
-                    if slice == 'lower':
-                        return datacube[1,:,:]   # field at lower surface only if "half-a-disc" is simulated in latitudinal direction!
-                    if slice == 'upper':
-                        return datacube[-1,:,:]   # field at upper surface only if "half-a-disc" is simulated in latitudinal direction!
+                    # polar or cartesian fields of view
+                    if np.abs(self.zmax-1.57) < 0.01:
+                        if slice == 'midplane':
+                            return datacube[-1,:,:]   # midplane field only if "half-a-disc" is simulated in latitudinal direction!
+                        if (slice == 'upper' or slice == '#'):
+                            return datacube[1,:,:]   # field at disc surface only if "half-a-disc" is simulated in latitudinal direction!
+                        if slice == 'intermediate':
+                            return datacube[self.nz//2,:,:]   # field at disc surface only if "half-a-disc" is simulated in latitudinal direction!
+                    else:
+                        if slice == 'midplane':
+                            return datacube[self.nz//2,:,:]   # midplane field only if "full" disc is simulated in latitudinal direction!
+                        if slice == 'lower':
+                            return datacube[1,:,:]   # field at lower surface only if "half-a-disc" is simulated in latitudinal direction!
+                        if slice == 'upper':
+                            return datacube[-1,:,:]   # field at upper surface only if "half-a-disc" is simulated in latitudinal direction!
 
 
     def compute_streamline(self, dtype='float64',niterations=100,R0=0,T0=0,rmin=0,rmax=1e4,pmin=0,pmax=6.28,forward=True,fieldofview='polar',slice='midplane'):
@@ -1008,14 +1013,14 @@ class Field(Mesh):
 
         # vrad should be subtracted by the instantaneous planet's migration rate da/dt ...
         if self.fargo3d == 'No':
-            vrad = self.__open_field(mydirectory+par.fluid+'vrad'+str(on)+'.dat',dtype,fieldofview,slice)
+            vrad = self.__open_field(mydirectory+par.fluid+'vrad'+str(on)+'.dat',dtype,fieldofview,slice,z_average)
             vrad = np.roll(vrad, shift=int(self.nsec/2), axis=1)
-            vphi = self.__open_field(mydirectory+par.fluid+'vtheta'+str(on)+'.dat',dtype,fieldofview,slice)
+            vphi = self.__open_field(mydirectory+par.fluid+'vtheta'+str(on)+'.dat',dtype,fieldofview,slice,z_average)
             vphi = np.roll(vphi, shift=int(self.nsec/2), axis=1)
             # fields are rolled to reflect planet's azimuthal position
         else:
-            vrad = self.__open_field(mydirectory+par.fluid+'vy'+str(on)+'.dat',dtype,fieldofview,slice)
-            vphi = self.__open_field(mydirectory+par.fluid+'vx'+str(on)+'.dat',dtype,fieldofview,slice)
+            vrad = self.__open_field(mydirectory+par.fluid+'vy'+str(on)+'.dat',dtype,fieldofview,slice,z_average)
+            vphi = self.__open_field(mydirectory+par.fluid+'vx'+str(on)+'.dat',dtype,fieldofview,slice,z_average)
 
         # case where simulation has been carried out in a stellocentric frame, in which case we need to compute 
         # the azimuthal velocity in the frame corotating with the planet
