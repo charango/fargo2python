@@ -30,7 +30,7 @@ def plotonedprofile():
         xtitle = 'radius [au]'
     else:
         xtitle = 'radius [code units]'
-    strfield = Field(field=par.whatfield, fluid=par.fluid, on=on[0], directory=directory[0], physical_units=par.physical_units, nodiff=par.nodiff, fieldofview=par.fieldofview, onedprofile=par.onedprofile, override_units=par.override_units).strname
+    strfield = Field(field=par.whatfield, fluid=par.fluid, on=on[0], directory=directory[0], physical_units=par.physical_units, nodiff=par.nodiff, fieldofview=par.fieldofview, onedprofile=par.onedprofile, z_average=par.z_average, override_units=par.override_units).strname
 
     # if fieldmin and fieldmax are undefined, find out min and max of
     # y-values to be displayed on plot by going though all directories
@@ -43,10 +43,10 @@ def plotonedprofile():
         
         for j in range(len(directory)):  # loop over directories
             if par.nodiff == 'No':
-                myfield0  = Field(field=par.whatfield, fluid=par.fluid, on=0, directory=directory[j], physical_units=par.physical_units, nodiff=par.nodiff, fieldofview=par.fieldofview, onedprofile=par.onedprofile, override_units=par.override_units)
+                myfield0  = Field(field=par.whatfield, fluid=par.fluid, on=0, directory=directory[j], physical_units=par.physical_units, nodiff=par.nodiff, fieldofview=par.fieldofview, onedprofile=par.onedprofile, z_average=par.z_average, override_units=par.override_units)
                 
             for k in range(len(on)):     # loop over output numbers
-                myfield  = Field(field=par.whatfield, fluid=par.fluid, on=on[k], directory=directory[j], physical_units=par.physical_units, nodiff=par.nodiff, fieldofview=par.fieldofview, onedprofile=par.onedprofile, override_units=par.override_units)
+                myfield  = Field(field=par.whatfield, fluid=par.fluid, on=on[k], directory=directory[j], physical_units=par.physical_units, nodiff=par.nodiff, fieldofview=par.fieldofview, onedprofile=par.onedprofile, z_average=par.z_average, override_units=par.override_units)
                 
                 if j==0 and k==0:
                     R = myfield.rmed
@@ -122,7 +122,7 @@ def plotonedprofile():
                 
         for j in range(len(directory)):  # loop over directories
             # it does not take much time to read all fields again...
-            myfield  = Field(field=par.whatfield, fluid=par.fluid, on=on[k], directory=directory[j], physical_units=par.physical_units, nodiff=par.nodiff, fieldofview=par.fieldofview, onedprofile=par.onedprofile, override_units=par.override_units)
+            myfield  = Field(field=par.whatfield, fluid=par.fluid, on=on[k], directory=directory[j], physical_units=par.physical_units, nodiff=par.nodiff, fieldofview=par.fieldofview, onedprofile=par.onedprofile, z_average=par.z_average, override_units=par.override_units)
             
             # stuff we do only once: set xmin and xmax
             if k == 0 and j == 0:
@@ -139,7 +139,7 @@ def plotonedprofile():
                     xmax = par.myrmax
             
             if par.nodiff == 'No':
-                myfield0  = Field(field=par.whatfield, fluid=par.fluid, on=0, directory=directory[j], physical_units=par.physical_units, nodiff=par.nodiff, fieldofview=par.fieldofview, onedprofile=par.onedprofile, override_units=par.override_units)
+                myfield0  = Field(field=par.whatfield, fluid=par.fluid, on=0, directory=directory[j], physical_units=par.physical_units, nodiff=par.nodiff, fieldofview=par.fieldofview, onedprofile=par.onedprofile, z_average=par.z_average, override_units=par.override_units)
                 array = (myfield.data-myfield0.data)/myfield0.data
             else:
                 array = myfield.data
