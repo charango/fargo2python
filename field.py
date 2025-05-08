@@ -902,6 +902,7 @@ class Field(Mesh):
                     on = [par.on] # range(0,par.on,par.take_one_point_every)
                 
                 for k in range(len(on)):
+                    print('k = ', k,' / ', len(on))
                     if self.fargo3d == 'No':
                         vrad = self.__open_field(directory+fluid+'vrad'+str(on[k])+'.dat',dtype,fieldofview,slice,z_average='No')
                         vphi = self.__open_field(directory+fluid+'vtheta'+str(on[k])+'.dat',dtype,fieldofview,slice,z_average='No')
@@ -926,6 +927,7 @@ class Field(Mesh):
                     on = [par.on] # range(0,par.on,par.take_one_point_every)
                 
                 for k in range(len(on)):
+                    print('k = ', k,' / ', len(on))
                     brad = self.__open_field(directory+'by'+str(on[k])+'.dat',dtype,fieldofview,slice,z_average='Yes')
                     bphi = self.__open_field(directory+'bx'+str(on[k])+'.dat',dtype,fieldofview,slice,z_average='Yes')
                     dens = self.__open_field(directory+'gasdens'+str(on[k])+'.dat',dtype,fieldofview,slice,z_average='Yes')
