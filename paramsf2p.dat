@@ -117,7 +117,7 @@ display_label               # add user-defined label in top-right corner of 2D p
 plot_libcross   No
 
 ### plot gas quantities for turbulent disc simulations (eg MRI-driven MHD turbulence 
-# with FARGO3D) -- plot_turb can be set to: No, power_spectrum
+# with FARGO3D) -- plot_turb can be set to: No, power_spectrum, auto_correlation
 plot_turb       No
 
 

@@ -151,7 +151,7 @@ def plotautocorrelationtimescale():
 
     # prepare figure
     fig = plt.figure(figsize=(8.,8.))
-    plt.subplots_adjust(left=0.16, right=0.96, top=0.95, bottom=0.12)
+    plt.subplots_adjust(left=0.17, right=0.96, top=0.95, bottom=0.12)
     ax = fig.gca()
     xtitle = r'Lag [T$_{\rm orb}$]'
     ytitle = 'Auto-correlation function'
@@ -173,7 +173,7 @@ def plotautocorrelationtimescale():
     ax.plot(tau,0*tau,color=par.c20[0],linestyle='dotted')
 
     # And save file
-    outfile = 'acf2_'+str(par.directory)
+    outfile = 'acf_'+str(par.directory)
     fileout = outfile+'.pdf'
     if par.saveaspdf == 'Yes':
         plt.savefig('./'+fileout, dpi=160)
