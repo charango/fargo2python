@@ -95,3 +95,5 @@ if ( ('plot_turb' in open('paramsf2p.dat').read()) and (par.plot_turb != 'No') )
     from plot_turb import *
     if par.plot_turb == 'power_spectrum':
         plotpowerspectrum()
+    if par.plot_turb == 'auto_correlation':
+        plotautocorrelationtimescale()

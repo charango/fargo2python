@@ -136,11 +136,6 @@ def plottqwk():
             pw = ip+op
             
             if par.plot_tqwk == 'torque':
-                '''
-                tq -= tq[-1] # CUIDADIN!!!
-                y = -0.15*tq
-                y += 0.025*Gamma_0
-                '''
                 y = tq
             if par.plot_tqwk == 'power':
                 y = pw

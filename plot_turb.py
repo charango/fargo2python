@@ -117,3 +117,65 @@ def plotpowerspectrum():
         plt.savefig('./'+fileout, dpi=160)
     if par.saveaspng == 'Yes':
         plt.savefig('./'+re.sub('.pdf', '.png', fileout), dpi=120)
+
+
+def plotautocorrelationtimescale():
+
+    # first import global variables
+    import par
+
+    # read tqwk0.dat file -> torque on a massless planet
+    f1, it, ot, f4, f5, ip, op, f8, f9, time = np.loadtxt(par.directory+"/tqwk0.dat",unpack=True)
+    tq = it+ot
+
+    # time in orbital periods at R=1
+    time /= (2.0*np.pi)
+
+    tmax = 20.0
+    nbtaustep = int(20.0*tmax)
+    tau = np.zeros(nbtaustep)
+    acf = np.zeros(nbtaustep)
+
+    nbtimestep = len(tq)
+
+    for k in range(1,nbtaustep): # tau goes from Torb/20 to tmax every Torb/20
+        tau[k] = k/20.0
+        num = 0.0
+        den = 0.0
+
+        for i in range(k,nbtimestep,1): # t goes from tau to TMAX every Torb/20
+            num += tq[i]*tq[i-k]
+            den += tq[i]*tq[i]
+
+        acf[k] = num/den
+
+    # prepare figure
+    fig = plt.figure(figsize=(8.,8.))
+    plt.subplots_adjust(left=0.16, right=0.96, top=0.95, bottom=0.12)
+    ax = fig.gca()
+    xtitle = r'Lag [T$_{\rm orb}$]'
+    ytitle = 'Auto-correlation function'
+    ax.set_xlabel(xtitle)
+    ax.set_ylabel(ytitle)
+    ax.tick_params(top='on', right='on', length = 5, width=1.0, direction='out')
+
+    # handle labels
+    if ('use_legend' in open('paramsf2p.dat').read()) and (par.use_legend != '#'):
+        mylabel = str(par.use_legend)
+    else:
+        mylabel = str(par.directory)
+
+    ax.set_xscale('log')
+    ax.set_xlim(tau[1],tau[-1])
+
+    ax.scatter(tau[1:], acf[1:], color=par.c20[0], s=10, label=mylabel)
+    ax.plot(tau[1:], acf[1:], color=par.c20[0],linestyle='-')
+    ax.plot(tau,0*tau,color=par.c20[0],linestyle='dotted')
+
+    # And save file
+    outfile = 'acf2_'+str(par.directory)
+    fileout = outfile+'.pdf'
+    if par.saveaspdf == 'Yes':
+        plt.savefig('./'+fileout, dpi=160)
+    if par.saveaspng == 'Yes':
+        plt.savefig('./'+re.sub('.pdf', '.png', fileout), dpi=120)
