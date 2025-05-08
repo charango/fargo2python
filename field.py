@@ -895,18 +895,48 @@ class Field(Mesh):
             # time-averaged Reynolds alpha parameter
             # ----        
             if field == 'alpha_reynolds':
-                if self.fargo3d == 'No':
-                    vrad = self.__open_field(directory+fluid+'vrad'+str(on)+'.dat',dtype,fieldofview,slice,z_average='No')
-                    vphi = self.__open_field(directory+fluid+'vtheta'+str(on)+'.dat',dtype,fieldofview,slice,z_average='No')
-                else:
-                    vrad = self.__open_field(directory+fluid+'vy'+str(on)+'.dat',dtype,fieldofview,slice,z_average='Yes')
-                    vphi = self.__open_field(directory+fluid+'vx'+str(on)+'.dat',dtype,fieldofview,slice,z_average='Yes')
 
-                axivrad = np.sum(vrad,axis=1)/self.nsec
-                axivphi = np.sum(vphi,axis=1)/self.nsec
-                self.data = axivrad*axivphi/0.05/0.05  # cuidadin!
-                self.strname = r'$\alpha_{\rm Rey}$'
+                if np.isscalar(par.on) == False:
+                    on = range(par.on[0],par.on[1]+1,par.take_one_point_every)
+                else:
+                    on = [par.on] # range(0,par.on,par.take_one_point_every)
                 
+                for k in range(len(on)):
+                    if self.fargo3d == 'No':
+                        vrad = self.__open_field(directory+fluid+'vrad'+str(on[k])+'.dat',dtype,fieldofview,slice,z_average='No')
+                        vphi = self.__open_field(directory+fluid+'vtheta'+str(on[k])+'.dat',dtype,fieldofview,slice,z_average='No')
+                    else:
+                        vrad = self.__open_field(directory+fluid+'vy'+str(on[k])+'.dat',dtype,fieldofview,slice,z_average='Yes')
+                        vphi = self.__open_field(directory+fluid+'vx'+str(on[k])+'.dat',dtype,fieldofview,slice,z_average='Yes')
+                    axivrad = (np.sum(vrad,axis=1)/self.nsec).repeat(self.nsec).reshape(self.nrad,self.nsec)
+                    axivphi = (np.sum(vphi,axis=1)/self.nsec).repeat(self.nsec).reshape(self.nrad,self.nsec)
+                    self.data += (vrad-axivrad)*(vphi-axivphi)/0.05/0.05  # cuidadin c_s^2 needs be more general!
+
+                self.data /= len(on)
+                self.strname = r'$\alpha_{\rm Rey}$'
+
+            # ----
+            # time-averaged Reynolds alpha parameter
+            # ----        
+            if field == 'alpha_maxwell':
+
+                if np.isscalar(par.on) == False:
+                    on = range(par.on[0],par.on[1]+1,par.take_one_point_every)
+                else:
+                    on = [par.on] # range(0,par.on,par.take_one_point_every)
+                
+                for k in range(len(on)):
+                    brad = self.__open_field(directory+'by'+str(on[k])+'.dat',dtype,fieldofview,slice,z_average='Yes')
+                    bphi = self.__open_field(directory+'bx'+str(on[k])+'.dat',dtype,fieldofview,slice,z_average='Yes')
+                    dens = self.__open_field(directory+'gasdens'+str(on[k])+'.dat',dtype,fieldofview,slice,z_average='Yes')
+                    axibrad = (np.sum(brad,axis=1)/self.nsec).repeat(self.nsec).reshape(self.nrad,self.nsec)
+                    axibphi = (np.sum(bphi,axis=1)/self.nsec).repeat(self.nsec).reshape(self.nrad,self.nsec)
+                    axidens = (np.sum(dens,axis=1)/self.nsec).repeat(self.nsec).reshape(self.nrad,self.nsec)
+                    self.data -= (brad-axibrad)*(bphi-axibphi)/axidens/0.05/0.05    # cuidadin c_s^2 needs be more general!
+
+                self.data /= len(on)
+                self.strname = r'$\alpha_{\rm Max}$'
+
                 
         # field name and units
         if field == 'dens':
