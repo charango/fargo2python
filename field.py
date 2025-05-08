@@ -890,6 +890,23 @@ class Field(Mesh):
                 axidens = np.sum(dens,axis=1)/self.nsec
                 self.data = dens/(axidens.repeat(self.nsec).reshape(self.nrad,self.nsec))
                 self.strname = r'$\Sigma / \langle\Sigma\rangle_\varphi$'
+
+            # ----
+            # time-averaged Reynolds alpha parameter
+            # ----        
+            if field == 'alpha_reynolds':
+                if self.fargo3d == 'No':
+                    vrad = self.__open_field(directory+fluid+'vrad'+str(on)+'.dat',dtype,fieldofview,slice,z_average='No')
+                    vphi = self.__open_field(directory+fluid+'vtheta'+str(on)+'.dat',dtype,fieldofview,slice,z_average='No')
+                else:
+                    vrad = self.__open_field(directory+fluid+'vy'+str(on)+'.dat',dtype,fieldofview,slice,z_average='Yes')
+                    vphi = self.__open_field(directory+fluid+'vx'+str(on)+'.dat',dtype,fieldofview,slice,z_average='Yes')
+
+                axivrad = np.sum(vrad,axis=1)/self.nsec
+                axivphi = np.sum(vphi,axis=1)/self.nsec
+                self.data = axivrad*axivphi/0.05/0.05  # cuidadin!
+                self.strname = r'$\alpha_{\rm Rey}$'
+                
                 
         # field name and units
         if field == 'dens':
