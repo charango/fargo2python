@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 
 import fnmatch
 import re
+import os
 
 from mesh import *
 from field import *
@@ -179,3 +180,52 @@ def plotautocorrelationtimescale():
         plt.savefig('./'+fileout, dpi=160)
     if par.saveaspng == 'Yes':
         plt.savefig('./'+re.sub('.pdf', '.png', fileout), dpi=120)
+
+
+def plot_alphas():
+
+    # first import global variables
+    import par
+
+    # get nrad
+    dens = Field(field='dens', fluid='gas', on=0, directory=par.directory, physical_units=par.physical_units, nodiff='Yes', fieldofview=par.fieldofview, onedprofile='No', slice='midplane', z_average='No', override_units=par.override_units)
+    nr = dens.nrad
+
+    # get 2D (r,time) binary file with Reynolds stress 
+    f = par.directory+'/monitor/gas/reynolds_1d_Y_raw.dat'
+    alpha_rey_file_data = np.fromfile(f, dtype='float64')
+
+    # number of outputs in 
+    nboutputs = int(len(alpha_rey_file_data)/nr)
+
+    # reshape output as a 2D array
+    buffer = alpha_rey_file_data.reshape(nboutputs,nr)  # 2D nrad, nb_outputs
+
+    # time-average 1D radial profile of alpha_reynolds
+    alpha_rey = np.sum(buffer, axis=0)/nboutputs/0.05/0.05  # cuidadin manually devide by c_s^2
+
+    # prepare figure
+    fig = plt.figure(figsize=(8.,8.))
+    plt.subplots_adjust(left=0.16, right=0.96, top=0.95, bottom=0.12)
+    ax = fig.gca()
+    xtitle = 'radius'
+    ytitle = r'$\alpha_{\rm Rey}$'
+    ax.set_xlabel(xtitle)
+    ax.set_ylabel(ytitle)
+    ax.tick_params(top='on', right='on', length = 5, width=1.0, direction='out')
+
+    # handle labels
+    if ('use_legend' in open('paramsf2p.dat').read()) and (par.use_legend != '#'):
+        mylabel = str(par.use_legend)
+    else:
+        mylabel = str(par.directory)
+
+    ax.plot(dens.rmed, alpha_rey, color=par.c20[0], label=mylabel)
+
+    # And save file
+    outfile = 'alpha_rey_'+str(par.directory)
+    fileout = outfile+'.pdf'
+    if par.saveaspdf == 'Yes':
+        plt.savefig('./'+fileout, dpi=160)
+    if par.saveaspng == 'Yes':
+        plt.savefig('./'+re.sub('.pdf', '.png', fileout), dpi=120)    

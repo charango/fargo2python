@@ -896,22 +896,51 @@ class Field(Mesh):
             # ----        
             if field == 'alpha_reynolds':
 
-                if np.isscalar(par.on) == False:
-                    on = range(par.on[0],par.on[1]+1,par.take_one_point_every)
+                if par.movie == 'Yes':
+                    on = range(0,on,par.take_one_point_every)
                 else:
-                    on = [par.on] # range(0,par.on,par.take_one_point_every)
-                
-                for k in range(len(on)):
-                    print('k = ', k,' / ', len(on))
-                    if self.fargo3d == 'No':
-                        vrad = self.__open_field(directory+fluid+'vrad'+str(on[k])+'.dat',dtype,fieldofview,slice,z_average='No')
-                        vphi = self.__open_field(directory+fluid+'vtheta'+str(on[k])+'.dat',dtype,fieldofview,slice,z_average='No')
+                    if np.isscalar(par.on) == False:
+                        on = range(par.on[0],par.on[1]+1,par.take_one_point_every)
                     else:
-                        vrad = self.__open_field(directory+fluid+'vy'+str(on[k])+'.dat',dtype,fieldofview,slice,z_average='Yes')
-                        vphi = self.__open_field(directory+fluid+'vx'+str(on[k])+'.dat',dtype,fieldofview,slice,z_average='Yes')
-                    axivrad = (np.sum(vrad,axis=1)/self.nsec).repeat(self.nsec).reshape(self.nrad,self.nsec)
-                    axivphi = (np.sum(vphi,axis=1)/self.nsec).repeat(self.nsec).reshape(self.nrad,self.nsec)
-                    self.data += (vrad-axivrad)*(vphi-axivphi)/0.05/0.05  # cuidadin c_s^2 needs be more general!
+                        on = [par.on] 
+                    
+                for k in range(len(on)):
+                    #print('k = ', k,' / ', len(on))
+
+                    if self.fargo3d == 'No':
+                        vrad = self.__open_field(directory+'gasvrad'+str(on[k])+'.dat',dtype,fieldofview,slice,z_average='No')
+                        vphi = self.__open_field(directory+'gasvtheta'+str(on[k])+'.dat',dtype,fieldofview,slice,z_average='No')
+                        dens = self.__open_field(directory+'gasdens'+str(on[k])+'.dat',dtype,fieldofview,slice,z_average='No')
+                        # get isothermal sound speed
+                        command = par.awk_command+' " /^AspectRatio/ " '+directory+'*.par'
+                        buf = subprocess.getoutput(command)
+                        aspectratio = float(buf.split()[1])
+                        command = par.awk_command+' " /^FlaringIndex/ " '+directory+'*.par'
+                        buf = subprocess.getoutput(command)
+                        flaringindex = float(buf.split()[1])
+                    else:
+                        vrad = self.__open_field(directory+'gasvy'+str(on[k])+'.dat',dtype,fieldofview,slice,z_average='Yes')
+                        vphi = self.__open_field(directory+'gasvx'+str(on[k])+'.dat',dtype,fieldofview,slice,z_average='Yes')
+                        dens = self.__open_field(directory+'gasdens'+str(on[k])+'.dat',dtype,fieldofview,slice,z_average='Yes')
+                        # get isothermal sound speed
+                        command = par.awk_command+' " /^ASPECTRATIO/ " '+directory+'*.par'
+                        buf = subprocess.getoutput(command)
+                        aspectratio = float(buf.split()[1])
+                        command = par.awk_command+' " /^FLARINGINDEX/ " '+directory+'*.par'
+                        buf = subprocess.getoutput(command)
+                        flaringindex = float(buf.split()[1])
+                        
+                    axivrad = np.sum(vrad*dens,axis=1)/np.sum(dens,axis=1)  # density-weighted azimuthal average
+                    axivphi = np.sum(vphi*dens,axis=1)/np.sum(dens,axis=1)  # density-weighted azimuthal average
+                    axidens = np.sum(dens,axis=1)/self.nsec  # (nrad)
+                    deltavr = vrad-axivrad.repeat(self.nsec).reshape(self.nrad,self.nsec) # (nrad, nsec)
+                    deltavp = vphi-axivphi.repeat(self.nsec).reshape(self.nrad,self.nsec) # (nrad, nsec)
+                    axidvrdvp = np.sum(deltavr*deltavp*dens,axis=1)/np.sum(dens,axis=1)  # density-weighted azimuthal average (nrad)
+                    # get pressure
+                    cs = aspectratio * self.rmed**(flaringindex-0.5)  # isothermal sound speed (nrad)
+                    pressure = dens*((cs*cs).repeat(self.nsec).reshape(self.nrad,self.nsec))  # 2D thermal pressure
+                    axipres = np.sum(pressure*dens,axis=1)/np.sum(dens,axis=1)  # density-weighted azimuthal average (nrad)
+                    self.data += (axidens*axidvrdvp/axipres).repeat(self.nsec).reshape(self.nrad,self.nsec) # 2D
 
                 self.data /= len(on)
                 self.strname = r'$\alpha_{\rm Rey}$'
@@ -921,20 +950,34 @@ class Field(Mesh):
             # ----        
             if field == 'alpha_maxwell':
 
-                if np.isscalar(par.on) == False:
-                    on = range(par.on[0],par.on[1]+1,par.take_one_point_every)
+                if par.movie == 'Yes':
+                    on = range(0,on,par.take_one_point_every)
                 else:
-                    on = [par.on] # range(0,par.on,par.take_one_point_every)
+                    if np.isscalar(par.on) == False:
+                        on = range(par.on[0],par.on[1]+1,par.take_one_point_every)
+                    else:
+                        on = [par.on] 
                 
                 for k in range(len(on)):
-                    print('k = ', k,' / ', len(on))
+                    #print('k = ', k,' / ', len(on))
+
                     brad = self.__open_field(directory+'by'+str(on[k])+'.dat',dtype,fieldofview,slice,z_average='Yes')
                     bphi = self.__open_field(directory+'bx'+str(on[k])+'.dat',dtype,fieldofview,slice,z_average='Yes')
                     dens = self.__open_field(directory+'gasdens'+str(on[k])+'.dat',dtype,fieldofview,slice,z_average='Yes')
-                    axibrad = (np.sum(brad,axis=1)/self.nsec).repeat(self.nsec).reshape(self.nrad,self.nsec)
-                    axibphi = (np.sum(bphi,axis=1)/self.nsec).repeat(self.nsec).reshape(self.nrad,self.nsec)
-                    axidens = (np.sum(dens,axis=1)/self.nsec).repeat(self.nsec).reshape(self.nrad,self.nsec)
-                    self.data -= (brad-axibrad)*(bphi-axibphi)/axidens/0.05/0.05    # cuidadin c_s^2 needs be more general!
+                    axibrbp = np.sum(brad*bphi*dens,axis=1)/np.sum(dens,axis=1)  # density-weighted azimuthal average
+                    # get isothermal sound speed
+                    command = par.awk_command+' " /^ASPECTRATIO/ " '+directory+'*.par'
+                    buf = subprocess.getoutput(command)
+                    aspectratio = float(buf.split()[1])
+                    command = par.awk_command+' " /^FLARINGINDEX/ " '+directory+'*.par'
+                    buf = subprocess.getoutput(command)
+                    flaringindex = float(buf.split()[1])
+                    cs = aspectratio * self.rmed**(flaringindex-0.5)  # isothermal sound speed (nrad)
+                    # get pressure                    
+                    pressure = dens*((cs*cs).repeat(self.nsec).reshape(self.nrad,self.nsec))  # 2D thermal pressure
+                    axipres = (np.sum(pressure*dens,axis=1)/np.sum(dens,axis=1))  # density-weighted azimuthal average (nrad)
+
+                    self.data -= (axibrbp/axipres).repeat(self.nsec).reshape(self.nrad,self.nsec) # 2D  # mu0 = 1 in code units
 
                 self.data /= len(on)
                 self.strname = r'$\alpha_{\rm Max}$'
