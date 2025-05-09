@@ -187,9 +187,27 @@ def plot_alphas():
     # first import global variables
     import par
 
-    # get nrad
-    dens = Field(field='dens', fluid='gas', on=0, directory=par.directory, physical_units=par.physical_units, nodiff='Yes', fieldofview=par.fieldofview, onedprofile='No', slice='midplane', z_average='No', override_units=par.override_units)
-    nr = dens.nrad
+    # get time-averaged density
+    dim = len(fnmatch.filter(os.listdir(par.directory), 'summary*.dat'))
+    on = range(0,dim,1)
+    for i in range(len(on)):
+        dens = Field(field='dens', fluid='gas', on=on[i], directory=par.directory, physical_units=par.physical_units, nodiff='Yes', fieldofview=par.fieldofview, onedprofile='No', slice='midplane', z_average='Yes', override_units=par.override_units)
+        if i==0:
+            nr = dens.nrad
+            axidens = np.zeros(nr)
+        axidens += np.sum(dens.data,axis=1)
+    axidens /= len(on)
+    axidens /= dens.nsec
+
+    # get isothermal sound speed then pressure
+    command = par.awk_command+' " /^ASPECTRATIO/ " '+par.directory+'/*.par'
+    buf = subprocess.getoutput(command)
+    aspectratio = float(buf.split()[1])
+    command = par.awk_command+' " /^FLARINGINDEX/ " '+par.directory+'/*.par'
+    buf = subprocess.getoutput(command)
+    flaringindex = float(buf.split()[1])
+    cs = aspectratio * dens.rmed**(flaringindex-0.5)  # isothermal sound speed (nrad)
+    axipres = axidens*cs*cs
 
     # get 2D (r,time) binary file with Reynolds stress 
     f = par.directory+'/monitor/gas/reynolds_1d_Y_raw.dat'
@@ -202,28 +220,39 @@ def plot_alphas():
     buffer = alpha_rey_file_data.reshape(nboutputs,nr)  # 2D nrad, nb_outputs
 
     # time-average 1D radial profile of alpha_reynolds
-    alpha_rey = np.sum(buffer, axis=0)/nboutputs/0.05/0.05  # cuidadin manually devide by c_s^2
+    alpha_rey = np.sum(buffer, axis=0)/nboutputs/axipres
+
+    # get 2D (r,time) binary file with Maxwell stress 
+    f = par.directory+'/monitor/gas/maxwell_1d_Y_raw.dat'
+    alpha_max_file_data = np.fromfile(f, dtype='float64')
+
+    # number of outputs in 
+    nboutputs = int(len(alpha_max_file_data)/nr)
+
+    # reshape output as a 2D array
+    buffer = alpha_max_file_data.reshape(nboutputs,nr)  # 2D nrad, nb_outputs
+
+    # time-average 1D radial profile of alpha_reynolds
+    alpha_max = -np.sum(buffer, axis=0)/nboutputs/axipres
 
     # prepare figure
     fig = plt.figure(figsize=(8.,8.))
-    plt.subplots_adjust(left=0.16, right=0.96, top=0.95, bottom=0.12)
+    plt.subplots_adjust(left=0.20, right=0.96, top=0.95, bottom=0.12)
     ax = fig.gca()
-    xtitle = 'radius'
-    ytitle = r'$\alpha_{\rm Rey}$'
+    xtitle = 'Radius'
+    ytitle = 'Time-averaged alpha coefficients'
     ax.set_xlabel(xtitle)
     ax.set_ylabel(ytitle)
     ax.tick_params(top='on', right='on', length = 5, width=1.0, direction='out')
+    ax.set_xlim(dens.rmed.min(),dens.rmed.max())
 
-    # handle labels
-    if ('use_legend' in open('paramsf2p.dat').read()) and (par.use_legend != '#'):
-        mylabel = str(par.use_legend)
-    else:
-        mylabel = str(par.directory)
+    ax.plot(dens.rmed, alpha_rey, color=par.c20[0], label=r'$\alpha_{\rm Rey}$')
+    ax.plot(dens.rmed, alpha_max, color=par.c20[1], label=r'$\alpha_{\rm Max}$')
 
-    ax.plot(dens.rmed, alpha_rey, color=par.c20[0], label=mylabel)
+    ax.legend(frameon=False,fontsize=15)
 
     # And save file
-    outfile = 'alpha_rey_'+str(par.directory)
+    outfile = 'alphas_'+str(par.directory)
     fileout = outfile+'.pdf'
     if par.saveaspdf == 'Yes':
         plt.savefig('./'+fileout, dpi=160)
