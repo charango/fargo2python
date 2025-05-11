@@ -62,6 +62,7 @@ def plotpowerspectrum():
     # ========================
     for k in range(len(on)):
 
+        print('k = ', k, ' / ', len(on)-1 )
         # get disc midplane density: array of size (nrad, nsec)
         dens = Field(field='dens', fluid='gas', on=on[k], directory=par.directory, physical_units=par.physical_units, nodiff='Yes', fieldofview=par.fieldofview, onedprofile='No', slice='midplane', z_average=par.z_average, override_units=par.override_units).data
 
@@ -132,7 +133,7 @@ def plotautocorrelationtimescale():
     # time in orbital periods at R=1
     time /= (2.0*np.pi)
 
-    tmax = time.max() # 20.0
+    tmax = time.max()
     nbtaustep = int(20.0*tmax)
     tau = np.zeros(nbtaustep)
     acf = np.zeros(nbtaustep)
