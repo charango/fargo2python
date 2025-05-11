@@ -132,7 +132,7 @@ def plotautocorrelationtimescale():
     # time in orbital periods at R=1
     time /= (2.0*np.pi)
 
-    tmax = 20.0
+    tmax = time.max() # 20.0
     nbtaustep = int(20.0*tmax)
     tau = np.zeros(nbtaustep)
     acf = np.zeros(nbtaustep)
