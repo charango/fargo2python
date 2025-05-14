@@ -173,12 +173,12 @@ class Field(Mesh):
         # get time in orbital periods at initial location of inner planet
         # also get omegaframe for vtheta
         if self.fargo3d == 'Yes':
-            f1, xpla, ypla, f4, f5, f6, f7, f8, date, omega = np.loadtxt(directory+"/planet0.dat",unpack=True)
+            f1, xpla, ypla, f4, f5, f6, f7, mpla, date, omega = np.loadtxt(directory+"/planet0.dat",unpack=True)
         else:
             if self.fargo_orig == 'Yes':
-                f1, xpla, ypla, f4, f5, f6, f7, date, omega = np.loadtxt(directory+"planet0.dat",unpack=True)
+                f1, xpla, ypla, f4, f5, mpla, f7, date, omega = np.loadtxt(directory+"planet0.dat",unpack=True)
             else:
-                f1, xpla, ypla, f4, f5, f6, f7, date, omega, f10, f11 = np.loadtxt(directory+"planet0.dat",unpack=True)
+                f1, xpla, ypla, f4, f5, mpla, f7, date, omega, f10, f11 = np.loadtxt(directory+"planet0.dat",unpack=True)
 
         # read only first line of file orbit0.dat to get initial semi-major axis:
         # procedure is independent of how many columns there is in the file
@@ -982,7 +982,202 @@ class Field(Mesh):
                 self.data /= len(on)
                 self.strname = r'$\alpha_{\rm Max}$'
 
+
+            # ----
+            # 2D field of disc's direct torque on planet
+            # ----        
+            if field == 'direct_torque':
+
+                dens  = self.__open_field(directory+'gasdens'+str(on)+'.dat',dtype,fieldofview,slice,z_average='No')
+
+                # get mass of each grid cell
+                surface = np.zeros((self.nrad,self.nsec))
+                Rinf = self.redge[0:len(self.redge)-1]
+                Rsup = self.redge[1:len(self.redge)]
+                surf = np.pi * (Rsup*Rsup - Rinf*Rinf) / self.nsec
+                for th in range(self.nsec):
+                    surface[:,th] = surf
+                mass = dens*surface
+
+                # smoothing length to be improved
+                eps = 0.03
+
+                # allocate arrays 
+                torque = np.zeros((self.nrad, self.nsec))
+
+                for i in range(self.nrad):
+                    for j in range(self.nsec):
+                        xc = self.rmed[i]*np.cos(self.pmed[j])  # x of center of cell (i,j)
+                        yc = self.rmed[i]*np.sin(self.pmed[j])  # y of center of cell (i,j)
+                        dx = xc-xpla[on]
+                        dy = yc-ypla[on]
+                        hill_cut = 1.0
+                        dist = np.sqrt( dx*dx + dy*dy + eps*eps )
+                        fx = mass[i,j]*dx*hill_cut/dist/dist/dist
+                        fy = mass[i,j]*dy*hill_cut/dist/dist/dist
+                        torque[i,j] = xpla[on]*fy - ypla[on]*fx
+
+                # if normalize_torque set to Yes, direct torque is computed in units of Gamma_0 the reference torque 
+                # normalization factor
+                if par.normalize_torque == 'Yes':
+                    # get planet-to-star mass ratio q
+                    q = mpla[on]   # time-varying array
+                    
+                    # get planet's orbital radius, local disc's aspect ratio + check if energy equation was used
+                    if self.fargo3d == 'Yes':
+                        command  = par.awk_command+' " /^ASPECTRATIO/ " '+directory+'/*.par'
+                        command2 = par.awk_command+' " /^FLARINGINDEX/ " '+directory+'/*.par'
+                        if "ISOTHERMAL" in open(directory+'/summary0.dat',"r").read():
+                            energyequation = "No"
+                        else:
+                            energyequation = "Yes"
+                    else:
+                        command  = par.awk_command+' " /^AspectRatio/ " '+directory+'/*.par'
+                        command2 = par.awk_command+' " /^FlaringIndex/ " '+directory+'/*.par'
+                        command3 = par.awk_command+' " /^EnergyEquation/ " '+directory+'/*.par'
+                        buf3 = subprocess.getoutput(command3)
+                        energyequation = str(buf3.split()[1])
+            
+                    buf = subprocess.getoutput(command)
+                    aspectratio = float(buf.split()[1])
+                    buf2 = subprocess.getoutput(command2)
+                    fli = float(buf2.split()[1])
+                    rpla0_normtq = np.sqrt( xpla[0]*xpla[0] + ypla[0]*ypla[0] )
+                    h = aspectratio*(rpla0_normtq**fli)  # constant in time
+                    
+                    # get adiabatic index
+                    if energyequation == 'Yes':
+                        if fargo3d == 'Yes':
+                            command4 = par.awk_command+' " /^GAMMA/ " '+directory[j]+'/*.par'
+                        else:
+                            command4 = par.awk_command+' " /^AdiabaticIndex/ " '+directory[j]+'/*.par'
+                        buf4 = subprocess.getoutput(command4)
+                        adiabatic_index = float(buf4.split()[1])
+                    else:
+                        adiabatic_index = 1.0
+
+                    # get local azimuthally averaged surface density
+                    myfield0 = Field(field='dens', fluid='gas', on=0, directory=directory, physical_units='No', nodiff='Yes', fieldofview=par.fieldofview, slice='midplane',z_average='No', onedprofile='Yes', override_units=par.override_units)
+                    dens = np.sum(myfield0.data,axis=1) / myfield0.nsec
+                    imin = np.argmin(np.abs(myfield0.rmed-rpla0_normtq))
+                    sigmap = dens[imin]
+
+                    # Finally infer Gamma_0
+                    Gamma_0 = (q/h/h)*sigmap*rpla0_normtq/adiabatic_index
+                    print('q = ', q)
+                    print('h = ', h)
+                    print('rpla0_normtq = ', rpla0_normtq)
+                    print('sigmap = ', sigmap)
+                    print('adiabatic index = ', adiabatic_index)
+                    print('Gamma_0 = ', Gamma_0)
+                    torque /= Gamma_0
+                    self.strname = r'Direct torque on planet $[\Gamma_0]$'
+                else:
+                    Gamma_0 = 1.0
+                    self.strname = 'Direct torque on planet [c.u.]'
+
+                for i in range(self.nrad-1):
+                    self.data[i,:] = torque[i,:]/(self.rmed[i+1]-self.rmed[i])
+                self.data[self.nrad-1,:] = self.data[self.nrad-2,:]
+                self.data *= self.nsec
+
+                #self.data = torque
+                print('total torque = ', np.sum(torque))
+
+            # ----
+            # 2D field of disc's indirect torque on planet
+            # ----        
+            if field == 'indirect_torque':
+
+                dens = self.__open_field(directory+'gasdens'+str(on)+'.dat',dtype,fieldofview='polar',slice='midplane',z_average='No')
+
+                surface = np.zeros((self.nrad,self.nsec))
+                Rinf = self.redge[0:len(self.redge)-1]
+                Rsup = self.redge[1:len(self.redge)]
+                surf = np.pi * (Rsup*Rsup - Rinf*Rinf) / self.nsec
+                for th in range(self.nsec):
+                    surface[:,th] = surf
+
+                # mass of each grid cell
+                mass = dens*surface
+
+                # allocate arrays 
+                torque = np.zeros((self.nrad, self.nsec))
+
+                for i in range(self.nrad):
+                    for j in range(self.nsec):
+                        xc = self.rmed[i]*np.cos(self.pmed[j])  # x of center of cell (i,j)
+                        yc = self.rmed[i]*np.sin(self.pmed[j])  # y of center of cell (i,j)
+                        dist = np.sqrt( xc*xc + yc*yc )
+                        fx = -mass[i,j]*xc/dist/dist/dist
+                        fy = -mass[i,j]*yc/dist/dist/dist
+                        torque[i,j] = xpla[on]*fy - ypla[on]*fx
                 
+                # if normalize_torque set to Yes, direct torque is computed in units of Gamma_0 the reference torque 
+                # normalization factor
+                if par.normalize_torque == 'Yes':
+                    # get planet-to-star mass ratio q
+                    q = mpla[on]   # time-varying array
+                    
+                    # get planet's orbital radius, local disc's aspect ratio + check if energy equation was used
+                    if self.fargo3d == 'Yes':
+                        command  = par.awk_command+' " /^ASPECTRATIO/ " '+directory+'/*.par'
+                        command2 = par.awk_command+' " /^FLARINGINDEX/ " '+directory+'/*.par'
+                        if "ISOTHERMAL" in open(directory+'/summary0.dat',"r").read():
+                            energyequation = "No"
+                        else:
+                            energyequation = "Yes"
+                    else:
+                        command  = par.awk_command+' " /^AspectRatio/ " '+directory+'/*.par'
+                        command2 = par.awk_command+' " /^FlaringIndex/ " '+directory+'/*.par'
+                        command3 = par.awk_command+' " /^EnergyEquation/ " '+directory+'/*.par'
+                        buf3 = subprocess.getoutput(command3)
+                        energyequation = str(buf3.split()[1])
+            
+                    buf = subprocess.getoutput(command)
+                    aspectratio = float(buf.split()[1])
+                    buf2 = subprocess.getoutput(command2)
+                    fli = float(buf2.split()[1])
+                    rpla0_normtq = np.sqrt( xpla[0]*xpla[0] + ypla[0]*ypla[0] )
+                    h = aspectratio*(rpla0_normtq**fli)  # constant in time
+                    
+                    # get adiabatic index
+                    if energyequation == 'Yes':
+                        if fargo3d == 'Yes':
+                            command4 = par.awk_command+' " /^GAMMA/ " '+directory[j]+'/*.par'
+                        else:
+                            command4 = par.awk_command+' " /^AdiabaticIndex/ " '+directory[j]+'/*.par'
+                        buf4 = subprocess.getoutput(command4)
+                        adiabatic_index = float(buf4.split()[1])
+                    else:
+                        adiabatic_index = 1.0
+
+                    # get local azimuthally averaged surface density
+                    myfield0 = Field(field='dens', fluid='gas', on=0, directory=directory, physical_units='No', nodiff='Yes', fieldofview=par.fieldofview, slice='midplane',z_average='No', onedprofile='Yes', override_units=par.override_units)
+                    dens = np.sum(myfield0.data,axis=1) / myfield0.nsec
+                    imin = np.argmin(np.abs(myfield0.rmed-rpla0_normtq))
+                    sigmap = dens[imin]
+
+                    # Finally infer Gamma_0
+                    Gamma_0 = (q/h/h)*sigmap*rpla0_normtq/adiabatic_index
+                    print('q = ', q)
+                    print('h = ', h)
+                    print('rpla0_normtq = ', rpla0_normtq)
+                    print('sigmap = ', sigmap)
+                    print('adiabatic index = ', adiabatic_index)
+                    print('Gamma_0 = ', Gamma_0)
+                    torque /= Gamma_0
+                    self.strname = r'Indirect torque on planet $[\Gamma_0]$'
+                else:
+                    self.strname = 'Indirect torque on planet [c.u.]'
+
+                for i in range(self.nrad-1):
+                    self.data[i,:] = (torque[i+1,:]-torque[i,:])/(self.rmed[i+1]-self.rmed[i])
+                self.data[self.nrad-1,:] = self.data[self.nrad-2,:]
+
+                print('total torque = ', np.sum(torque))
+
+
         # field name and units
         if field == 'dens':
             self.strname += ' density'

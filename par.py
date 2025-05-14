@@ -152,6 +152,10 @@ if (nodiff == 'No'):
 if whatfield == 'bx' or whatfield == 'by' or whatfield == 'bz':
     fluid = ''
 
+# case direct or indirect torque of disc on planet is computed
+if whatfield == 'direct_torque' or whatfield == 'indirect_torque':
+    nodiff = 'Yes'
+
 # case where all fluids should be displayed!
 if fluid == 'all':
     import numpy as np
