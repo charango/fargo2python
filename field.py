@@ -1329,7 +1329,8 @@ class Field(Mesh):
 
         #
         if physical_units == 'No' and nodiff == 'Yes':
-            self.strname += r' [code units]'            
+            if (not('torque') in field) and (par.normalize_torque == 'No'):
+                self.strname += r' [code units]'            
 
         if onedprofile == 'No':
             self.strname += ' at '+self.strtime
