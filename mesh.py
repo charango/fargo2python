@@ -37,14 +37,16 @@ class Mesh():
             else:
                 # case used_azi.dat does not exist, for instance with original FARGO code:
                 self.pedge = np.linspace(0.,2.*np.pi,self.nsec+1)  # phi-edge   
+            # cuidadin (May 2025)
+            self.pmed  = np.linspace(0.,2.*np.pi,self.nsec+1)   
+            self.pedge = self.pmed - 0.5*(self.pmed[1]-self.pmed[0])
         else:
             try:
                 domain_azi = np.loadtxt(directory+"domain_x.dat")  # radial interfaces of grid cells
             except IOError:
                 print('IOError')
             self.pedge = domain_azi
-            #self.pedge = np.linspace(0.,2.*np.pi,self.nsec+1)  # phi-edge         
-        self.pmed = 0.5*(self.pedge[:-1] + self.pedge[1:]) # phi-center
+            self.pmed = 0.5*(self.pedge[:-1] + self.pedge[1:]) # phi-center
 
         # -----
         # colatitude / latitude

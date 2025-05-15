@@ -260,6 +260,70 @@ class Field(Mesh):
             if (field == 'vtheta' or field == 'vx') and self.cartesian_grid == 'No':
                 for i in range(self.nrad):
                     self.data[i,:] += (self.rmed)[i]*omegaframe
+            
+            if field == 'Test':
+
+                self.strname = 'Direct torque on planet'
+                self.data *= self.nsec
+
+                if par.normalize_torque == 'Yes':
+                    # get planet-to-star mass ratio q
+                    q = mpla[on]   # time-varying array
+                    
+                    # get planet's orbital radius, local disc's aspect ratio + check if energy equation was used
+                    if self.fargo3d == 'Yes':
+                        command  = par.awk_command+' " /^ASPECTRATIO/ " '+directory+'/*.par'
+                        command2 = par.awk_command+' " /^FLARINGINDEX/ " '+directory+'/*.par'
+                        if "ISOTHERMAL" in open(directory+'/summary0.dat',"r").read():
+                            energyequation = "No"
+                        else:
+                            energyequation = "Yes"
+                    else:
+                        command  = par.awk_command+' " /^AspectRatio/ " '+directory+'/*.par'
+                        command2 = par.awk_command+' " /^FlaringIndex/ " '+directory+'/*.par'
+                        command3 = par.awk_command+' " /^EnergyEquation/ " '+directory+'/*.par'
+                        buf3 = subprocess.getoutput(command3)
+                        energyequation = str(buf3.split()[1])
+            
+                    buf = subprocess.getoutput(command)
+                    aspectratio = float(buf.split()[1])
+                    buf2 = subprocess.getoutput(command2)
+                    fli = float(buf2.split()[1])
+                    rpla0_normtq = np.sqrt( xpla[0]*xpla[0] + ypla[0]*ypla[0] )
+                    h = aspectratio*(rpla0_normtq**fli)  # constant in time
+                    
+                    # get adiabatic index
+                    if energyequation == 'Yes':
+                        if fargo3d == 'Yes':
+                            command4 = par.awk_command+' " /^GAMMA/ " '+directory[j]+'/*.par'
+                        else:
+                            command4 = par.awk_command+' " /^AdiabaticIndex/ " '+directory[j]+'/*.par'
+                        buf4 = subprocess.getoutput(command4)
+                        adiabatic_index = float(buf4.split()[1])
+                    else:
+                        adiabatic_index = 1.0
+
+                    # get local azimuthally averaged surface density
+                    myfield0 = Field(field='dens', fluid='gas', on=0, directory=directory, physical_units='No', nodiff='Yes', fieldofview=par.fieldofview, slice='midplane',z_average='No', onedprofile='Yes', override_units=par.override_units)
+                    dens = np.sum(myfield0.data,axis=1) / myfield0.nsec
+                    imin = np.argmin(np.abs(myfield0.rmed-rpla0_normtq))
+                    sigmap = dens[imin]
+
+                    # Finally infer Gamma_0
+                    Gamma_0 = (q/h/h)*sigmap*rpla0_normtq/adiabatic_index
+                    print('q = ', q)
+                    print('h = ', h)
+                    print('rpla0_normtq = ', rpla0_normtq)
+                    print('sigmap = ', sigmap)
+                    print('adiabatic index = ', adiabatic_index)
+                    print('Gamma_0 = ', Gamma_0)
+
+                    self.data /= Gamma_0
+
+                    self.strname += r' [$\Gamma_0$]'
+
+                print('total torque dfadsg = ', np.sum(self.data)/self.nsec)
+
             '''
             if field == 'dens' and 'cavity_gas' in open('paramsf2p.dat').read() and cavity_gas == 'Yes':
                 imin = np.argmin(np.abs(self.rmed-1.3))
@@ -986,7 +1050,7 @@ class Field(Mesh):
             # ----
             # 2D field of disc's direct torque on planet
             # ----        
-            if field == 'direct_torque':
+            if field == 'direct_torque' or field == 'cumulative_direct_torque':
 
                 dens  = self.__open_field(directory+'gasdens'+str(on)+'.dat',dtype,fieldofview,slice,z_average='No')
 
@@ -999,8 +1063,23 @@ class Field(Mesh):
                     surface[:,th] = surf
                 mass = dens*surface
 
-                # smoothing length to be improved
-                eps = 0.03
+                # smoothing length of planet's gravitational potential
+                if self.fargo3d == 'Yes':
+                    command   = par.awk_command+' " /^THICKNESSSMOOTHING/ " '+directory+'/variables.par'
+                    command2  = par.awk_command+' " /^ASPECTRATIO/ " '+directory+'/variables.par'
+                    command3  = par.awk_command+' " /^FLARINGINDEX/ " '+directory+'/variables.par'
+                else:
+                    command   = par.awk_command+' " /^ThicknessSmoothing/ " '+directory+'/*.par'
+                    command2  = par.awk_command+' " /^AspectRatio/ " '+directory+'/*.par'
+                    command3  = par.awk_command+' " /^FlaringIndex/ " '+directory+'/*.par'
+                buf = subprocess.getoutput(command)
+                eps = float(buf.split()[1]) 
+                buf = subprocess.getoutput(command2)
+                ar  = float(buf.split()[1]) 
+                buf = subprocess.getoutput(command3)
+                fli = float(buf.split()[1])
+                rpla = np.sqrt( xpla[on]*xpla[on] + ypla[on]*ypla[on] )
+                eps *= (ar * rpla**(1.+fli))
 
                 # allocate arrays 
                 torque = np.zeros((self.nrad, self.nsec))
@@ -1025,8 +1104,8 @@ class Field(Mesh):
                     
                     # get planet's orbital radius, local disc's aspect ratio + check if energy equation was used
                     if self.fargo3d == 'Yes':
-                        command  = par.awk_command+' " /^ASPECTRATIO/ " '+directory+'/*.par'
-                        command2 = par.awk_command+' " /^FLARINGINDEX/ " '+directory+'/*.par'
+                        command  = par.awk_command+' " /^ASPECTRATIO/ " '+directory+'/variables.par'
+                        command2 = par.awk_command+' " /^FLARINGINDEX/ " '+directory+'/variables.par'
                         if "ISOTHERMAL" in open(directory+'/summary0.dat',"r").read():
                             energyequation = "No"
                         else:
@@ -1048,7 +1127,7 @@ class Field(Mesh):
                     # get adiabatic index
                     if energyequation == 'Yes':
                         if fargo3d == 'Yes':
-                            command4 = par.awk_command+' " /^GAMMA/ " '+directory[j]+'/*.par'
+                            command4 = par.awk_command+' " /^GAMMA/ " '+directory[j]+'/variables.par'
                         else:
                             command4 = par.awk_command+' " /^AdiabaticIndex/ " '+directory[j]+'/*.par'
                         buf4 = subprocess.getoutput(command4)
@@ -1075,19 +1154,26 @@ class Field(Mesh):
                 else:
                     Gamma_0 = 1.0
                     self.strname = 'Direct torque on planet [c.u.]'
+                
+                self.data = torque*self.nsec
+                print('total torque f2p = ', np.sum(torque))
 
-                for i in range(self.nrad-1):
-                    self.data[i,:] = torque[i,:]/(self.rmed[i+1]-self.rmed[i])
-                self.data[self.nrad-1,:] = self.data[self.nrad-2,:]
-                self.data *= self.nsec
+                if field == 'cumulative_direct_torque':
+                    self.strname = 'Cumul. '+self.strname
+                    self.data = 0.0*torque
+                    test = np.zeros(self.nrad)
+                    axitorque = np.zeros(self.nrad)
+                    axitorque = np.sum(torque, axis=1)
+                    test[0] = axitorque[0]
+                    for i in range(1,self.nrad):
+                        test[i] = test[i-1]+axitorque[i]
+                    self.data = test.repeat(self.nsec).reshape(self.nrad,self.nsec)  # 2D 
 
-                #self.data = torque
-                print('total torque = ', np.sum(torque))
 
             # ----
             # 2D field of disc's indirect torque on planet
             # ----        
-            if field == 'indirect_torque':
+            if field == 'indirect_torque' or field == 'cumulative_indirect_torque':
 
                 dens = self.__open_field(directory+'gasdens'+str(on)+'.dat',dtype,fieldofview='polar',slice='midplane',z_average='No')
 
@@ -1171,12 +1257,20 @@ class Field(Mesh):
                 else:
                     self.strname = 'Indirect torque on planet [c.u.]'
 
-                for i in range(self.nrad-1):
-                    self.data[i,:] = (torque[i+1,:]-torque[i,:])/(self.rmed[i+1]-self.rmed[i])
-                self.data[self.nrad-1,:] = self.data[self.nrad-2,:]
+                self.data = torque*self.nsec
+                print('total torque f2p = ', np.sum(torque))
 
-                print('total torque = ', np.sum(torque))
-
+                if field == 'cumulative_indirect_torque':
+                    self.strname = 'Cumul. '+self.strname
+                    self.data = 0.0*torque
+                    test = np.zeros(self.nrad)
+                    axitorque = np.zeros(self.nrad)
+                    axitorque = np.sum(torque, axis=1)
+                    test[0] = axitorque[0]
+                    for i in range(1,self.nrad):
+                        test[i] = test[i-1]+axitorque[i]
+                    self.data = test.repeat(self.nsec).reshape(self.nrad,self.nsec)  # 2D 
+                
 
         # field name and units
         if field == 'dens':

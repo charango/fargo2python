@@ -152,6 +152,10 @@ if (nodiff == 'No'):
 if whatfield == 'bx' or whatfield == 'by' or whatfield == 'bz':
     fluid = ''
 
+# case polargrid Test has been used in simulation
+if whatfield == 'Test':
+    fluid = ''
+
 # case direct or indirect torque of disc on planet is computed
 if whatfield == 'direct_torque' or whatfield == 'indirect_torque':
     nodiff = 'Yes'

@@ -149,3 +149,9 @@ plot_turb       No
 # sgaccr: radial self-gravitating acceleration
 # sgacctheta: azimuthal self-gravitating acceleration
 # bettacooling: cooling-timescale-to-orbital-period ratio
+# direct_torque: direct disc torque on planet
+# cumulative_direct_torque: cumulative direct disc torque on planet (int_rmin^r Gamma(x)dx)
+# indirect_torque: indirect disc torque on planet
+# cumulative_indirect_torque: cumulative indirect disc torque on planet (int_rmin^r Gamma(x)dx)
+# alpha_reynolds: vertically and azimuthally averaged radial profile of Reynolds alpha parameter
+# alpha_maxwell: vertically and azimuthally averaged radial profile of Maxwell alpha parameter
