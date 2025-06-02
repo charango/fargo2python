@@ -930,7 +930,7 @@ class Field(Mesh):
                 dens = self.__open_field(directory+fluid+'dens'+str(on)+'.dat',dtype,fieldofview,slice,z_average)
                 axidens = np.sum(dens,axis=1)/self.nsec
                 self.data = (dens-axidens.repeat(self.nsec).reshape(self.nrad,self.nsec))/axidens.repeat(self.nsec).reshape(self.nrad,self.nsec)
-                self.strname = r'$(\Sigma - \langle\Sigma\rangle_\varphi$)/\langle\Sigma\rangle_\varphi$'
+                self.strname = r'$(\Sigma - \langle\Sigma\rangle_\varphi) / \langle\Sigma\rangle_\varphi$'
 
             # ----
             # time-averaged particle density: means that we read
