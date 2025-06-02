@@ -926,7 +926,7 @@ class Field(Mesh):
                     print(self.data.min(),self.data.max(),end='\r')
                 self.strname = r'$\Sigma - \langle\Sigma\rangle_\varphi$'
 
-            f field == 'normnaodens':
+            if field == 'normnaodens':
                 dens = self.__open_field(directory+fluid+'dens'+str(on)+'.dat',dtype,fieldofview,slice,z_average)
                 axidens = np.sum(dens,axis=1)/self.nsec
                 self.data = (dens-axidens.repeat(self.nsec).reshape(self.nrad,self.nsec))/axidens.repeat(self.nsec).reshape(self.nrad,self.nsec)
