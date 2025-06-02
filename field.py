@@ -76,6 +76,12 @@ class Field(Mesh):
                 field = 'vx'
             if field == 'vcol':
                 field = 'vz'
+            if field == 'br':
+                field = 'by'
+            if field == 'btheta':
+                field = 'bx'
+            if field == 'bcol':
+                field = 'bz'
             command = par.awk_command+' " /^ZMAX/ " '+directory+'/variables.par'
             if sys.version_info[0] < 3:   # python 2.X
                 buf = subprocess.check_output(command, shell=True)
@@ -920,6 +926,12 @@ class Field(Mesh):
                     print(self.data.min(),self.data.max(),end='\r')
                 self.strname = r'$\Sigma - \langle\Sigma\rangle_\varphi$'
 
+            f field == 'normnaodens':
+                dens = self.__open_field(directory+fluid+'dens'+str(on)+'.dat',dtype,fieldofview,slice,z_average)
+                axidens = np.sum(dens,axis=1)/self.nsec
+                self.data = (dens-axidens.repeat(self.nsec).reshape(self.nrad,self.nsec))/axidens.repeat(self.nsec).reshape(self.nrad,self.nsec)
+                self.strname = r'$(\Sigma - \langle\Sigma\rangle_\varphi$)/\langle\Sigma\rangle_\varphi$'
+
             # ----
             # time-averaged particle density: means that we read
             # dustdensX.dat files for X from 0 to current output
@@ -1315,6 +1327,14 @@ class Field(Mesh):
             if physical_units == 'Yes' and nodiff == 'Yes':
                 self.unit = 1e-3*(self.culength)/(self.cutime)
                 self.strname += r' [km s$^{-1}$]'
+        if field == 'brad' or field == 'by':
+            self.strname += r' $B_{r}$'
+        if field == 'btheta' or field == 'bx':
+            self.strname += r' $B_{\varphi}$'
+        if field == 'bcol':
+            self.strname += r' $B_{\theta}$'
+        if field == 'bz':
+            self.strname += r' $B_{z}$'
         if field == 'temp':
             self.strname += ' temperature'
             if physical_units == 'Yes' and nodiff == 'Yes':
