@@ -1296,7 +1296,6 @@ class Field(Mesh):
 
         # field name and units
         if nodiff != 'nao' and nodiff != 'normnao':
-            print('coucou')
             if field == 'dens':
                 self.strname += ' density'
                 #self.strname += r' $\Sigma$'
