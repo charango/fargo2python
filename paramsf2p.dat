@@ -127,11 +127,16 @@ plot_turb       No
 
 # dens: surface density (2D runs) or volume density (3D runs)
 # surfacedens: vertically-integrated volume density (3D runs)
-# naodens: non-axisymmetric component of the gas density (2D runs)
+# naodens: non-axisymmetric component of the gas density (2D runs): Sigma-<Sigma>
+# normnaodens: (Sigma - <Sigma>)/<Sigma>
+# normnaotemp: (T - <T>)/<T>
 # rtadens: running-time averaged particle density (2D runs with Lagrangian particles)
 # vrad: radial velocity
 # vtheta: azimuthal velocity
 # vcol: latitudinal velocity
+# brad: radial component of magnetic field
+# btheta: azimuthal component of magnetic field
+# bcol: latitudinal component of magnetic field
 # pressure: thermal pressure
 # temp: temperature
 # toomre: Toomre-Q parameter (2D runs)
