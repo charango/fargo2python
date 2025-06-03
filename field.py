@@ -1294,69 +1294,69 @@ class Field(Mesh):
                 self.strname = 'normalised n.a.o '+field
         
 
-
         # field name and units
-        if field == 'dens':
-            self.strname += ' density'
-            #self.strname += r' $\Sigma$'
-            if self.fargo3d == 'No':  # 2D
-                if physical_units == 'Yes' and nodiff == 'Yes':
-                    self.unit = (self.cumass*1e3)/((self.culength*1e2)**2.)
-                    self.strname += r' [g cm$^{-2}$]'
-            else:
-                #self.strname += ' midplane density'
-                if physical_units == 'Yes' and nodiff == 'Yes':
-                    if self.nz > 1:  # 3D
-                        self.unit = (self.cumass*1e3)/((self.culength*1e2)**3.)
-                        self.strname += r' [g cm$^{-3}$]'
-                    else:  # 2D
+        if nodiff != 'nao' and 'nodiff' != 'normnao':
+            if field == 'dens':
+                self.strname += ' density'
+                #self.strname += r' $\Sigma$'
+                if self.fargo3d == 'No':  # 2D
+                    if physical_units == 'Yes' and nodiff == 'Yes':
                         self.unit = (self.cumass*1e3)/((self.culength*1e2)**2.)
                         self.strname += r' [g cm$^{-2}$]'
-        if field == 'energy' and  self.fargo3d == 'Yes':
-            self.strname += ' sound speed'
-            if physical_units == 'Yes' and nodiff == 'Yes':
-                self.unit = 1e-3*(self.culength)/(self.cutime)
-                self.strname += r' [km s$^{-1}$]'
-        if field == 'vrad' or field == 'vy':
-            if field == 'vy' and self.cartesian_grid == 'Yes':
-                self.strname += r' $v_{y}$'
-            else:
-                self.strname += r' $v_{r}$'
-            if physical_units == 'Yes' and nodiff == 'Yes':
-                self.unit = 1e-3*(self.culength)/(self.cutime)
-                self.strname += r' [km s$^{-1}$]'
-        if field == 'vtheta' or field == 'vx':
-            if field == 'vx' and self.cartesian_grid == 'Yes':
-                self.strname += r' $v_{x}$'
-            else:
-                self.strname += r' $v_{\varphi}$'
-            if physical_units == 'Yes' and nodiff == 'Yes':
-                self.unit = 1e-3*(self.culength)/(self.cutime)
-                self.strname += r' [km s$^{-1}$]'
-        if field == 'vcol' or field == 'vz':
-            self.strname += r' $v_{\theta}$'
-            if physical_units == 'Yes' and nodiff == 'Yes':
-                self.unit = 1e-3*(self.culength)/(self.cutime)
-                self.strname += r' [km s$^{-1}$]'
-        if field == 'brad' or field == 'by':
-            self.strname += r' $B_{r}$'
-        if field == 'btheta' or field == 'bx':
-            self.strname += r' $B_{\varphi}$'
-        if field == 'bcol':
-            self.strname += r' $B_{\theta}$'
-        if field == 'bz':
-            self.strname += r' $B_{z}$'
-        if field == 'temp':
-            self.strname += ' temperature'
-            if physical_units == 'Yes' and nodiff == 'Yes':
-                self.unit = self.cutemp
-                self.strname += ' [K]'
-        if field == 'mdot':
-            if physical_units == 'Yes' and nodiff == 'Yes':
-                self.unit = (self.cumass)/(self.cutime)
-                self.unit /= 2e30  
-                self.unit *= 3.15e7
-                self.strname += r' [$M_{\odot}$ yr$^{-1}$]'
+                else:
+                    #self.strname += ' midplane density'
+                    if physical_units == 'Yes' and nodiff == 'Yes':
+                        if self.nz > 1:  # 3D
+                            self.unit = (self.cumass*1e3)/((self.culength*1e2)**3.)
+                            self.strname += r' [g cm$^{-3}$]'
+                        else:  # 2D
+                            self.unit = (self.cumass*1e3)/((self.culength*1e2)**2.)
+                            self.strname += r' [g cm$^{-2}$]'
+            if field == 'energy' and  self.fargo3d == 'Yes':
+                self.strname += ' sound speed'
+                if physical_units == 'Yes' and nodiff == 'Yes':
+                    self.unit = 1e-3*(self.culength)/(self.cutime)
+                    self.strname += r' [km s$^{-1}$]'
+            if field == 'vrad' or field == 'vy':
+                if field == 'vy' and self.cartesian_grid == 'Yes':
+                    self.strname += r' $v_{y}$'
+                else:
+                    self.strname += r' $v_{r}$'
+                if physical_units == 'Yes' and nodiff == 'Yes':
+                    self.unit = 1e-3*(self.culength)/(self.cutime)
+                    self.strname += r' [km s$^{-1}$]'
+            if field == 'vtheta' or field == 'vx':
+                if field == 'vx' and self.cartesian_grid == 'Yes':
+                    self.strname += r' $v_{x}$'
+                else:
+                    self.strname += r' $v_{\varphi}$'
+                if physical_units == 'Yes' and nodiff == 'Yes':
+                    self.unit = 1e-3*(self.culength)/(self.cutime)
+                    self.strname += r' [km s$^{-1}$]'
+            if field == 'vcol' or field == 'vz':
+                self.strname += r' $v_{\theta}$'
+                if physical_units == 'Yes' and nodiff == 'Yes':
+                    self.unit = 1e-3*(self.culength)/(self.cutime)
+                    self.strname += r' [km s$^{-1}$]'
+            if field == 'brad' or field == 'by':
+                self.strname += r' $B_{r}$'
+            if field == 'btheta' or field == 'bx':
+                self.strname += r' $B_{\varphi}$'
+            if field == 'bcol':
+                self.strname += r' $B_{\theta}$'
+            if field == 'bz':
+                self.strname += r' $B_{z}$'
+            if field == 'temp':
+                self.strname += ' temperature'
+                if physical_units == 'Yes' and nodiff == 'Yes':
+                    self.unit = self.cutemp
+                    self.strname += ' [K]'
+            if field == 'mdot':
+                if physical_units == 'Yes' and nodiff == 'Yes':
+                    self.unit = (self.cumass)/(self.cutime)
+                    self.unit /= 2e30  
+                    self.unit *= 3.15e7
+                    self.strname += r' [$M_{\odot}$ yr$^{-1}$]'
 
         #
         if physical_units == 'No' and nodiff == 'Yes':
