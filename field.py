@@ -370,7 +370,7 @@ class Field(Mesh):
             # TEMPERATURE or PRESSURE or ENTROPY or TOOMRE Q-parameter = c_s Omega / pi G Sigma
             # or BETA_COOLING parameter beta = Sigma tau_eff Omega / 4 pi / (gamma-1) / sigma_SB / T^3
             # ----
-            if field == 'temp' or field == 'pressure' or field == 'entropy' or field == 'toomre' or field == 'betacooling' or field == 'stokes' or field == 'normnaotemp':
+            if field == 'temp' or field == 'pressure' or field == 'entropy' or field == 'toomre' or field == 'betacooling' or field == 'stokes':
                 if field == 'pressure':
                     self.strname += ' pressure'
                 if field == 'toomre':
@@ -471,12 +471,6 @@ class Field(Mesh):
                         energy = self.__open_field(directory+'gasenergy'+str(on)+'.dat',dtype,fieldofview,slice,z_average)
                         rho = self.__open_field(directory+fluid+'dens'+str(on)+'.dat',dtype,fieldofview,slice,z_average)
                         self.data = (gamma-1.0)*energy/rho
-
-                if field == 'normnaotemp':
-                    axitemp = np.sum(self.data ,axis=1)/self.nsec
-                    self.data = (self.data-axitemp.repeat(self.nsec).reshape(self.nrad,self.nsec))/axitemp.repeat(self.nsec).reshape(self.nrad,self.nsec)
-                    self.strname = r'$(T - \langle T\rangle_\varphi) / \langle T\rangle_\varphi$'
-
 
                 # work out pressure then
                 if field == 'pressure':
@@ -920,23 +914,6 @@ class Field(Mesh):
                     #print(vphi_cart.min(),vphi_cart.max())
                     self.data = vphi_cart
 
-            # ----
-            # Non-axisymmetric part of gas density
-            # ----        
-            if field == 'naodens':
-                dens = self.__open_field(directory+fluid+'dens'+str(on)+'.dat',dtype,fieldofview,slice,z_average)
-                axidens = np.sum(dens,axis=1)/self.nsec
-                self.data = dens-axidens.repeat(self.nsec).reshape(self.nrad,self.nsec)
-                if par.verbose == 'Yes':
-                    print('#### NAO DENSITY ###')
-                    print(self.data.min(),self.data.max(),end='\r')
-                self.strname = r'$\Sigma - \langle\Sigma\rangle_\varphi$'
-
-            if field == 'normnaodens':
-                dens = self.__open_field(directory+fluid+'dens'+str(on)+'.dat',dtype,fieldofview,slice,z_average)
-                axidens = np.sum(dens,axis=1)/self.nsec
-                self.data = (dens-axidens.repeat(self.nsec).reshape(self.nrad,self.nsec))/axidens.repeat(self.nsec).reshape(self.nrad,self.nsec)
-                self.strname = r'$(\Sigma - \langle\Sigma\rangle_\varphi) / \langle\Sigma\rangle_\varphi$'
 
             # ----
             # time-averaged particle density: means that we read
@@ -1289,6 +1266,34 @@ class Field(Mesh):
                         test[i] = test[i-1]+axitorque[i]
                     self.data = test.repeat(self.nsec).reshape(self.nrad,self.nsec)  # 2D 
                 
+
+        # Non-axisymmetric part of 2D field:
+        if nodiff == 'nao':
+            axidata = np.sum(self.data ,axis=1)/self.nsec
+            self.data = (self.data-axidata.repeat(self.nsec).reshape(self.nrad,self.nsec))
+            if field == 'dens':
+                self.strname = r'$(\Sigma - \langle \Sigma\rangle_\varphi)$'
+            elif field == 'temp':
+                self.strname = r'$(T - \langle T\rangle_\varphi)$'
+            elif field == 'bx':
+                self.strname = r'$(B_{\varphi} - \langle B_{\varphi}\rangle_\varphi)$'
+            else:
+                self.strname = 'n.a.o '+field
+        
+        # Non-axisymmetric part of 2D field, normalized:
+        if nodiff == 'normnao':
+            axidata = np.sum(self.data ,axis=1)/self.nsec
+            self.data = (self.data-axidata.repeat(self.nsec).reshape(self.nrad,self.nsec))/axidata.repeat(self.nsec).reshape(self.nrad,self.nsec)
+            if field == 'dens':
+                self.strname = r'$(\Sigma - \langle \Sigma\rangle_\varphi) / \langle \Sigma\rangle_\varphi$'
+            elif field == 'temp':
+                self.strname = r'$(T - \langle T\rangle_\varphi) / \langle T\rangle_\varphi$'
+            elif field == 'bx':
+                self.strname = r'$(B_{\varphi} - \langle B_{\varphi}\rangle_\varphi) / \langle B_{\varphi}\rangle_\varphi$'
+            else:
+                self.strname = 'normalised n.a.o '+field
+        
+
 
         # field name and units
         if field == 'dens':
