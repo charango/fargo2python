@@ -259,3 +259,82 @@ def plot_alphas():
         plt.savefig('./'+fileout, dpi=160)
     if par.saveaspng == 'Yes':
         plt.savefig('./'+re.sub('.pdf', '.png', fileout), dpi=120)    
+
+
+
+# function that plots histogram of quantity (Sigma - <Sigma>) / <Sigma> at different times
+def plot_histodens():
+
+    # first import global variables
+    import par
+
+    # Define range of output numbers to consider (in case a time-averaged spectrum is required)
+    if par.take_one_point_every == '#':
+        take_one_point_every = 1
+    else:
+        take_one_point_every = par.take_one_point_every
+
+    if np.isscalar(par.on) == False:
+        on = range(par.on[0],par.on[1]+1,par.take_one_point_every)
+    else:
+        on = [par.on]
+        #nboutputs = len(fnmatch.filter(os.listdir(par.directory), 'summary*.dat'))
+        #on = range(0,nboutputs,take_one_point_every)
+
+    # prepare figure
+    fig = plt.figure(figsize=(8.,8.))
+    plt.subplots_adjust(left=0.16, right=0.96, top=0.95, bottom=0.12)
+    ax = fig.gca()
+    xtitle = r'$(\Sigma - \langle \Sigma\rangle_\varphi) / \langle \Sigma\rangle_\varphi$'
+    ytitle = 'Histogram'
+    ax.set_xlabel(xtitle)
+    ax.set_ylabel(ytitle)
+    ax.tick_params(top='on', right='on', length = 5, width=1.0, direction='out')
+
+    # handle labels
+    if ('use_legend' in open('paramsf2p.dat').read()) and (par.use_legend != '#'):
+        mylabel = str(par.use_legend)
+    else:
+        mylabel = str(par.directory)
+
+    ax.set_yscale('log')
+    #ax.set_xscale('log')
+
+    min_bin = -0.3
+    max_bin = 0.3
+    nb_bins = 50
+    mybins = min_bin + (max_bin-min_bin)*np.arange(nb_bins)/(nb_bins-1.0)
+
+    # ========================
+    # loop over output numbers
+    # ========================
+    for k in range(len(on)):
+
+        print('k = ', k, ' / ', len(on)-1 )
+        # get disc midplane density: array of size (nrad, nsec)
+        dens = Field(field='dens', fluid='gas', on=on[k], directory=par.directory, physical_units=par.physical_units, nodiff='Yes', fieldofview=par.fieldofview, onedprofile='No', slice='midplane', z_average=par.z_average, override_units=par.override_units)
+        nrad = dens.nrad
+        nsec = dens.nsec
+
+        axidens = (np.sum(dens.data ,axis=1)/nsec).repeat(nsec).reshape(nrad,nsec)
+        dens = (dens.data-axidens)/axidens
+
+        dens1d = dens.reshape(nrad*nsec)
+
+        # add histogram here
+        cmap = matplotlib.cm.get_cmap('Spectral')
+        c20 = cmap(k/(len(on)-1.0))
+        n, bins, patches = plt.hist(x=dens1d, bins=mybins, color=c20, alpha=0.5, rwidth=0.9)
+    
+
+    # And save file
+    outfile = 'histodens_'+str(par.directory)+'_'
+    if np.isscalar(par.on) == False:
+        outfile += str(par.on[0])+'_'+str(par.on[1])
+    else:
+        outfile += str(par.on)
+    fileout = outfile+'.pdf'
+    if par.saveaspdf == 'Yes':
+        plt.savefig('./'+fileout, dpi=160)
+    if par.saveaspng == 'Yes':
+        plt.savefig('./'+re.sub('.pdf', '.png', fileout), dpi=120)

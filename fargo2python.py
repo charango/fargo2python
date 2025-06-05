@@ -99,3 +99,5 @@ if ( ('plot_turb' in open('paramsf2p.dat').read()) and (par.plot_turb != 'No') )
         plotautocorrelationtimescale()
     if par.plot_turb == 'alphas':
         plot_alphas()
+    if par.plot_turb == 'histo_dens':
+        plot_histodens()
