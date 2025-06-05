@@ -300,8 +300,14 @@ def plot_histodens():
     ax.set_yscale('log')
     #ax.set_xscale('log')
 
-    min_bin = -0.3
-    max_bin = 0.3
+    if par.myfieldmin != '#":
+        min_bin = par.myfieldmin
+    else
+        min_bin = -0.3
+    if par.myfieldmax != '#":
+        max_bin = par.myfieldmax
+    else
+        max_bin = 0.3
     nb_bins = 50
     mybins = min_bin + (max_bin-min_bin)*np.arange(nb_bins)/(nb_bins-1.0)
 
