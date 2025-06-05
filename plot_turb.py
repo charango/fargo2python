@@ -302,11 +302,11 @@ def plot_histodens():
 
     if par.fieldmin != '#':
         min_bin = par.fieldmin
-    else
+    else:
         min_bin = -0.3
     if par.fieldmax != '#':
         max_bin = par.fieldmax
-    else
+    else:
         max_bin = 0.3
     nb_bins = 50
     mybins = min_bin + (max_bin-min_bin)*np.arange(nb_bins)/(nb_bins-1.0)
