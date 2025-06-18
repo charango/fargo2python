@@ -117,7 +117,7 @@ display_label               # add user-defined label in top-right corner of 2D p
 plot_libcross   No
 
 ### plot gas quantities for turbulent disc simulations (eg MRI-driven MHD turbulence 
-# with FARGO3D) -- plot_turb can be set to: No, power_spectrum, auto_correlation
+# with FARGO3D) -- plot_turb can be set to: No, power_spectrum, histo_dens, auto_correlation
 plot_turb       No
 
 
@@ -127,7 +127,6 @@ plot_turb       No
 
 # dens: surface density (2D runs) or volume density (3D runs)
 # surfacedens: vertically-integrated volume density (3D runs)
-# rtadens: running-time averaged particle density (2D runs with Lagrangian particles)
 # vrad: radial velocity
 # vtheta: azimuthal velocity
 # vcol: latitudinal velocity
