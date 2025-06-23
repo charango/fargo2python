@@ -216,13 +216,13 @@ def plotplanet():
                 umin = 0
             else:
                 xmin = par.mytmin
-                umin = np.argmin(np.abs(time-xmin))
+                umin = np.argmin(np.abs(time/(2.0*np.pi*rpla_0*np.sqrt(rpla_0))-xmin))
             if (par.mytmax == '#'):
                 xmax = time.max() / (2.0*np.pi*rpla_0*np.sqrt(rpla_0))  # time in orbital periods at inner planet's initial location
                 umax = len(time)-1
             else:
                 xmax = par.mytmax
-                umax = np.argmin(np.abs(time-xmax))
+                umax = np.argmin(np.abs(time/(2.0*np.pi*rpla_0*np.sqrt(rpla_0))-xmax))
                 
             if par.plot_planet[0] == 't':                              
                 x = time[umin:umax+1] / (2.0*np.pi*rpla_0*np.sqrt(rpla_0))  # time in orbital periods at inner planet's initial location
@@ -293,10 +293,10 @@ def plotplanet():
                         
             if par.plot_planet[1] == 'p':
                 if k == 0:
-                    p0 = a**(1.5)
+                    p0 = (a[umin:umax+1])**(1.5)
                 if k == 1:
-                    p1 = a**(1.5)
-                    
+                    p1 = (a[umin:umax+1])**(1.5)
+
             if par.plot_planet[1] == 'mmr':
                 if k == 0:
                     lambda0 = mylambda[umin:umax+1]
