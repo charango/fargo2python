@@ -312,6 +312,9 @@ def plotplanet():
                     ax.legend(frameon=False,fontsize=15)
                 ax.plot(x[::par.take_one_point_every], y[::par.take_one_point_every], color=par.c20[k*len(directory)+j], lw=2., linestyle = 'solid', label=mylabel)
                 fig.add_subplot(ax)
+
+            if par.log_xyplots_x == 'Yes':
+                ax.set_xscale('log')
                 
         if par.plot_planet[1] == 'p':
             y = p1/p0
