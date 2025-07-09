@@ -120,9 +120,10 @@ def plottwodfield():
                 '''
                 array = (myfield.data-array0)/array0
             else:
-                # conversion in physical units
-                if par.physical_units == 'Yes':
-                    array *= myfield.unit
+                if par.nodiff != 'normnao':
+                    # conversion in physical units
+                    if par.physical_units == 'Yes':
+                        array *= myfield.unit
             
             # rotate field by user-defined angle specified in degree in .dat file
             if ('rotate_angle' in open('paramsf2p.dat').read()) and (par.rotate_angle != '#'):
@@ -264,8 +265,9 @@ def plottwodfield():
             # -------------------
             if par.fieldofview == 'polar':
                 # shift by nsec/2 along azimuthal direction, same for dust
-                if par.fargo3d == 'No':
-                    array = np.roll(array, shift=int(myfield.nsec//2), axis=1)
+                #if par.fargo3d == 'No':
+                    #array = np.roll(array, shift=int(myfield.nsec//2), axis=1)
+                array = np.roll(array, shift=int(myfield.nsec//2), axis=1)
                 array_orig = array
                 if par.showdust == 'Yes':
                     td += np.pi
