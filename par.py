@@ -131,6 +131,20 @@ if movie == 'Yes':
     saveaspng = 'Yes'
     if isinstance(on, int) == True:
         sys.exit("ERROR: you requested an animation but specified a single output number: on needs to be specified as min,max -- eg: 1,10 for output numbers from 1 to 10")
+    elif isinstance(on, str) == True:
+        if on=="all":
+            import fnmatch
+            if isinstance(directory, list) == True:
+                dir = directory[0]
+            else:
+                dir = directory
+            if fargo3d == 'No':
+                nboutputs = len(fnmatch.filter(os.listdir(dir), 'gasdens*.dat'))
+            else:
+                nboutputs = len(fnmatch.filter(os.listdir(dir), 'summary*.dat'))
+            on = [0,nboutputs-1]
+        else:
+            sys.exit("ERROR: on needs to be a tuple. If it is a string, the only choice is all")
 
 # units
 if whatfield == 'stokes' or whatfield == 'betacooling':
