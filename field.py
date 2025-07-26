@@ -207,14 +207,19 @@ class Field(Mesh):
             self.rpla = np.sqrt( xpla[on]*xpla[on] + ypla[on]*ypla[on] )
             #rpla_0 = np.sqrt( xpla[0]*xpla[0] + ypla[0]*ypla[0] )        
             #time_in_code_units = round(date[on]/2./np.pi/rpla_0/np.sqrt(rpla_0),1)
-            time_in_code_units = round(date[on]/2./np.pi/apla/np.sqrt(apla),1)
+            time_in_code_units = round(date[on]/2./np.pi,1)
+            if ('time_in_code_units' in open('paramsf2p.dat').read()) and par.time_in_code_units == 'Yes':
+                time_in_code_units = round(date[on]/2./np.pi/apla/np.sqrt(apla),1)
         else:
             omegaframe = omega
             self.omegaframe = omegaframe
             self.rpla = np.sqrt( xpla*xpla + ypla*ypla )
             #rpla_0 = np.sqrt( xpla*xpla + ypla*ypla )        
             #time_in_code_units = round(date/2./np.pi/rpla_0/np.sqrt(rpla_0),1)
-            time_in_code_units = round(date/2./np.pi/apla/np.sqrt(apla),1)
+            time_in_code_units = round(date/2./np.pi,1)
+            if ('time_in_code_units' in open('paramsf2p.dat').read()) and par.time_in_code_units == 'Yes':
+                time_in_code_units = round(date/2./np.pi/apla/np.sqrt(apla),1)
+        
         self.strtime = str(time_in_code_units)+r'$\,T_0$'
 
         # --------- NB: it can take WAY more time to read orbit0.dat
