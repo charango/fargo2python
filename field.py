@@ -1414,7 +1414,7 @@ class Field(Mesh):
                             return datacube[-1,:,:]   # field at upper surface only if "half-a-disc" is simulated in latitudinal direction!
 
 
-    def compute_streamline(self, dtype='float64',niterations=100,R0=0,T0=0,rmin=0,rmax=1e4,pmin=0,pmax=6.28,forward=True,fieldofview='polar',slice='midplane'):
+    def compute_streamline(self, dtype='float64',niterations=100,R0=0,T0=0,rmin=0,rmax=1e4,pmin=0,pmax=6.28,forward=True,fieldofview='polar',slice='midplane',z_average='No'):
         
         # first import global variables
         import par
