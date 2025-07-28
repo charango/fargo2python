@@ -163,7 +163,7 @@ if (nodiff == 'No'):
 
 # case magnetic field is displayed in FARGO3D runs: convert fluid to '' as 
 # fieldnames are simply, eg, bx123.dat and not gasbx123.dat
-if whatfield == 'bx' or whatfield == 'by' or whatfield == 'bz':
+if whatfield == 'bx' or whatfield == 'by' or whatfield == 'bz' or whatfield == 'btheta' or whatfield == 'brad' or whatfield == 'bcol':
     fluid = ''
 
 # case polargrid Test has been used in simulation

@@ -10,6 +10,7 @@ new_unit_mass	    4e30		# new unit of mass in kg
 
 movie		        No			# make a movie? requires on to take the form onmin,onmax (eg: 1,10)
 on	   	            20		    # fargo's output number(s), separated by a comma (,) if several
+                                # can also be all to display all available frames
 
 verbose             Yes         # displays more information on screen
 
@@ -45,7 +46,8 @@ plot_dust	    No
 fluid		    gas			# what fluid? gas, dust or all (FARGO3D only)
 whatfield	    dens		# full list of available fields to be displayed at the bottom of this file
 onedprofile	    No			# plot azimuthally-averaged radial profile (1D)?
-nodiff	        Yes			# relative difference wrt initial field? (Yes or No)
+nodiff	        Yes			# relative difference wrt initial field? (Yes, No, nao or normnao)
+                            # nao = X - <X>_phi, normnao = X / <X>_phi - 1
 
 fieldmin        		    # if specified, minimum value of field to display (for color bar)
 fieldmax				    # if specified, maximum value of field to display (for color bar)
@@ -92,7 +94,8 @@ mytmax					    # if specified, maximum time for y=f(time) plots
 myymin					    # if specified, minimum y-value for y=f(time or x) plots
 myymax	        			# if specified, maximum y-value for y=f(time or x) plots
 
-time_in_inner_planet_orbits No
+time_in_inner_planet_orbits No   # by default time is expressed in code's units except if  
+                                 # it is specified to be in orbital periods at innermost planet
 
 take_one_point_every        # if specified, take one point every N in y=f(x) plots
 
@@ -159,3 +162,6 @@ plot_turb       No
 # cumulative_indirect_torque: cumulative indirect disc torque on planet (int_rmin^r Gamma(x)dx)
 # alpha_reynolds: vertically and azimuthally averaged radial profile of Reynolds alpha parameter
 # alpha_maxwell: vertically and azimuthally averaged radial profile of Maxwell alpha parameter
+# bc: beta cooling if computed by FARGO3D
+# betacooling: computed via density and temperature outputs, assuming BL94 opacities
+# kappa: Rossland opacities if computed by FARGO3D
