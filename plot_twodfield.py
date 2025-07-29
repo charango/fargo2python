@@ -265,9 +265,9 @@ def plottwodfield():
             # -------------------
             if par.fieldofview == 'polar':
                 # shift by nsec/2 along azimuthal direction, same for dust
-                #if par.fargo3d == 'No':
-                #    array = np.roll(array, shift=int(myfield.nsec//2), axis=1)
-                array = np.roll(array, shift=int(myfield.nsec//2), axis=1)
+                if par.fargo3d == 'No':
+                    array = np.roll(array, shift=int(myfield.nsec//2), axis=1)
+                #array = np.roll(array, shift=int(myfield.nsec//2), axis=1)
                 array_orig = array
                 if par.showdust == 'Yes':
                     td += np.pi
