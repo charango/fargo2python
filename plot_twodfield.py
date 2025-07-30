@@ -151,12 +151,18 @@ def plottwodfield():
                     R *= (myfield.culength / 1.5e11) # in au
             
                 # define visualisation params
-                if ('rbox' in open('paramsf2p.dat').read()) and (par.rbox != '#'):
+                if (('rbox' in open('paramsf2p.dat').read()) and (par.rbox != '#')) or (('box_around_planet' in open('paramsf2p.dat').read()) and (par.box_around_planet != '#')):
+                    planet_to_track = 0
+                    if ('planet_to_track' in open('paramsf2p.dat').read()) and (par.planet_to_track != '#'):
+                        planet_to_track = par.planet_to_track
                     # start by finding planet's orbita radius
                     if myfield.fargo3d == 'Yes':
-                        f1, xpla, ypla, f4, f5, f6, f7, f8, date, omega = np.loadtxt(directory+"/planet0.dat",unpack=True)
+                        f1, xpla, ypla, f4, f5, f6, f7, f8, date, omega = np.loadtxt(directory+"/planet"+str(planet_to_track)+".dat",unpack=True)
                     else:
-                        f1, xpla, ypla, f4, f5, f6, f7, date, omega, f10, f11 = np.loadtxt(directory+"/planet0.dat",unpack=True)                    
+                        f1, xpla, ypla, f4, f5, f6, f7, date, omega, f10, f11 = np.loadtxt(directory+"/planet"+str(planet_to_track)+".dat",unpack=True)
+                    if par.physical_units == 'Yes':
+                        xpla *= (myfield.culength / 1.5e11)  # in au
+                        ypla *= (myfield.culength / 1.5e11)  # in au
                 else:
                     if (par.myrmin != '#'):
                         myrmin = par.myrmin
@@ -214,16 +220,32 @@ def plottwodfield():
             # case where fields are displayed with a fixed radial range about planet's orbital radius
             # -------------------
             if ('rbox' in open('paramsf2p.dat').read()) and (par.rbox != '#'):
-                if par.take_one_point_every == '#':
-                    take_one_point_every = 1
-                else:
-                    take_one_point_every = par.take_one_point_every
                 rpla = np.sqrt( xpla[int(on[k])]*xpla[int(on[k])] + ypla[int(on[k])]*ypla[int(on[k])] )
                 myrmin = rpla-par.rbox
                 myrmax = rpla+par.rbox
                 imin = np.argmin(np.abs(R-myrmin))
                 imax = np.argmin(np.abs(R-myrmax)) 
 
+            # -------------------
+            # case where fields are displayed over a squared box around one (tracked) planet
+            # -------------------
+            if ('box_around_planet' in open('paramsf2p.dat').read()) and (par.box_around_planet != '#'):
+                rpla = np.sqrt( xpla[int(on[k])]*xpla[int(on[k])] + ypla[int(on[k])]*ypla[int(on[k])] )
+                myrmin = rpla-par.box_around_planet
+                myrmax = rpla+par.box_around_planet
+                imin = np.argmin(np.abs(R-myrmin))
+                imax = np.argmin(np.abs(R-myrmax)) 
+                tpla = math.atan2(ypla[int(on[k])],xpla[int(on[k])])  # between 0 and 2pi
+
+                if par.fieldofview == 'polar':
+                    rotate_angle_box = -tpla
+                    shift_box = int(myfield.nsec*tpla/2.0/np.pi)
+                    array = np.roll(array,shift=-shift_box,axis=1)
+                    myphimin = np.pi-2.0*par.box_around_planet
+                    myphimax = np.pi+2.0*par.box_around_planet
+                else:
+                    myphimin = tpla-2.0*par.box_around_planet
+                    myphimax = tpla+2.0*par.box_around_planet
 
             # -------------------
             # read information on the dust particles
@@ -560,6 +582,7 @@ def plottwodfield():
                 yp = np.zeros(nbplanets)
 
                 for l in range(nbplanets):
+
                     # read information on the planets (inner one so far)
                     if par.fargo3d == 'Yes':
                         f1, xpla, ypla, f4, f5, f6, f7, f8, date, omega = np.loadtxt(directory+"/planet"+str(l)+".dat",unpack=True)
@@ -579,6 +602,16 @@ def plottwodfield():
                     # rotate particles azimuth by user-defined angle specified in degree in .dat file
                     if ('rotate_angle' in open('paramsf2p.dat').read()) and (par.rotate_angle != '#'):
                         planet_shift_angle = np.pi*par.rotate_angle/180  # in radian
+                        tp += planet_shift_angle                  
+                        if tp > 2.0*np.pi:
+                            tp -= 2.0*np.pi
+                        if tp < 0.0:
+                            tp += 2.0*np.pi
+                        xp[l] = rp*np.cos(tp)
+                        yp[l] = rp*np.sin(tp)
+
+                    if ('box_around_planet' in open('paramsf2p.dat').read()) and (par.box_around_planet != '#'):
+                        planet_shift_angle = rotate_angle_box
                         tp += planet_shift_angle                  
                         if tp > 2.0*np.pi:
                             tp -= 2.0*np.pi
@@ -739,7 +772,6 @@ def plottwodfield():
         # ------------------
         # save in pdf or png files
         # ------------------
-
         if ('filename' in open('paramsf2p.dat').read()) and (par.filename != '#'):
             outfile = par.filename
         else:

@@ -84,6 +84,10 @@ use_legend				    # manually enter legend to be used for 1D profiles if plot_tqw
 myrmin					    # if specified, minimum radius to display field
 myrmax	        			# if specified, maximum radius to display field
 rbox                        # if specified, radius range about planet's orbital radius to display
+                            # specify 'planet_to_track' below if there are several planets
+planet_to_track             # index of planet to display squared box around
+box_around_planet           # size of squared box around tracked planet
+
 myphimin				    # if specified, minimum azimuth to display field (between 0 and 2pi)
 myphimax				    # if specified, maximum azimuth to display field (between 0 and 2pi)
 myzmin                      # if specified, minimum z to display field
