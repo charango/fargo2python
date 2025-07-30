@@ -211,21 +211,26 @@ def plotplanet():
                 else:
                     time, e, a, M, V, argPA, phiangle, incl, longAN, PA = np.loadtxt(directory[j]+"/orbit"+str(k)+".dat",unpack=True)
             
+            if ('time_in_inner_planet_orbits' in open('paramsf2p.dat').read()) and par.time_in_inner_planet_orbits == 'Yes':
+                time /= (2.0*np.pi*rpla_0*np.sqrt(rpla_0))  # time in orbital periods at inner planet's initial location
+            else:
+                time /= (2.0*np.pi) # time in orbital periods at code's unit of length
+
             if (par.mytmin == '#'):
-                xmin = time.min() / (2.0*np.pi*rpla_0*np.sqrt(rpla_0))  # time in orbital periods at inner planet's initial location
+                xmin = time.min()
                 umin = 0
             else:
                 xmin = par.mytmin
-                umin = np.argmin(np.abs(time/(2.0*np.pi*rpla_0*np.sqrt(rpla_0))-xmin))
+                umin = np.argmin(np.abs(time-xmin))
             if (par.mytmax == '#'):
-                xmax = time.max() / (2.0*np.pi*rpla_0*np.sqrt(rpla_0))  # time in orbital periods at inner planet's initial location
+                xmax = time.max() 
                 umax = len(time)-1
             else:
                 xmax = par.mytmax
-                umax = np.argmin(np.abs(time/(2.0*np.pi*rpla_0*np.sqrt(rpla_0))-xmax))
+                umax = np.argmin(np.abs(time-xmax))
                 
             if par.plot_planet[0] == 't':                              
-                x = time[umin:umax+1] / (2.0*np.pi*rpla_0*np.sqrt(rpla_0))  # time in orbital periods at inner planet's initial location
+                x = time[umin:umax+1]
                 ax.set_xlim(xmin,xmax)
                 
             if par.plot_planet[0] == 'a':
@@ -244,7 +249,7 @@ def plotplanet():
             
             if par.plot_planet[1] == 'adot':
                 y = (a[umin+1:umax+1]-a[umin:umax])/(time[umin+1:umax+1]-time[umin:umax])
-                x = time[umin:umax] / (2.0*np.pi*rpla_0*np.sqrt(rpla_0))  # time in orbital periods at inner planet's initial location
+                x = time[umin:umax]
 
             if par.plot_planet[1] == 'r' or par.plot_planet[1] == 'rdot' or par.plot_planet[1] == 'm':
                 if fargo3d == 'No':
@@ -254,7 +259,12 @@ def plotplanet():
                         f1, xpla, ypla, f4, f5, mpla, f7, date, f9, f10, f11 = np.loadtxt(directory[j]+"/bigplanet"+str(k)+".dat",unpack=True)
                 else:
                     f1, xpla, ypla, zpla, f5, f6, f7, mpla, date, f10 = np.loadtxt(directory[j]+"/bigplanet"+str(k)+".dat",unpack=True)
-                mytime = date/(2.0*np.pi*rpla_0*np.sqrt(rpla_0))
+    
+                if ('time_in_inner_planet_orbits' in open('paramsf2p.dat').read()) and par.time_in_inner_planet_orbits == 'Yes':
+                    mytime = date/(2.0*np.pi*rpla_0*np.sqrt(rpla_0))  # time in orbital periods at inner planet's initial location
+                else:
+                    mytime = date/(2.0*np.pi) # time in orbital periods at code's unit of length
+
                 # repeat stuff above just in case the bigplanet and orbit.dat files have different lengths...
                 if (par.mytmin == '#'):
                     umin = 0
