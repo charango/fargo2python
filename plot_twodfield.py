@@ -585,14 +585,14 @@ def plottwodfield():
 
                     # read information on the planets (inner one so far)
                     if par.fargo3d == 'Yes':
-                        f1, xpla, ypla, f4, f5, f6, f7, f8, date, omega = np.loadtxt(directory+"/planet"+str(l)+".dat",unpack=True)
+                        f1, xplabis, yplabis, f4, f5, f6, f7, f8, date, omega = np.loadtxt(directory+"/planet"+str(l)+".dat",unpack=True)
                     else:
                         if par.fargo_orig == 'No':
-                            f1, xpla, ypla, f4, f5, f6, f7, date, omega, f10, f11 = np.loadtxt(directory+"/planet"+str(l)+".dat",unpack=True)
+                            f1, xplabis, yplabis, f4, f5, f6, f7, date, omega, f10, f11 = np.loadtxt(directory+"/planet"+str(l)+".dat",unpack=True)
                         else:
-                            f1, xpla, ypla, f4, f5, f6, f7, date, omega = np.loadtxt(directory+"/planet"+str(l)+".dat",unpack=True)
-                    xp[l] = xpla[on[k]]
-                    yp[l] = ypla[on[k]]
+                            f1, xplabis, yplabis, f4, f5, f6, f7, date, omega = np.loadtxt(directory+"/planet"+str(l)+".dat",unpack=True)
+                    xp[l] = xplabis[on[k]]
+                    yp[l] = yplabis[on[k]]
                     if par.physical_units == 'Yes':
                         xp[l] *= (myfield.culength / 1.5e11)  # in au
                         yp[l] *= (myfield.culength / 1.5e11)  # in au
