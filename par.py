@@ -145,6 +145,18 @@ if movie == 'Yes':
             on = [0,nboutputs-1]
         else:
             sys.exit("ERROR: on needs to be a tuple. If it is a string, the only choice is all")
+else:
+    if on=="last":
+        import fnmatch
+        if isinstance(directory, list) == True:
+            dir = directory[0]
+        else:
+            dir = directory
+        if fargo3d == 'No':
+            nboutputs = len(fnmatch.filter(os.listdir(dir), 'gasdens*.dat'))
+        else:
+            nboutputs = len(fnmatch.filter(os.listdir(dir), 'summary*.dat'))
+        on = nboutputs-1
 
 # units
 if whatfield == 'stokes' or whatfield == 'betacooling':
