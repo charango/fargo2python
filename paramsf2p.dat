@@ -109,6 +109,8 @@ mycolormap	     nipy_spectral 	    # color scale for 2D contour plots
 
 display_label               # add user-defined label in top-right corner of 2D plots
 
+dynamical_colorscale        # if an animation is requested, colorscale varies from one frame to another
+                            # instead of being set throughout all frames
 
 ################################
 ### Other options in roadmap ###

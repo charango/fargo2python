@@ -180,6 +180,11 @@ def plotonedprofile():
 
             ax.plot(R, axiarray, color=mycolor, lw=2., linestyle = 'solid', label=mylabel)
             ax.set_ylabel(strfield)
+
+            if ( ('dynamical_colorscale' in open('paramsf2p.dat').read()) and (par.dynamical_colorscale == 'Yes') ):
+                ymin = axiarray.min()
+                ymax = axiarray.max()
+
             ax.set_ylim(ymin,ymax)
             ax.set_xlim(xmin,xmax)
             ax.tick_params(top='on', right='on', length = 5, width=1.0, direction='out')
