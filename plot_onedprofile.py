@@ -71,6 +71,8 @@ def plotonedprofile():
                         array = np.abs(array)
                         
                 axiarray = np.sum(array[imin:imax,:],axis=1)/myfield.nsec
+                if par.onedprofile == 'Cut':
+                    axiarray = array[:,0]    # azimuthal cut at zero azimuth (j=0)
                 
                 if axiarray.min() < ymin:
                     ymin = axiarray.min()
@@ -151,6 +153,10 @@ def plotonedprofile():
                     array = np.abs(array)
                     
             axiarray = np.sum(array,axis=1)/myfield.nsec
+
+            if par.onedprofile == 'Cut':
+                axiarray = array[:,0]    # azimuthal cut at zero azimuth (j=0)
+
             #axiarray = axiarray[2:-2]  # CUIDADIN!!
             R = myfield.rmed
             #R = R[2:-2] # CUIDADIN!!

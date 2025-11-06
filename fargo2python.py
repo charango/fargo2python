@@ -42,7 +42,7 @@ if par.onedprofile == 'No' and par.plot_field == True:
 # =====================
 # 3. DISPLAY AZIMUTHALLY-AVERAGED RADIAL 1D PROFILES
 # =====================
-if par.onedprofile == 'Yes' and par.plot_field == True:
+if par.onedprofile != 'No' and par.plot_field == True:
     from plot_onedprofile import *
     plotonedprofile()
 
