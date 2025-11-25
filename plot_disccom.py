@@ -138,14 +138,16 @@ def plotdisccom():
                     Y = radius_matrix * np.sin(theta_matrix)       # nsec, nrad
 
                     # get time
+                    index_orbit_file = 0
                     if dens.fargo3d == 'Yes':
                         f1, xpla, ypla, f4, f5, f6, f7, mpla, date, f10 = np.loadtxt(directory[j]+"/planet0.dat",unpack=True)
                     else:
                         if fargo2d1d == 'Yes':
                             f1, xpla, ypla, f4, f5, mpla, f7, date, f9 = np.loadtxt(directory[j]+"/planet0.dat",unpack=True)
+                            index_orbit_file = 1
                         else:
                             f1, xpla, ypla, f4, f5, mpla, f7, date, f9, f10, f11 = np.loadtxt(directory[j]+"/planet0.dat",unpack=True)
-                    with open(directory[j]+"/orbit0.dat") as f_in:
+                    with open(directory[j]+"/orbit"+str(index_orbit_file)+".dat") as f_in:
                         firstline_orbitfile = np.genfromtxt(itertools.islice(f_in, 0, 1, None), dtype=float)
                     apla = firstline_orbitfile[2]
                 
