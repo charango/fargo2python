@@ -762,7 +762,7 @@ class Field(Mesh):
             # ----
             # VORTICITY or VORTENSITY
             # ----
-            if (field == 'vorticity' or field == 'drl' or field == 'vortensity' or field == 'invvortensity' or field == 'normvorticity'):
+            if (field == 'vorticity' or field == 'drl' or field == 'vortensity' or field == 'invvortensity' or field == 'normvorticity' or field == 'rossby'):
 
                 if self.fargo3d == 'No':
                     vrad = self.__open_field(directory+fluid+'vrad'+str(on)+'.dat',dtype,fieldofview,slice,z_average)
@@ -771,9 +771,10 @@ class Field(Mesh):
                     vrad = self.__open_field(directory+fluid+'vy'+str(on)+'.dat',dtype,fieldofview,slice,z_average)
                     vphi = self.__open_field(directory+fluid+'vx'+str(on)+'.dat',dtype,fieldofview,slice,z_average)
                 
-                # vphi is in the corotating frame!
+                # original vphi is in the corotating frame!
                 for i in range(self.nrad):
                     vphi[i,:] += (self.rmed)[i]*omegaframe
+
                 # we first calculate drrvphi
                 drrvphi = np.zeros((self.nrad,self.nsec))
                 for j in range(self.nsec):
@@ -789,17 +790,34 @@ class Field(Mesh):
                         jm1 = j-1
                     for i in range(self.nrad):
                         dphivr[i,j] = (vrad[i,j]-vrad[i,jm1])/2.0/np.pi*self.nsec
-                # we deduce the vorticity or vortensity
+                # we finally get the vorticity
                 for j in range(self.nsec):
                     for i in range(self.nrad):
                         self.data[i,j] = (drrvphi[i,j] - dphivr[i,j]) / (self.redge)[i]
 
                 # this is the radial derivative of the specific angular momentum
-                if field == 'normvorticity':
+                if (field == 'normvorticity'):
                     for j in range(self.nsec):
                         for i in range(self.nrad):
                             self.data[i,j] = 2.0*self.data[i,j] / ( vphi[i,j]/(self.redge)[i] )   # divide by Omega = vphi / R
                     self.strname = r'$\kappa^2 / \Omega^2$'
+
+                # Rossby number = {curl(v).e_z - <curl(v).e_z>} / 2<Omega>
+                # with <.> an azimuthal average
+                if (field == 'rossby'):
+                    # azimuthally-averaged vorticity
+                    axidata = np.sum(self.data,axis=1)/self.nsec
+                    self.data -= axidata.repeat(self.nsec).reshape(self.nrad,self.nsec)
+
+                    # azimuthally-averaged angular frequency
+                    omega = vphi / self.rmed.repeat(self.nsec).reshape(self.nrad,self.nsec)
+                    axiomega = np.sum(omega,axis=1)/self.nsec
+
+                    # CB: testing other to compute Rossby number
+                    #self.data -= 0.5*axiomega.repeat(self.nsec).reshape(self.nrad,self.nsec)   
+                
+                    self.data /= (2.0*axiomega.repeat(self.nsec).reshape(self.nrad,self.nsec))
+                    self.strname = 'Rossby number'
 
                 # this is the radial derivative of the specific angular momentum
                 if field == 'drl':

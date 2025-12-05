@@ -223,3 +223,13 @@ else:
 # Color map
 if not('mycolormap' in open('paramsf2p.dat').read()):
     mycolormap = 'nipy_spectral'
+
+if whatfield == 'rossby':
+    try:
+        import cmcrameri
+        mycolormap = cmcrameri.cm.managua_r
+    except ImportError:
+        pass    
+
+# import cmcrameri
+# mycolormap = cmcrameri.cm.lipari

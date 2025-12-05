@@ -171,3 +171,4 @@ plot_turb       No
 # bc: beta cooling if computed by FARGO3D
 # betacooling: computed via density and temperature outputs, assuming BL94 opacities
 # kappa: Rossland opacities if computed by FARGO3D
+# rossby: Rossby number (~normalized relative vorticity)
