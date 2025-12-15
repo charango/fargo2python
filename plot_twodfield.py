@@ -499,10 +499,10 @@ def plottwodfield():
             ax.tick_params(top='on', right='on', length = 5, width=1.0, direction='out')
             ax.tick_params(axis='x', which='minor', top=True)
             ax.tick_params(axis='y', which='minor', right=True)
-            ax.xaxis.set_major_locator(plt.MaxNLocator(7))
-            ax.yaxis.set_major_locator(plt.MaxNLocator(7))
-            #ax.xaxis.set_major_locator(plt.MaxNLocator(5))
-            #ax.yaxis.set_major_locator(plt.MaxNLocator(5))
+            #ax.xaxis.set_major_locator(plt.MaxNLocator(7))
+            #ax.yaxis.set_major_locator(plt.MaxNLocator(7))
+            ax.xaxis.set_major_locator(plt.MaxNLocator(5))
+            ax.yaxis.set_major_locator(plt.MaxNLocator(5))
 
             # -------------------
             # adjust min and max in color bar according to field of view
@@ -714,7 +714,7 @@ def plottwodfield():
                     color_label = 'black'
                 else:
                     color_label = 'white'
-                ax.text(xlabel, ylabel, mylabel, fontsize=15, color = color_label,weight='bold', horizontalalignment='right')
+                ax.text(xlabel, ylabel, mylabel, fontsize=20, color = color_label,weight='bold', horizontalalignment='right')
 
             # ----------------
             # special case all fluids 
