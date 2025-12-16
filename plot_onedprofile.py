@@ -200,7 +200,7 @@ def plotonedprofile():
             if ( ('write_ascii' in open('paramsf2p.dat').read()) and (par.write_ascii == 'Yes') ):
                  ascii = open('1D'+directory[j]+par.whatfield+str(on[k])+'.dat','w')
                  for v in range(len(R)):
-                    ascii.write(str(R[v])+'\t'+str(axiarray[v]))
+                    ascii.write(str(R[v])+'\t'+str(axiarray[v])+'\n')
                     
 
         # save file
