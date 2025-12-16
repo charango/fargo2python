@@ -196,6 +196,13 @@ def plotonedprofile():
                 ax.legend(frameon=False,fontsize=15)
             fig.add_subplot(ax)
 
+            # option to write result in 1D ascii file
+            if ( ('write_ascii' in open('paramsf2p.dat').read()) and (par.write_ascii == 'Yes') ):
+                 ascii = open('1D'+par.dir+par.whatfield+str(on[k])'.dat','w')
+                 for v in len(range(R)):
+                    ascii.write(str(R[i])+'\t'+str(axiarray[i]))
+                    
+
         # save file
         if len(directory) == 1:           
             outfile = 'axi'+par.fluid+'_'+par.whatfield+'_'+str(directory[0])+'_'+str(on[k]).zfill(4)
