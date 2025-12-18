@@ -663,14 +663,38 @@ def plottwodfield():
             # ------------------
             if ('showwkzones' in open('paramsf2p.dat').read()) and par.showwkzones == 'Yes':
 
-                buf = subprocess.getoutput(par.awk_command+' " /^Rmin / " '+directory+'/*.par')
-                grid_rmin = float(buf.split()[1])
-                buf = subprocess.getoutput(par.awk_command+' " /^WKZRmin/ " '+directory+'/*.par')
-                grid_wkzrmin = float(buf.split()[1])
-                buf = subprocess.getoutput(par.awk_command+' " /^Rmax / " '+directory+'/*.par')
-                grid_rmax = float(buf.split()[1])
-                buf = subprocess.getoutput(par.awk_command+' " /^WKZRmax/ " '+directory+'/*.par')
-                grid_wkzrmax = float(buf.split()[1])
+                if par.fargo3d == 'No':
+                    buf = subprocess.getoutput(par.awk_command+' " /^Rmin / " '+directory+'/*.par')
+                    grid_rmin = float(buf.split()[1])
+                    buf = subprocess.getoutput(par.awk_command+' " /^WKZRmin/ " '+directory+'/*.par')
+                    grid_wkzrmin = float(buf.split()[1])
+                    buf = subprocess.getoutput(par.awk_command+' " /^Rmax / " '+directory+'/*.par')
+                    grid_rmax = float(buf.split()[1])
+                    buf = subprocess.getoutput(par.awk_command+' " /^WKZRmax/ " '+directory+'/*.par')
+                    grid_wkzrmax = float(buf.split()[1])
+
+                else:                    
+                    command = par.awk_command+' " /^YMIN/ " '+directory+'/variables.par'
+                    if sys.version_info[0] < 3:   # python 2.X
+                        buf = subprocess.check_output(command, shell=True)
+                    else:                         # python 3.X
+                        buf = subprocess.getoutput(command)
+                    grid_rmin = float(buf.split()[1])
+                    command = par.awk_command+' " /^YMAX/ " '+directory+'/variables.par'
+                    if sys.version_info[0] < 3:   # python 2.X
+                        buf = subprocess.check_output(command, shell=True)
+                    else:                         # python 3.X
+                        buf = subprocess.getoutput(command)
+                    grid_rmax = float(buf.split()[1])
+                    command = par.awk_command+' " /^DAMPINGZONE/ " '+directory+'/variables.par'
+                    if sys.version_info[0] < 3:   # python 2.X
+                        buf = subprocess.check_output(command, shell=True)
+                    else:                         # python 3.X
+                        buf = subprocess.getoutput(command)
+                    dampingzone = float(buf.split()[1])
+                    grid_wkzrmin = grid_rmin*(dampingzone**(2./3))
+                    grid_wkzrmax = grid_rmax*(dampingzone**(-2./3))
+
 
                 if par.physical_units == 'Yes':
                     grid_rmin *= (myfield.culength / 1.5e11) # in au  
