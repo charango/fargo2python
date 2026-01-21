@@ -154,22 +154,23 @@ def plotplanet():
                     print('new unit of time [s] = ',cutime)
                     print('new unit of temperature [K] = ',cutemp)
                 
+
+        # Find number of columns in orbit*.dat files
+        command = par.awk_command+' "{print NF; exit}" '+directory[j]+'/orbit0.dat'
+        if sys.version_info[0] < 3:   # python 2.X
+            buf = subprocess.check_output(command, shell=True)
+        else:                         # python 3.X
+            buf = subprocess.getoutput(command)
+        nbcol = float(buf.split()[0])
+        
         if fargo3d == 'No':
-            if fargo_orig == 'No':
+            if nbcol == 8:
                 time, e, a, M, V, PA, mylambda, varpi = np.loadtxt(directory[j]+"/orbit0.dat",unpack=True)
             else:
+                time, e, a, M, V, PA = np.loadtxt(directory[j]+"/orbit0.dat",unpack=True)
                 if fargo2d1d == 'Yes':
                     time, e, a, M, V, PA = np.loadtxt(directory[j]+"/orbit1.dat",unpack=True)
-                else:
-                    time, e, a, M, V, PA = np.loadtxt(directory[j]+"/orbit0.dat",unpack=True)
         else:
-            command = par.awk_command+' "{print NF; exit}" '+directory[j]+'/orbit0.dat'
-            # check which version of python we're using
-            if sys.version_info[0] < 3:   # python 2.X
-                buf = subprocess.check_output(command, shell=True)
-            else:                         # python 3.X
-                buf = subprocess.getoutput(command)
-            nbcol = float(buf.split()[0])
             if nbcol == 11:
                 time, e, a, M, V, argPA, phiangle, incl, longAN, PA, mylambda = np.loadtxt(directory[j]+"/orbit0.dat",unpack=True)
             else:
@@ -201,7 +202,7 @@ def plotplanet():
         for k in range(nbplanets):
             
             if fargo3d == 'No':
-                if fargo_orig == 'No':
+                if nbcol == 8:
                     time, e, a, M, V, PA, mylambda, varpi = np.loadtxt(directory[j]+"/orbit"+str(k)+".dat",unpack=True)
                 else:
                     time, e, a, M, V, PA = np.loadtxt(directory[j]+"/orbit"+str(k)+".dat",unpack=True)
@@ -309,10 +310,10 @@ def plotplanet():
 
             if par.plot_planet[1] == 'mmr':
                 if k == 0:
-                    lambda0 = mylambda[umin:umax+1]
+                    lambda0 = PA[umin:umax+1] + M[umin:umax+1]
                     varpi0  = PA[umin:umax+1]
                 if k == 1:
-                    lambda1 = mylambda[umin:umax+1]
+                    lambda1 = PA[umin:umax+1] + M[umin:umax+1]
                     varpi1  = PA[umin:umax+1]
                     
             if par.plot_planet[1] != 'p' and par.plot_planet[1] != 'mmr':
@@ -347,6 +348,8 @@ def plotplanet():
                 while y1[l2] < 0:
                     y1[l2] += 2.0*np.pi
             ax.yaxis.label.set_color(color=par.c20[2*j])
+            ax.set_ylim(0,2.0*np.pi)
+            ax2.set_ylim(0,2.0*np.pi)
             ax.scatter(x[::par.take_one_point_every], y0[::par.take_one_point_every], s=5, c=par.c20[2*j],   alpha=1.0)
             ax2.scatter(x[::par.take_one_point_every], y1[::par.take_one_point_every], s=5, c=par.c20[2*j+1], alpha=1.0)
             ax.legend(frameon=False,fontsize=15)
