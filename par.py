@@ -40,6 +40,8 @@ params.close()
 plot_disccom = 'No'
 plot_discmass = 'No'
 plot_libcross = 'No'
+plot_discecc = 'No'
+plot_discperarg = 'No'
 plot_turb = 'No'
 
 par = []                       # allocating a dictionary
@@ -112,7 +114,7 @@ else:
 # global boolean: if True, then plot 1D or 2D fields
 plot_field = True
 
-if ( (plot_tqwk != 'No') or (plot_planet != 'No') or (plot_disccom != 'No') or (plot_discmass != 'No') or (plot_libcross != 'No') or (plot_turb != 'No') ):
+if ( (plot_tqwk != 'No') or (plot_planet != 'No') or (plot_disccom != 'No') or (plot_discmass != 'No') or (plot_libcross != 'No') or (plot_turb != 'No') or (plot_discecc != 'No') or (plot_discperarg != 'No') ):
     plot_field = False
     movie = 'No'
     if plot_planet[1] == 'mmr':
