@@ -102,13 +102,12 @@ def plotdiscecc():
                     f1, xpla, ypla, f4, f5, f6, f7, date, omega, f10, f11 = np.loadtxt(directory[j]+"/planet0.dat",unpack=True)
                 with open(directory[j]+"/orbit0.dat") as f_in:
                     firstline_orbitfile = np.genfromtxt(itertools.islice(f_in, 0, 1, None), dtype=float)
-                apla = firstline_orbitfile[2]
 
 
             # get total disc mass and time at current output number
             disc_ecc[k] = np.sum(ecc.data*dens.data*surface)/np.sum(dens.data*surface)
             # get time
-            mytime[k] = date[take_one_point_every*k]/2.0/np.pi/(apla**1.5)  # orbital periods at apla
+            mytime[k] = date[take_one_point_every*k]/2.0/np.pi/(1.0**1.5)  # orbital periods at apla=1
 
             if par.physical_units == 'Yes':
                 mytime[k] *= dens.cutime/3.15e7   # in year
@@ -251,13 +250,12 @@ def plotdiscperarg():
                     f1, xpla, ypla, f4, f5, f6, f7, date, omega, f10, f11 = np.loadtxt(directory[j]+"/planet0.dat",unpack=True)
                 with open(directory[j]+"/orbit0.dat") as f_in:
                     firstline_orbitfile = np.genfromtxt(itertools.islice(f_in, 0, 1, None), dtype=float)
-                apla = firstline_orbitfile[2]
 
 
             # get total disc mass and time at current output number
             disc_varpi[k] = np.sum(varpi.data*dens.data*surface)/np.sum(dens.data*surface)
             # get time
-            mytime[k] = date[take_one_point_every*k]/2.0/np.pi/(apla**1.5)  # orbital periods at apla
+            mytime[k] = date[take_one_point_every*k]/2.0/np.pi/(1.0**1.5)  # orbital periods at apla=1.0
 
             if par.physical_units == 'Yes':
                 mytime[k] *= dens.cutime/3.15e7   # in year
