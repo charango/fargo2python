@@ -758,6 +758,70 @@ class Field(Mesh):
                 
                 self.strname += ' eccentricity'
             #
+            # ----
+            # DISC'S PERICENTER ARGUMENT varpi
+            # ----
+            if field == 'varpi':
+                dens = self.__open_field(directory+fluid+'dens'+str(on)+'.dat',dtype,fieldofview,slice,z_average)
+                if self.fargo3d == 'No':
+                    vrad = self.__open_field(directory+fluid+'vrad'+str(on)+'.dat',dtype,fieldofview,slice,z_average)
+                    vphi = self.__open_field(directory+fluid+'vtheta'+str(on)+'.dat',dtype,fieldofview,slice,z_average)
+                else:
+                    vrad = self.__open_field(directory+fluid+'vy'+str(on)+'.dat',dtype,fieldofview,slice,z_average)
+                    vphi = self.__open_field(directory+fluid+'vx'+str(on)+'.dat',dtype,fieldofview,slice,z_average)
+
+                # vphi is in the corotating frame!
+                for i in range(self.nrad):
+                    vphi[i,:] += (self.rmed)[i]*omegaframe
+                    
+                mass    = np.zeros((self.nrad,self.nsec))
+                vrcent  = np.zeros((self.nrad,self.nsec))
+                vtcent  = np.zeros((self.nrad,self.nsec))
+                surface = np.zeros((self.nrad,self.nsec))
+                rmed2D  = np.zeros((self.nrad,self.nsec))
+                pmed2D  = np.zeros((self.nrad,self.nsec))
+                
+                Rinf = self.redge[0:len(self.redge)-1]
+                Rsup = self.redge[1:len(self.redge)]
+                surf = np.pi * (Rsup*Rsup - Rinf*Rinf) / self.nsec
+                for th in range(self.nsec):
+                    surface[:,th] = surf
+                    rmed2D[:,th]  = self.rmed
+
+                for r in range(self.nrad):
+                    pmed2D[r,:]  = self.pmed
+
+                # mass of each grid cell
+                mass = dens*surface
+                #print('disc total mass is: ', np.sum(mass))
+
+                # loop below could probably be made more concise / optimized
+                for i in range(self.nrad):
+                    for j in range(self.nsec):
+                        if i < self.nrad-1:
+                            vrcent[i,j] = (self.rmed[i] - self.redge[i])*vrad[i+1,j] + (self.redge[i+1] - self.rmed[i])*vrad[i,j]
+                            vrcent[i,j] /= (self.redge[i+1] - self.redge[i])
+                        else:
+                            vrcent[i,j] = vrad[i,j]
+                        jm = j
+                        jp = j+1
+                        if (jp > self.nsec-1):
+                            jp -= self.nsec
+                        vtcent[i,j] = 0.5*(vphi[i,jm] + vphi[i,jp])
+
+                x = rmed2D*np.cos(pmed2D)
+                y = rmed2D*np.sin(pmed2D)
+                d = np.sqrt(x*x + y*y)
+                vx = vrcent*np.cos(pmed2D) - vtcent*np.sin(pmed2D)
+                vy = vrcent*np.sin(pmed2D) + vtcent*np.cos(pmed2D)
+
+                Ax = (x*vy*vy - y*vx*vy) - x*(1.0+mass)/d  # cos(varpi)
+                Ay = (y*vx*vx - x*vx*vy) - y*(1.0+mass)/d  # sin(varpi)
+                self.data = math.atan2(Ay,Ax)
+                
+                self.strname += ' pericentre argument'
+
+            #
             #
             # ----
             # VORTICITY or VORTENSITY
@@ -818,6 +882,49 @@ class Field(Mesh):
                 
                     self.data /= (2.0*axiomega.repeat(self.nsec).reshape(self.nrad,self.nsec))
                     self.strname = 'Rossby number'
+
+                    # test alternative method to compute Rossby number as curl(v-<v>)/(2<Omega>)
+                    # axivrad = np.sum(vrad,axis=1)/self.nsec
+                    # axivphi = np.sum(vphi,axis=1)/self.nsec
+                    # if self.fargo3d == 'No':
+                    #     vphi_orig = self.__open_field(directory+fluid+'vtheta'+str(on)+'.dat',dtype,fieldofview,slice,z_average)
+                    # else:
+                    #     vphi_orig = self.__open_field(directory+fluid+'vx'+str(on)+'.dat',dtype,fieldofview,slice,z_average)
+
+                    # # original vphi is in the corotating frame!
+                    # for i in range(self.nrad):
+                    #     vphi_orig[i,:] += (self.rmed)[i]*omegaframe
+
+                    # vrad -= axivrad.repeat(self.nsec).reshape(self.nrad,self.nsec)
+                    # vphi -= axivphi.repeat(self.nsec).reshape(self.nrad,self.nsec)
+
+                    # # we first calculate drrvphi
+                    # drrvphi = np.zeros((self.nrad,self.nsec))
+                    # for j in range(self.nsec):
+                    #     for i in range(1,self.nrad):
+                    #         drrvphi[i,j] = ( (self.rmed)[i]*vphi[i,j] - (self.rmed)[i-1]*vphi[i-1,j] ) / ((self.rmed)[i] - (self.rmed)[i-1] )
+                    #     drrvphi[0,j] = drrvphi[1,j]
+                    # # then we calculate dphivr
+                    # dphivr = np.zeros((self.nrad,self.nsec))
+                    # for j in range(self.nsec):
+                    #     if j==0:
+                    #         jm1 = self.nsec-1
+                    #     else:
+                    #         jm1 = j-1
+                    #     for i in range(self.nrad):
+                    #         dphivr[i,j] = (vrad[i,j]-vrad[i,jm1])/2.0/np.pi*self.nsec
+                    # # we finally get the vorticity of v - <v>
+                    # for j in range(self.nsec):
+                    #     for i in range(self.nrad):
+                    #         self.data[i,j] = (drrvphi[i,j] - dphivr[i,j]) / (self.redge)[i]
+
+                    # # azimuthally-averaged angular frequency
+                    # omega = vphi_orig / self.rmed.repeat(self.nsec).reshape(self.nrad,self.nsec)
+                    # axiomega = np.sum(omega,axis=1)/self.nsec
+                    
+                    # self.data /= (2.0*axiomega.repeat(self.nsec).reshape(self.nrad,self.nsec))
+                    # self.strname = 'Rossby number'
+
 
                 # this is the radial derivative of the specific angular momentum
                 if field == 'drl':

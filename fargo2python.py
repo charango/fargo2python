@@ -101,3 +101,13 @@ if ( ('plot_turb' in open('paramsf2p.dat').read()) and (par.plot_turb != 'No') )
         plot_alphas()
     if par.plot_turb == 'histo_dens':
         plot_histodens()
+
+# =====================
+# 11. DISC'S ECCENTRICITY OR PERICENTRE ARGUMENT
+# =====================
+if ( ('plot_discecc' in open('paramsf2p.dat').read()) and (par.plot_discecc != 'No') ):
+    from plot_discbinary import *
+    plotdiscecc()
+if ( ('plot_discperarg' in open('paramsf2p.dat').read()) and (par.plot_discperarg != 'No') ):
+    from plot_discbinary import *
+    plotdiscperarg()

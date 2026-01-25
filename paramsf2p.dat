@@ -122,7 +122,13 @@ dynamical_colorscale        # if an animation is requested, colorscale varies fr
 #plot_disccom	No
 
 ### plot time evolution of disc mass?
-#plot_discmass	No
+plot_discmass	No
+
+### plot time evolution of disc's averaged eccentricity?
+plot_discecc	No
+
+### plot time evolution of disc's averaged pericentre argument?
+plot_discperarg	No
 
 ### plot time evolution of librating, orbit-crossing flow vortensities?
 plot_libcross   No
