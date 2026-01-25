@@ -817,7 +817,9 @@ class Field(Mesh):
 
                 Ax = (x*vy*vy - y*vx*vy) - x*(1.0+mass)/d  # cos(varpi)
                 Ay = (y*vx*vx - x*vx*vy) - y*(1.0+mass)/d  # sin(varpi)
-                self.data = math.atan2(Ay,Ax)
+                for i in range(self.nrad):
+                    for j in range(self.nsec):
+                        self.data[i,j] = math.atan2(Ay[i,j],Ax[i,j])
                 
                 self.strname += ' pericentre argument'
 
