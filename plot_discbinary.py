@@ -21,13 +21,15 @@ def plotdiscecc():
     plt.subplots_adjust(left=0.18, right=0.94, top=0.94, bottom=0.12)
     ax = fig.gca()
     
-    if par.physical_units == 'No':
-        xtitle = r'time [$T_0$]'
-        ytitle = r'$e_{\rm disc}$'
-    else:
-        xtitle = 'time [years]'
-        ytitle = r'$e_{\rm disc}$'        
+    # if par.physical_units == 'No':
+    #     xtitle = r'time [$T_0$]'
+    #     ytitle = r'$e_{\rm disc}$'
+    # else:
+    #     xtitle = 'time [years]'
+    #     ytitle = r'$e_{\rm disc}$'        
 
+    xtitle = r'time [$T_0$]'
+    ytitle = r'$e_{\rm disc}$'
     ax.set_xlabel(xtitle)
     ax.set_ylabel(ytitle)
     
@@ -79,8 +81,8 @@ def plotdiscecc():
             print('output number =',str(k),'out of', str(len(on)),end='\r')
 
             # get 2D gas surface density field (not compatible with 3D yet...)
-            dens = Field(field='dens', fluid='gas', on=on[k], directory=directory[j], physical_units=par.physical_units, nodiff=par.nodiff, fieldofview=par.fieldofview, onedprofile='No', override_units=par.override_units)
-            ecc  = Field(field='ecc',  fluid='gas', on=on[k], directory=directory[j], physical_units=par.physical_units, nodiff=par.nodiff, fieldofview=par.fieldofview, onedprofile='No', override_units=par.override_units)
+            dens = Field(field='dens', fluid='gas', on=on[k], directory=directory[j], physical_units='No', nodiff=par.nodiff, fieldofview=par.fieldofview, onedprofile='No', override_units=par.override_units)
+            ecc  = Field(field='ecc',  fluid='gas', on=on[k], directory=directory[j], physical_units='No', nodiff=par.nodiff, fieldofview=par.fieldofview, onedprofile='No', override_units=par.override_units)
 
             # things we do only when entering for loop
             if first_time == 0:
@@ -109,8 +111,8 @@ def plotdiscecc():
             # get time
             mytime[k] = date[take_one_point_every*k]/2.0/np.pi/(1.0**1.5)  # orbital periods at apla=1
 
-            if par.physical_units == 'Yes':
-                mytime[k] *= dens.cutime/3.15e7   # in year
+            # if par.physical_units == 'Yes':
+            #     mytime[k] *= dens.cutime/3.15e7   # in year
 
         # find minimum anx maximum
         ymin = disc_ecc.min()
@@ -168,13 +170,15 @@ def plotdiscperarg():
     plt.subplots_adjust(left=0.18, right=0.94, top=0.94, bottom=0.12)
     ax = fig.gca()
     
-    if par.physical_units == 'No':
-        xtitle = r'time [$T_0$]'
-        ytitle = r'$\varpi_{\rm disc}$'
-    else:
-        xtitle = 'time [years]'
-        ytitle = r'$\varpi_{\rm disc}$'        
+    # if par.physical_units == 'No':
+    #     xtitle = r'time [$T_0$]'
+    #     ytitle = r'$\varpi_{\rm disc}$'
+    # else:
+    #     xtitle = 'time [years]'
+    #     ytitle = r'$\varpi_{\rm disc}$'        
 
+    xtitle = r'time [$T_0$]'
+    ytitle = r'$\varpi_{\rm disc}$'
     ax.set_xlabel(xtitle)
     ax.set_ylabel(ytitle)
     
@@ -226,8 +230,8 @@ def plotdiscperarg():
             print('output number =',str(k),'out of', str(len(on)),end='\r')
 
             # get 2D gas surface density field (not compatible with 3D yet...)
-            dens = Field(field='dens', fluid='gas', on=on[k], directory=directory[j], physical_units=par.physical_units, nodiff=par.nodiff, fieldofview=par.fieldofview, onedprofile='No', override_units=par.override_units)
-            varpi= Field(field='varpi',fluid='gas', on=on[k], directory=directory[j], physical_units=par.physical_units, nodiff=par.nodiff, fieldofview=par.fieldofview, onedprofile='No', override_units=par.override_units)
+            dens = Field(field='dens', fluid='gas', on=on[k], directory=directory[j], physical_units='No', nodiff=par.nodiff, fieldofview=par.fieldofview, onedprofile='No', override_units=par.override_units)
+            varpi= Field(field='varpi',fluid='gas', on=on[k], directory=directory[j], physical_units='No', nodiff=par.nodiff, fieldofview=par.fieldofview, onedprofile='No', override_units=par.override_units)
 
 
             # things we do only when entering for loop
@@ -257,8 +261,8 @@ def plotdiscperarg():
             # get time
             mytime[k] = date[take_one_point_every*k]/2.0/np.pi/(1.0**1.5)  # orbital periods at apla=1.0
 
-            if par.physical_units == 'Yes':
-                mytime[k] *= dens.cutime/3.15e7   # in year
+            # if par.physical_units == 'Yes':
+            #     mytime[k] *= dens.cutime/3.15e7   # in year
 
         # find minimum anx maximum
         ymin = disc_varpi.min()
