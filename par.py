@@ -43,6 +43,7 @@ plot_libcross = 'No'
 plot_discecc = 'No'
 plot_discperarg = 'No'
 plot_turb = 'No'
+central_binary = 'No'
 
 par = []                       # allocating a dictionary
 var = []                       # allocating a dictionary

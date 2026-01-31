@@ -189,7 +189,7 @@ def plotdisccom():
 
                 # For simulations of circumbinary discs, return X and Y of disc's centre of mass
                 # to then get its position angle
-                if par.binary == 'Yes':
+                if par.central_binary == 'Yes':
                     x_com[k] = np.sum(mass*X) / np.sum(mass)
                     y_com[k] = np.sum(mass*Y) / np.sum(mass)
                     pa_com[k] = math.atan2(y_com[k],x_com[k])
@@ -301,7 +301,7 @@ def plotdisccom():
                 t_com[k] = round(date[k*take_one_point_every]/2./np.pi/apla/np.sqrt(apla),1)
 
                 # For simulations of circumbinary discs, return X and Y of disc's centre of mass
-                if par.binary == 'Yes':
+                if par.central_binary == 'Yes':
                     x_com[k] = np.sum(mass*X) / np.sum(mass)
                     y_com[k] = np.sum(mass*Y) / np.sum(mass)
                     t_com[k] = round(date[k*take_one_point_every]/2./np.pi,1)
@@ -327,7 +327,7 @@ def plotdisccom():
             ax.set_xscale('log')
             ax.set_yscale('log')
             ax.scatter(t_com[1:len(t_com)-1], r_com[1:len(t_com)-1], s=20, marker='+', alpha=1.0, color=par.c20[j],label=mylabel)
-        if par.binary == 'Yes' and par.plot_disccom == 'tpa':
+        if par.central_binary == 'Yes' and par.plot_disccom == 'tpa':
             ax.scatter(t_com, pa_com, s=30, marker='+', alpha=1.0, color=par.c20[j],label=mylabel)
 
         # save data in ascii file
