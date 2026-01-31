@@ -186,8 +186,14 @@ def plotdisccom():
                 r_com[k] = np.sqrt( x_com[k]*x_com[k] + y_com[k]*y_com[k] )
                 # time
                 t_com[k] = round(date[k*take_one_point_every]/2./np.pi/apla/np.sqrt(apla),1)
-                # centre-of-mass' position angle
-                pa_com[k] = math.atan2(y_com[k],x_com[k])
+
+                # For simulations of circumbinary discs, return X and Y of disc's centre of mass
+                # to then get its position angle
+                if par.binary == 'Yes':
+                    x_com[k] = np.sum(mass*X) / np.sum(mass)
+                    y_com[k] = np.sum(mass*Y) / np.sum(mass)
+                    pa_com[k] = math.atan2(y_com[k],x_com[k])
+                    t_com[k] = round(date[k*take_one_point_every]/2./np.pi,1)
 
                 #print(mp*xp, np.sum(mass*X), mp*xp+np.sum(mass*X))
                 #print(mp*yp, np.sum(mass*Y), mp*yp+np.sum(mass*Y))
@@ -291,9 +297,15 @@ def plotdisccom():
                 # test:
                 #r_com[k] = np.sqrt( x_com[k]*x_com[k] + y_com[k]*y_com[k] )
                 #print('xcom, ycom, zcom, rcom = ', x_com[k], y_com[k], z_com[k], r_com[k])
+                # time
                 t_com[k] = round(date[k*take_one_point_every]/2./np.pi/apla/np.sqrt(apla),1)
-                # centre-of-mass' position angle
-                pa_com[k] = math.atan2(y_com[k],x_com[k])
+
+                # For simulations of circumbinary discs, return X and Y of disc's centre of mass
+                if par.binary == 'Yes':
+                    x_com[k] = np.sum(mass*X) / np.sum(mass)
+                    y_com[k] = np.sum(mass*Y) / np.sum(mass)
+                    t_com[k] = round(date[k*take_one_point_every]/2./np.pi,1)
+                    pa_com[k] = math.atan2(y_com[k],x_com[k])
 
 
         # find minimum anx maximum time over directories
@@ -315,7 +327,7 @@ def plotdisccom():
             ax.set_xscale('log')
             ax.set_yscale('log')
             ax.scatter(t_com[1:len(t_com)-1], r_com[1:len(t_com)-1], s=20, marker='+', alpha=1.0, color=par.c20[j],label=mylabel)
-        if par.plot_disccom == 'tpa':
+        if par.binary == 'Yes' and par.plot_disccom == 'tpa':
             ax.scatter(t_com, pa_com, s=30, marker='+', alpha=1.0, color=par.c20[j],label=mylabel)
 
         # save data in ascii file
