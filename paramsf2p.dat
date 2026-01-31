@@ -117,8 +117,9 @@ dynamical_colorscale        # if an animation is requested, colorscale varies fr
 ################################
 
 ### plot disc's centre-of-mass?
-# type 'xy' to plot x vs. y (time in colour) or 'tr' to show time evolution of radial distance
-# of centre-of-mass from frame's origin (ie the central star)
+# type 'xy' to plot x vs. y (time in colour) or 'tr' to show time evolution of radial distance 
+# of centre-of-mass from frame's origin (ie the central star), or 'tpa' to show time evolution 
+# of the position angle of the disc's centre of mass
 #plot_disccom	No
 
 ### plot time evolution of disc mass?

@@ -26,6 +26,9 @@ def plotdisccom():
         ytitle = 'centre-of-mass radius'
         if par.physical_units == 'Yes':
             ytitle += ' [au]'
+    if par.plot_disccom == 'tpa':
+        xtitle = 'time [orbits]'
+        ytitle = 'Centre-of-mass position angle'
 
     ax.set_xlabel(xtitle)
     ax.set_ylabel(ytitle)
@@ -103,6 +106,7 @@ def plotdisccom():
             y_com = np.zeros(len(on))
             r_com = np.zeros(len(on))
             t_com = np.zeros(len(on))
+            pa_com = np.zeros(len(on))
             
             first_time = 0
 
@@ -182,6 +186,8 @@ def plotdisccom():
                 r_com[k] = np.sqrt( x_com[k]*x_com[k] + y_com[k]*y_com[k] )
                 # time
                 t_com[k] = round(date[k*take_one_point_every]/2./np.pi/apla/np.sqrt(apla),1)
+                # centre-of-mass' position angle
+                pa_com[k] = math.atan2(y_com[k],x_com[k])
 
                 #print(mp*xp, np.sum(mass*X), mp*xp+np.sum(mass*X))
                 #print(mp*yp, np.sum(mass*Y), mp*yp+np.sum(mass*Y))
@@ -205,6 +211,7 @@ def plotdisccom():
             z_com = np.zeros(len(on))
             r_com = np.zeros(len(on))
             t_com = np.zeros(len(on))
+            pa_com = np.zeros(len(on))
 
             # get 2D gas surface density field just to inherit from mesh properties
             buf = Field(field='dens', fluid='gas', on=int(on[0]), directory=directory[j], physical_units=par.physical_units, nodiff='Yes', fieldofview='polar', slice='midplane', onedprofile='No', override_units=par.override_units)
@@ -285,7 +292,8 @@ def plotdisccom():
                 #r_com[k] = np.sqrt( x_com[k]*x_com[k] + y_com[k]*y_com[k] )
                 #print('xcom, ycom, zcom, rcom = ', x_com[k], y_com[k], z_com[k], r_com[k])
                 t_com[k] = round(date[k*take_one_point_every]/2./np.pi/apla/np.sqrt(apla),1)
-
+                # centre-of-mass' position angle
+                pa_com[k] = math.atan2(y_com[k],x_com[k])
 
 
         # find minimum anx maximum time over directories
@@ -307,6 +315,8 @@ def plotdisccom():
             ax.set_xscale('log')
             ax.set_yscale('log')
             ax.scatter(t_com[1:len(t_com)-1], r_com[1:len(t_com)-1], s=20, marker='+', alpha=1.0, color=par.c20[j],label=mylabel)
+        if par.plot_disccom == 'tpa':
+            ax.scatter(t_com, pa_com, s=30, marker='+', alpha=1.0, color=par.c20[j],label=mylabel)
 
         # save data in ascii file
         fileout = open('log10rcom_'+str(directory[j])+'.dat','w')
