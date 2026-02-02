@@ -96,7 +96,7 @@ def plotonedprofile():
     if par.movie == 'No':
         # first prepare figure
         fig = plt.figure(figsize=(8.,8.))
-        plt.subplots_adjust(left=0.20, right=0.96, top=0.94, bottom=0.12)
+        plt.subplots_adjust(left=0.20, right=0.95, top=0.94, bottom=0.12)
         ax = fig.gca()
         ax.set_xlabel(xtitle)
         if par.log_xyplots_y == 'Yes':
@@ -113,7 +113,7 @@ def plotonedprofile():
             print('animation: output number '+str(k)+' / '+str(len(on)-1),end='\r')
             # first prepare figure
             fig = plt.figure(figsize=(8.,8.))
-            plt.subplots_adjust(left=0.20, right=0.96, top=0.94, bottom=0.12)
+            plt.subplots_adjust(left=0.20, right=0.95, top=0.94, bottom=0.12)
             ax = fig.gca()
             ax.set_xlabel(xtitle)
             if par.log_xyplots_y == 'Yes':
