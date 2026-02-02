@@ -189,7 +189,8 @@ def plotonedprofile():
             ax.set_xlim(xmin,xmax)
             ax.tick_params(top='on', right='on', length = 5, width=1.0, direction='out')
             #plt.ticklabel_format(axis='y', style='scientific', scilimits=(0,0))
-            ax.get_xaxis().set_major_formatter(matplotlib.ticker.ScalarFormatter())
+            ax.get_xaxis().set_major_formatter(matplotlib.ticker.ScalarFormatter('%.2f'))
+            #ax.xaxis.set_major_formatter(matplotlib.ticker.FormatStrFormatter('%.2f'))
             if par.movie == 'Yes':
                 ax.legend(frameon=False,fontsize=15,loc='upper left')
             else:
