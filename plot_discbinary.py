@@ -180,7 +180,7 @@ def plotdiscperarg():
     #     ytitle = r'$\varpi_{\rm disc}$'        
 
     xtitle = r'time [$T_0$]'
-    ytitle = r'$\varpi_{\rm disc}$'
+    ytitle = r'$\varpi_{\rm disc}$ [rad]'
     ax.set_xlabel(xtitle)
     ax.set_ylabel(ytitle)
     
