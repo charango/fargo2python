@@ -140,9 +140,11 @@ def plotdiscecc():
     # finally add legend
     ax.set_axisbelow(False)
     ax.grid(axis='both', which='major', ls='-', alpha=0.8)
-    legend = plt.legend(loc='upper right',fontsize=15,facecolor='white',edgecolor='white',framealpha=0.85,numpoints=1,bbox_transform=plt.gcf().transFigure)
-    for line, text in zip(legend.get_lines(), legend.get_texts()):
-        text.set_color(line.get_color())
+
+    if ('use_legend' in open('paramsf2p.dat').read()) and (par.use_legend != 'None'):
+        legend = plt.legend(loc='upper right',fontsize=15,facecolor='white',edgecolor='white',framealpha=0.85,numpoints=1,bbox_transform=plt.gcf().transFigure)
+        for line, text in zip(legend.get_lines(), legend.get_texts()):
+            text.set_color(line.get_color())
     
     # And save file
     if len(directory) == 1:           
@@ -290,9 +292,11 @@ def plotdiscperarg():
     # finally add legend
     ax.set_axisbelow(False)
     ax.grid(axis='both', which='major', ls='-', alpha=0.8)
-    legend = plt.legend(loc='upper right',fontsize=15,facecolor='white',edgecolor='white',framealpha=0.85,numpoints=1,bbox_transform=plt.gcf().transFigure)
-    for line, text in zip(legend.get_lines(), legend.get_texts()):
-        text.set_color(line.get_color())
+
+    if ('use_legend' in open('paramsf2p.dat').read()) and (par.use_legend != 'None'):
+        legend = plt.legend(loc='upper right',fontsize=15,facecolor='white',edgecolor='white',framealpha=0.85,numpoints=1,bbox_transform=plt.gcf().transFigure)
+        for line, text in zip(legend.get_lines(), legend.get_texts()):
+            text.set_color(line.get_color())
     
     # And save file
     if len(directory) == 1:           
