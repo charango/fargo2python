@@ -305,7 +305,7 @@ def plotdisccom():
                     x_com[k] = np.sum(mass*X) / np.sum(mass)
                     y_com[k] = np.sum(mass*Y) / np.sum(mass)
                     t_com[k] = round(date[k*take_one_point_every]/2./np.pi,1)
-                    pa_com[k] = math.atan2(y_com[k],x_com[k])
+                    pa_com[k] = math.atan2(y_com[k],x_com[k])+np.pi
 
 
         # find minimum anx maximum time over directories
@@ -329,6 +329,7 @@ def plotdisccom():
             ax.scatter(t_com[1:len(t_com)-1], r_com[1:len(t_com)-1], s=20, marker='+', alpha=1.0, color=par.c20[j],label=mylabel)
         if par.central_binary == 'Yes' and par.plot_disccom == 'tpa':
             ax.scatter(t_com, pa_com, s=30, marker='+', alpha=1.0, color=par.c20[j],label=mylabel)
+            ax.set_xlim(pa_com.min(),pa_com.max())
 
         # save data in ascii file
         fileout = open('log10rcom_'+str(directory[j])+'.dat','w')
