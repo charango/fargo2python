@@ -28,7 +28,7 @@ def plotdisccom():
             ytitle += ' [au]'
     if par.plot_disccom == 'tpa':
         xtitle = 'time [orbits]'
-        ytitle = 'Centre-of-mass position angle'
+        ytitle = 'Centre-of-mass position angle [rad]'
 
     ax.set_xlabel(xtitle)
     ax.set_ylabel(ytitle)
@@ -192,7 +192,7 @@ def plotdisccom():
                 if par.central_binary == 'Yes':
                     x_com[k] = np.sum(mass*X) / np.sum(mass)
                     y_com[k] = np.sum(mass*Y) / np.sum(mass)
-                    pa_com[k] = math.atan2(y_com[k],x_com[k])+np.pi
+                    pa_com[k] = math.atan2(y_com[k],x_com[k])+np.pi # + pi to be consistent with simulations outputs
                     t_com[k] = round(date[k*take_one_point_every]/2./np.pi,1)
 
                 #print(mp*xp, np.sum(mass*X), mp*xp+np.sum(mass*X))
@@ -305,7 +305,7 @@ def plotdisccom():
                     x_com[k] = np.sum(mass*X) / np.sum(mass)
                     y_com[k] = np.sum(mass*Y) / np.sum(mass)
                     t_com[k] = round(date[k*take_one_point_every]/2./np.pi,1)
-                    pa_com[k] = math.atan2(y_com[k],x_com[k])+np.pi
+                    pa_com[k] = math.atan2(y_com[k],x_com[k])+np.pi # + pi to be consistent with simulations outputs
 
 
         # find minimum anx maximum time over directories
