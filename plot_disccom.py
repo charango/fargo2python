@@ -329,7 +329,7 @@ def plotdisccom():
             ax.scatter(t_com[1:len(t_com)-1], r_com[1:len(t_com)-1], s=20, marker='+', alpha=1.0, color=par.c20[j],label=mylabel)
         if par.central_binary == 'Yes' and par.plot_disccom == 'tpa':
             ax.scatter(t_com, pa_com, s=30, marker='+', alpha=1.0, color=par.c20[j],label=mylabel)
-            ax.set_ylim(pa_com.min(),pa_com.max())
+            ax.set_ylim(0.0,2.0*np.pi)
 
         # save data in ascii file
         fileout = open('log10rcom_'+str(directory[j])+'.dat','w')
