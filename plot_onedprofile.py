@@ -157,6 +157,9 @@ def plotonedprofile():
             if par.onedprofile == 'Cut':
                 axiarray = array[:,0]    # azimuthal cut at zero azimuth (j=0)
 
+            if par.onedprofile == 'Median':
+                axiarray = np.median(array,axis=1)   # median over azimuth of the density profile
+
             #axiarray = axiarray[2:-2]  # CUIDADIN!!
             R = myfield.rmed
             #R = R[2:-2] # CUIDADIN!!

@@ -45,7 +45,7 @@ plot_dust	    No
 
 fluid		    gas			# what fluid? gas, dust or all (FARGO3D only)
 whatfield	    dens		# full list of available fields to be displayed at the bottom of this file
-onedprofile	    No			# plot azimuthally-averaged radial profile (1D)?
+onedprofile	    No			# default is to plot (1D) azimuthally-averaged radial profile. Other options: Cut, Median
 nodiff	        Yes			# relative difference wrt initial field? (Yes, No, nao or normnao)
                             # nao = X - <X>_phi, normnao = X / <X>_phi - 1
 
