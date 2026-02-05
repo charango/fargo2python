@@ -861,7 +861,7 @@ class Field(Mesh):
                     for i in range(self.nrad):
                         self.data[i,j] = (drrvphi[i,j] - dphivr[i,j]) / (self.redge)[i]
 
-                # this is the radial derivative of the specific angular momentum
+                # below is Kappa^2 / Omega^2 since Kappa^2 = 2 Omega x vorticity
                 if (field == 'normvorticity'):
                     for j in range(self.nsec):
                         for i in range(self.nrad):
@@ -1013,7 +1013,7 @@ class Field(Mesh):
                 # vertically-integrated density: \int_zmin^zmax rhoxdz
                 self.data = np.sum(datacube_cyl,axis=0)*np.abs(self.zmed[1]-self.zmed[0])   # (nrad,nsec)
                 self.strname += ' surface density'
-                if physical_units == 'Yes' and nodiff == 'Yes':
+                if physical_units == 'Yes' and nodiff != 'No':
                     self.unit = (self.cumass*1e3)/((self.culength*1e2)**2.)
                     self.strname += r' [g cm$^{-2}$]'
 
@@ -1430,12 +1430,12 @@ class Field(Mesh):
                 self.strname += ' density'
                 #self.strname += r' $\Sigma$'
                 if self.fargo3d == 'No':  # 2D
-                    if physical_units == 'Yes' and nodiff == 'Yes':
+                    if physical_units == 'Yes' and nodiff != 'No':
                         self.unit = (self.cumass*1e3)/((self.culength*1e2)**2.)
                         self.strname += r' [g cm$^{-2}$]'
                 else:
                     #self.strname += ' midplane density'
-                    if physical_units == 'Yes' and nodiff == 'Yes':
+                    if physical_units == 'Yes' and nodiff != 'No':
                         if self.nz > 1:  # 3D
                             self.unit = (self.cumass*1e3)/((self.culength*1e2)**3.)
                             self.strname += r' [g cm$^{-3}$]'
@@ -1444,7 +1444,7 @@ class Field(Mesh):
                             self.strname += r' [g cm$^{-2}$]'
             if field == 'energy' and  self.fargo3d == 'Yes':
                 self.strname += ' sound speed'
-                if physical_units == 'Yes' and nodiff == 'Yes':
+                if physical_units == 'Yes' and nodiff != 'No':
                     self.unit = 1e-3*(self.culength)/(self.cutime)
                     self.strname += r' [km s$^{-1}$]'
             if field == 'vrad' or field == 'vy':
@@ -1452,7 +1452,7 @@ class Field(Mesh):
                     self.strname += r' $v_{y}$'
                 else:
                     self.strname += r' $v_{r}$'
-                if physical_units == 'Yes' and nodiff == 'Yes':
+                if physical_units == 'Yes' and nodiff != 'No':
                     self.unit = 1e-3*(self.culength)/(self.cutime)
                     self.strname += r' [km s$^{-1}$]'
             if field == 'vtheta' or field == 'vx':
@@ -1460,12 +1460,12 @@ class Field(Mesh):
                     self.strname += r' $v_{x}$'
                 else:
                     self.strname += r' $v_{\varphi}$'
-                if physical_units == 'Yes' and nodiff == 'Yes':
+                if physical_units == 'Yes' and nodiff != 'No':
                     self.unit = 1e-3*(self.culength)/(self.cutime)
                     self.strname += r' [km s$^{-1}$]'
             if field == 'vcol' or field == 'vz':
                 self.strname += r' $v_{\theta}$'
-                if physical_units == 'Yes' and nodiff == 'Yes':
+                if physical_units == 'Yes' and nodiff != 'No':
                     self.unit = 1e-3*(self.culength)/(self.cutime)
                     self.strname += r' [km s$^{-1}$]'
             if field == 'brad' or field == 'by':
@@ -1478,18 +1478,18 @@ class Field(Mesh):
                 self.strname += r' $B_{z}$'
             if field == 'temp':
                 self.strname += ' temperature'
-                if physical_units == 'Yes' and nodiff == 'Yes':
+                if physical_units == 'Yes' and nodiff != 'No':
                     self.unit = self.cutemp
                     self.strname += ' [K]'
             if field == 'mdot':
-                if physical_units == 'Yes' and nodiff == 'Yes':
+                if physical_units == 'Yes' and nodiff != 'No':
                     self.unit = (self.cumass)/(self.cutime)
                     self.unit /= 2e30  
                     self.unit *= 3.15e7
                     self.strname += r' [$M_{\odot}$ yr$^{-1}$]'
 
         #
-        if physical_units == 'No' and nodiff == 'Yes':
+        if physical_units == 'No' and nodiff != 'No':
             if (not('torque') in field) and (par.normalize_torque == 'No'):
                 self.strname += r' [code units]'            
 
