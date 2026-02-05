@@ -205,17 +205,22 @@ def plotonedprofile():
                  ascii = open('1D'+directory[j]+par.whatfield+str(on[k])+'.dat','w')
                  for v in range(len(R)):
                     ascii.write(str(R[v])+'\t'+str(axiarray[v])+'\n')
-                    
+
+        prefix = 'axi'
+        if par.onedprofile == 'Cut':
+            prefix = 'cut'
+        if par.onedprofile == 'Median':
+            prefix = 'median'
 
         # save file
         if len(directory) == 1:           
-            outfile = 'axi'+par.fluid+'_'+par.whatfield+'_'+str(directory[0])+'_'+str(on[k]).zfill(4)
+            outfile = prefix+par.fluid+'_'+par.whatfield+'_'+str(directory[0])+'_'+str(on[k]).zfill(4)
             if par.movie == 'Yes' and par.take_one_point_every != 1:
-                outfile = 'axi'+par.fluid+'_'+par.whatfield+'_'+str(directory[0])+'_'+str(k).zfill(4)
+                outfile = prefix+par.fluid+'_'+par.whatfield+'_'+str(directory[0])+'_'+str(k).zfill(4)
         else:
-            outfile = 'axi'+par.fluid+'_'+par.whatfield+'_'+str(on[k]).zfill(4)
+            outfile = prefix+par.fluid+'_'+par.whatfield+'_'+str(on[k]).zfill(4)
             if par.movie == 'Yes' and par.take_one_point_every != 1:
-                outfile = 'axi'+par.fluid+'_'+par.whatfield+'_'+str(k).zfill(4)
+                outfile = prefix+par.fluid+'_'+par.whatfield+'_'+str(k).zfill(4)
         fileout = outfile+'.pdf'
         if par.saveaspdf == 'Yes':
             plt.savefig('./'+fileout, dpi=160)
@@ -229,22 +234,22 @@ def plotonedprofile():
     if par.movie == 'Yes':
         if len(directory) == 1:
             # png files that have been created above
-            allpngfiles = ['axi'+par.fluid+'_'+par.whatfield+'_'+str(directory[0])+'_'+str(on[x]).zfill(4)+'.png' for x in range(len(on))]
+            allpngfiles = [prefix+par.fluid+'_'+par.whatfield+'_'+str(directory[0])+'_'+str(on[x]).zfill(4)+'.png' for x in range(len(on))]
             if par.take_one_point_every != 1:
-                allpngfiles = ['axi'+par.fluid+'_'+par.whatfield+'_'+str(directory[0])+'_'+str(x).zfill(4)+'.png' for x in range(len(on))]
+                allpngfiles = [prefix+par.fluid+'_'+par.whatfield+'_'+str(directory[0])+'_'+str(x).zfill(4)+'.png' for x in range(len(on))]
             # input files for ffpmeg
-            input_files = 'axi'+par.fluid+'_'+par.whatfield+'_'+str(directory[0])+'_%04d.png'
+            input_files = prefix+par.fluid+'_'+par.whatfield+'_'+str(directory[0])+'_%04d.png'
             # output file for ffmpeg
-            filempg = 'axi'+par.fluid+'_'+par.whatfield+'_'+str(directory[0])+'_'+str(on[0])+'_'+str(on[len(on)-1])+'.mpg'    
+            filempg = prefix+par.fluid+'_'+par.whatfield+'_'+str(directory[0])+'_'+str(on[0])+'_'+str(on[len(on)-1])+'.mpg'    
         else:
             # png files that have been created above
-            allpngfiles = ['axi'+par.fluid+'_'+par.whatfield+'_'+str(on[x]).zfill(4)+'.png' for x in range(len(on))]
+            allpngfiles = [prefix+par.fluid+'_'+par.whatfield+'_'+str(on[x]).zfill(4)+'.png' for x in range(len(on))]
             if par.take_one_point_every != 1:
-                allpngfiles = ['axi'+par.fluid+'_'+par.whatfield+'_'+str(x).zfill(4)+'.png' for x in range(len(on))]
+                allpngfiles = [prefix+par.fluid+'_'+par.whatfield+'_'+str(x).zfill(4)+'.png' for x in range(len(on))]
             # input files for ffpmeg
-            input_files = 'axi'+par.fluid+'_'+par.whatfield+'_%04d.png'
+            input_files = prefix+par.fluid+'_'+par.whatfield+'_%04d.png'
             # output file for ffmpeg
-            filempg = 'axi'+par.fluid+'_'+par.whatfield+'_'+str(on[0])+'_'+str(on[len(on)-1])+'.mpg'
+            filempg = prefix+par.fluid+'_'+par.whatfield+'_'+str(on[0])+'_'+str(on[len(on)-1])+'.mpg'
         # options
         if par.take_one_point_every != 1:
             str_on_start_number = str(0)
