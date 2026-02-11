@@ -10,7 +10,7 @@ new_unit_mass	    4e30		# new unit of mass in kg
 
 movie		        No			# make a movie? requires on to take the form onmin,onmax (eg: 1,10)
 on	   	            20		    # fargo's output number(s), separated by a comma (,) if several
-                                # can also be all to display all available frames
+                                # can also be 'all' to display all available frames
 
 verbose             Yes         # displays more information on screen
 
@@ -120,7 +120,8 @@ dynamical_colorscale        # if an animation is requested, colorscale varies fr
 # type 'xy' to plot x vs. y (time in colour) or 'tr' to show time evolution of radial distance 
 # of centre-of-mass from frame's origin (ie the central star), or 'tpa' to show time evolution 
 # of the position angle of the disc's centre of mass
-#plot_disccom	No
+plot_disccom	No
+central_binary  No          
 
 ### plot time evolution of disc mass?
 plot_discmass	No
