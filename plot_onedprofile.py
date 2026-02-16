@@ -175,9 +175,7 @@ def plotonedprofile():
                         use_legend = [par.use_legend]
                     mylegend = str(use_legend[j])
                     mylegend = mylegend.replace("_", " ")
-                    print(mylegend)
                     mylabel = mylegend + ', '+ mylabel
-                    print(mylabel)
                 else:
                     mylabel = str(directory[j]) + ', '+ mylabel
                     
