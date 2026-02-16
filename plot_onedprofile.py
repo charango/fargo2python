@@ -170,12 +170,18 @@ def plotonedprofile():
 
             if len(directory) > 1:
                 if ('use_legend' in open('paramsf2p.dat').read()) and (par.use_legend != '#'):
+                    use_legend = par.use_legend
+                    if isinstance(par.use_legend, str) == True:
+                        use_legend = [par.use_legend]
+                    mylegend = str(use_legend[j])
+                    mylegend = mylegend.replace("_", " ")
                     if len(directory) == 1:
-                        mylabel = str(par.use_legend) + ', '+ mylabel
+                        mylabel = mylegend + ', '+ mylabel
                     else:
-                        mylabel = str(par.use_legend[j]) + ', '+ mylabel
+                        mylabel = mylegend[j] + ', '+ mylabel
                 else:
                     mylabel = str(directory[j]) + ', '+ mylabel
+                    
             if par.movie == 'Yes':
                 mycolor = par.c20[j]
             else:

@@ -66,12 +66,13 @@ def plotdiscecc():
         mytime    = np.zeros(len(on))
 
         if ('use_legend' in open('paramsf2p.dat').read()) and (par.use_legend != '#'):
-           if len(directory) == 1:
-               mylabel = str(par.use_legend)
-           else:
-               mylabel = str(par.use_legend[j])
+            use_legend = par.use_legend
+            if isinstance(par.use_legend, str) == True:
+                use_legend = [par.use_legend]
+            mylabel = str(use_legend[j])
+            mylabel = mylabel.replace("_", " ")
         else:
-           mylabel = str(directory[j])
+            mylabel = str(directory[j])
         
         first_time = 0
 
@@ -225,12 +226,14 @@ def plotdiscperarg():
         mytime    = np.zeros(len(on))
 
         if ('use_legend' in open('paramsf2p.dat').read()) and (par.use_legend != '#'):
-           if len(directory) == 1:
-               mylabel = str(par.use_legend)
-           else:
-               mylabel = str(par.use_legend[j])
+            use_legend = par.use_legend
+            if isinstance(par.use_legend, str) == True:
+                use_legend = [par.use_legend]
+            mylabel = str(use_legend[j])
+            mylabel = mylabel.replace("_", " ")
         else:
-           mylabel = str(directory[j])
+            mylabel = str(directory[j])
+
         
         first_time = 0
 

@@ -53,14 +53,6 @@ def plotdisccom():
     # loop over directories
     for j in range(len(directory)):
 
-        # if ('use_legend' in open('paramsf2p.dat').read()) and (par.use_legend != '#'):
-        #     if len(directory) == 1:
-        #         mylabel = str(par.use_legend)
-        #     else:
-        #         mylabel = str(par.use_legend[j])
-        # else:
-        #     mylabel = str(directory[j])
-
         if ('use_legend' in open('paramsf2p.dat').read()) and (par.use_legend != '#'):
             use_legend = par.use_legend
             if isinstance(par.use_legend, str) == True:
