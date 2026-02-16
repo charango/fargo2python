@@ -158,6 +158,14 @@ def plotdiscecc():
         plt.savefig('./'+re.sub('.pdf', '.png', fileout), dpi=120)
 
 
+    # save data in ascii file
+    outasciifile = outfile+'_every'+str(par.take_one_point_every)+'.dat'
+    fileout = open(outasciifile,'w')
+    for i in range(len(x[::par.take_one_point_every])):
+        fileout.write(str(mytime[i])+'\t'+str(disc_ecc[i])+'\n')
+    fileout.close()
+
+
 
 # ============
 # Function that plots time evolution of the disc's pericenter argument varpi (primarily for binary disc simulations)
@@ -308,3 +316,10 @@ def plotdiscperarg():
         plt.savefig('./'+fileout, dpi=160)
     if par.saveaspng == 'Yes':
         plt.savefig('./'+re.sub('.pdf', '.png', fileout), dpi=120)
+
+    # save data in ascii file
+    outasciifile = outfile+'_every'+str(par.take_one_point_every)+'.dat'
+    fileout = open(outasciifile,'w')
+    for i in range(len(x[::par.take_one_point_every])):
+        fileout.write(str(mytime[i])+'\t'+str(disc_ecc[i])+'\n')
+    fileout.close()
