@@ -79,7 +79,8 @@ log_colorscale    Yes	    # logarithmic color scale for 2D plots?
 log_xyplots_y	  No		# logarithmic y-scale for y=f(x) plots?
 log_xyplots_x	  No		# logarithmic x-scale for y=f(x) plots?
 
-use_legend				    # manually enter legend to be used for 1D profiles if plot_tqwk set to Yes
+use_legend				    # manually enter legend to be used for 1D plots if several directories 
+                            # ex: 'First_run','Second_run','Third_run' (the '_' will be replaced by white spaces)
 
 myrmin					    # if specified, minimum radius to display field
 myrmax	        			# if specified, maximum radius to display field
