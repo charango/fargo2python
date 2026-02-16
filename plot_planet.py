@@ -374,3 +374,15 @@ def plotplanet():
         plt.savefig('./'+fileout, dpi=160)
     if par.saveaspng == 'Yes':
         plt.savefig('./'+re.sub('.pdf', '.png', fileout), dpi=120)
+
+
+    # save data in ascii file
+    outasciifile = outfile+'_every'+str(par.take_one_point_every)+'.dat'
+    fileout = open(outasciifile,'w')
+    if par.plot_planet[1] != 'mmr':
+        for i in range(len(x[::par.take_one_point_every])):
+            fileout.write(str(x[i:i:par.take_one_point_every])+'\t'+str(y0[i:i:par.take_one_point_every])+'\n')
+    else:
+        for i in range(len(x[::par.take_one_point_every])):
+            fileout.write(str(x[i:i:par.take_one_point_every])+'\t'+str(y0[i:i:par.take_one_point_every])+'\t'+str(y1[i:i:par.take_one_point_every])+'\n')
+    fileout.close()
