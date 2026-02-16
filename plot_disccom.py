@@ -332,12 +332,17 @@ def plotdisccom():
             ax.set_ylim(0.0,2.0*np.pi)
 
         # save data in ascii file
-        fileout = open('log10rcom_'+str(directory[j])+'.dat','w')
-        fileout.write('# time[orb]\t log10(rcom)\n')
-        for i in range(1,len(t_com)):
-            fileout.write(str(t_com[i])+'\t'+str(np.log10(r_com[i]))+'\n')
-        fileout.close()
-
+        if par.central_binary == 'Yes' and par.plot_disccom == 'tpa':
+            fileout = open('pa_com_'+str(directory[j])+'_every'+str(take_one_point_every)+'.dat','w')
+            for i in range(1,len(t_com)):
+                fileout.write(str(t_com[i])+'\t'+str(pa_com[i])+'\n')
+            fileout.close()
+        else:
+            fileout = open('log10rcom_'+str(directory[j])+'.dat','w')
+            fileout.write('# time[orb]\t log10(rcom)\n')
+            for i in range(1,len(t_com)):
+                fileout.write(str(t_com[i])+'\t'+str(np.log10(r_com[i]))+'\n')
+            fileout.close()
             
     # set x-range
     if par.plot_disccom != 'xy':

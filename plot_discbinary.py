@@ -321,5 +321,5 @@ def plotdiscperarg():
     outasciifile = outfile+'_every'+str(par.take_one_point_every)+'.dat'
     fileout = open(outasciifile,'w')
     for i in range(len(mytime)):
-        fileout.write(str(mytime[i])+'\t'+str(disc_ecc[i])+'\n')
+        fileout.write(str(mytime[i])+'\t'+str(disc_varpi[i])+'\n')
     fileout.close()
