@@ -161,7 +161,7 @@ def plotdiscecc():
     # save data in ascii file
     outasciifile = outfile+'_every'+str(par.take_one_point_every)+'.dat'
     fileout = open(outasciifile,'w')
-    for i in range(len(x[::par.take_one_point_every])):
+    for i in range(len(mytime)):
         fileout.write(str(mytime[i])+'\t'+str(disc_ecc[i])+'\n')
     fileout.close()
 
@@ -320,6 +320,6 @@ def plotdiscperarg():
     # save data in ascii file
     outasciifile = outfile+'_every'+str(par.take_one_point_every)+'.dat'
     fileout = open(outasciifile,'w')
-    for i in range(len(x[::par.take_one_point_every])):
+    for i in range(len(mytime)):
         fileout.write(str(mytime[i])+'\t'+str(disc_ecc[i])+'\n')
     fileout.close()
