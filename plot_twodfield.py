@@ -423,7 +423,7 @@ def plottwodfield():
                     else:
                         fig = plt.figure(figsize=(8.,8.))
                         # do not edit subplot position below!
-                        plt.subplots_adjust(left=0.17, right=0.92, top=0.89, bottom=0.11)
+                        plt.subplots_adjust(left=0.18, right=0.93, top=0.89, bottom=0.11)
                     ax = plt.gca()
 
                 xlim_min = -myrmax
