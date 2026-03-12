@@ -519,6 +519,12 @@ def plottwodfield():
                 if par.fieldofview == 'latitudinal':
                     myfieldmax = array_orig[imin:imax+1,jmin:jmax+1].max()
 
+            if ( ('symmetrical_colorscale' in open('paramsf2p.dat').read()) and (par.symmetrical_colorscale == 'Yes') ):
+                if myfieldmax > np.abs(myfieldmin):
+                    myfieldmin = -myfieldmax
+                else:
+                    myfieldmax = -myfieldmin
+
             if par.log_colorscale == 'Yes':
                 if (par.fieldmin == 'auto' or par.fieldmax == 'auto'):
                     minarray = array.min() #1e-3*array.max()?
