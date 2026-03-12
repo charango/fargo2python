@@ -70,6 +70,12 @@ def plotdisccom():
         else:
             fargo2d1d = 'No'
 
+        usedazi_file = directory[j]+'/used_azi.dat'
+        if os.path.isfile(usedazi_file) == False:
+            fargo_orig = 'Yes'
+        else:
+            fargo_orig = 'No'
+
         # Test if simulation has been done with FARGO3D in 3D
         runwas3d = 'No'
         summary_file  = directory[j]+'/summary0.dat'
@@ -150,7 +156,7 @@ def plotdisccom():
                         if fargo2d1d == 'Yes':
                             f1, xpla, ypla, f4, f5, mpla, f7, date, f9 = np.loadtxt(directory[j]+"/planet0.dat",unpack=True)
                             index_orbit_file = 1
-                        elif par.fargo_orig == 'No':
+                        elif fargo_orig == 'No':
                             f1, xpla, ypla, f4, f5, mpla, f7, date, f9, f10, f11 = np.loadtxt(directory[j]+"/planet0.dat",unpack=True)
                         else:
                             f1, xpla, ypla, f4, f5, mpla, f7, date, f9 = np.loadtxt(directory[j]+"/planet0.dat",unpack=True)
