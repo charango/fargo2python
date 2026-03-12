@@ -78,8 +78,10 @@ def plotdisccom():
 
         # Test if simulation has been done with FARGO3D in 3D
         runwas3d = 'No'
+        fargo3d  = 'No'
         summary_file  = directory[j]+'/summary0.dat'
         if os.path.isfile(summary_file) == True:
+            fargo3d == 'Yes'
             command = par.awk_command+' " /^ZMAX/ " '+directory[j]+'/variables.par'
             if sys.version_info[0] < 3:   # python 2.X
                 buf = subprocess.check_output(command, shell=True)
@@ -98,7 +100,7 @@ def plotdisccom():
         if runwas3d == 'No':
 
             # find how many output numbers were produced for each directory
-            if par.fargo3d == 'No':
+            if fargo3d == 'No':
                 if fargo2d1d == 'No':
                     nboutputs = len(fnmatch.filter(os.listdir(directory[j]), 'gasdens*.dat'))
                 else:
