@@ -104,8 +104,7 @@ def plotdisccom():
                 if fargo2d1d == 'No':
                     nboutputs = len(fnmatch.filter(os.listdir(directory[j]), 'gasdens*.dat'))
                 else:
-                    nboutputs = len(fnmatch.filter(os.listdir(directory[j]), 'gasdens*.dat'))
-                    # nboutputs = len(fnmatch.filter(os.listdir(directory[j]), 'gasdens1D*.dat')) # CUIDADIN!
+                    nboutputs = len(fnmatch.filter(os.listdir(directory[j]), 'gasdens1D*.dat'))
             else:
                 nboutputs = len(fnmatch.filter(os.listdir(directory[j]), 'summary*.dat'))
             print('number of outputs for directory ',directory[j],': ',nboutputs)
