@@ -93,24 +93,26 @@ if not('verbose' in open('paramsf2p.dat').read()):
 # was simulation carried out with Fargo3D?
 fargo3d = 'No'
 fargo_orig = 'No'
+fargo2d1d = 'No'
 if isinstance(directory, str) == False:
     summary0_file = directory[0]+'/summary0.dat'
     usedazi_file  = directory[0]+'/used_azi.dat'
+    dims1d_file  = directory[0]+'/dims1D.dat'
 else:
     summary0_file = directory+'/summary0.dat'
     usedazi_file  = directory+'/used_azi.dat'
+    dims1d_file  = directory+'/dims1D.dat'
 if os.path.isfile(summary0_file) == True:
     # Simulations were carried out with Fargo3D
     fargo3d = 'Yes'
 else:
     # Simulations were carried out with Fargo2D
-    fargo3d = 'No'
-    if os.path.isfile(usedazi_file) == True:
-    # Simulations were carried out with Dusty FARGO-ADSG
-        fargo_orig = 'No'
-    else:
-    # Simulations were carried out with the original FARGO code
+    if os.path.isfile(usedazi_file) == False:
+       # Simulations were carried out with the original FARGO code
         fargo_orig = 'Yes'
+        print('dims1d_file = ', dims1d_file)
+        if os.path.isfile(dims1d_file) == True:
+            fargo2d1d = 'Yes'
 
 # global boolean: if True, then plot 1D or 2D fields
 plot_field = True
@@ -143,6 +145,9 @@ if movie == 'Yes':
                 dir = directory
             if fargo3d == 'No':
                 nboutputs = len(fnmatch.filter(os.listdir(dir), 'gasdens*.dat'))
+                if fargo2d1d == 'Yes':
+                   nboutputs = len(fnmatch.filter(os.listdir(dir), 'gasdens1D*.dat'))
+                   print('nboutputs = ', nboutputs)
             else:
                 nboutputs = len(fnmatch.filter(os.listdir(dir), 'summary*.dat'))
             on = [0,nboutputs-1]

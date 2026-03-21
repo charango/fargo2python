@@ -64,7 +64,7 @@ def plotdisccom():
 
         # Test if file gasdens1D0.dat exists to know if simulation in current directory 
         # has been carried out with FARGO2D1D or not
-        gasdens1D0_file  = directory[j]+'/gasdens1D0.dat'
+        gasdens1D0_file  = directory[j]+'/dims1D.dat'
         if os.path.isfile(gasdens1D0_file) == True:
             fargo2d1d = 'Yes'
         else:
@@ -104,7 +104,8 @@ def plotdisccom():
                 if fargo2d1d == 'No':
                     nboutputs = len(fnmatch.filter(os.listdir(directory[j]), 'gasdens*.dat'))
                 else:
-                    nboutputs = len(fnmatch.filter(os.listdir(directory[j]), 'gasdens1D*.dat'))
+                    nboutputs = len(fnmatch.filter(os.listdir(directory[j]), 'gasdens*.dat'))
+                    # nboutputs = len(fnmatch.filter(os.listdir(directory[j]), 'gasdens1D*.dat')) # CUIDADIN!
             else:
                 nboutputs = len(fnmatch.filter(os.listdir(directory[j]), 'summary*.dat'))
             print('number of outputs for directory ',directory[j],': ',nboutputs)
