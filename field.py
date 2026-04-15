@@ -1107,14 +1107,14 @@ class Field(Mesh):
             # ----        
             if field == 'alpha_reynolds':
 
-                # if par.movie == 'Yes':
-                #     on = range(0,on,par.take_one_point_every)
-                # else:
-                #     if np.isscalar(par.on) == False:
-                #         on = range(par.on[0],par.on[1]+1,par.take_one_point_every)
-                #     else:
-                #         on = [par.on] 
-                on = [on] # cuidadin!
+                if par.movie == 'Yes':
+                    on = range(0,on,par.take_one_point_every)
+                else:
+                    if np.isscalar(par.on) == False:
+                        on = range(par.on[0],par.on[1]+1,par.take_one_point_every)
+                    else:
+                        on = [par.on] 
+                # on = [on] # cuidadin!
                     
                 for k in range(len(on)):
                     #print('k = ', k,' / ', len(on))
@@ -1155,7 +1155,7 @@ class Field(Mesh):
                     self.data += (axidens*axidvrdvp/axipres).repeat(self.nsec).reshape(self.nrad,self.nsec) # 2D
 
                 self.data /= len(on)
-                self.strname = r'$\alpha_{\rm Rey}$'
+                self.strname = r'$\alpha_{\rm Reynolds}$'
 
             # ----
             # time-averaged Reynolds alpha parameter
@@ -1192,7 +1192,7 @@ class Field(Mesh):
                     self.data -= (axibrbp/axipres).repeat(self.nsec).reshape(self.nrad,self.nsec) # 2D  # mu0 = 1 in code units
 
                 self.data /= len(on)
-                self.strname = r'$\alpha_{\rm Max}$'
+                self.strname = r'$\alpha_{\rm Maxwell}$'
 
 
             # ----
