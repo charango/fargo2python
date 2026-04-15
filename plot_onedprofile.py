@@ -159,7 +159,7 @@ def plotonedprofile():
             ax.set_ylabel('r.t.a. '+myfield.strname)
 
         # ax.set_ylim(ymin,ymax)
-        # ax.set_xlim(xmin,xmax)
+        ax.set_xlim(R.min(),R.max())
         ax.tick_params(top='on', right='on', length = 5, width=1.0, direction='out')
         #plt.ticklabel_format(axis='y', style='scientific', scilimits=(0,0))
         ax.get_xaxis().set_major_formatter(matplotlib.ticker.ScalarFormatter())
