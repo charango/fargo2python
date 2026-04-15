@@ -157,7 +157,11 @@ def plotonedprofile():
             ax.plot(R, axiarray, color=mycolor, lw=2., linestyle = 'solid', label=myfield.strtime)
             ax.set_ylabel('r.t.a. '+myfield.strname)
 
-        # ax.set_ylim(ymin,ymax)
+        if (par.fieldmin != '#') and (par.fieldmax != '#'):
+            ymin = par.fieldmin
+            ymax = par.fieldmax
+            ax.set_ylim(ymin,ymax)
+
         ax.set_xlim(R.min(),R.max())
         ax.tick_params(top='on', right='on', length = 5, width=1.0, direction='out')
         #plt.ticklabel_format(axis='y', style='scientific', scilimits=(0,0))
