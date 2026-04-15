@@ -169,9 +169,9 @@ def plotonedprofile():
 
         # save file
         if len(directory) == 1:           
-            outfile = par.fluid+'_rta_'+par.whatfield+'_'+str(directory[0])+'_'+str(on[k]).zfill(4)
+            outfile = 'axi'+par.fluid+'_rta_'+par.whatfield+'_'+str(directory[0])+'_'+str(on[k]).zfill(4)
         else:
-            outfile = par.fluid+'_rta_'+par.whatfield+'_'+str(on[k]).zfill(4)
+            outfile = 'axi'+par.fluid+'_rta_'+par.whatfield+'_'+str(on[k]).zfill(4)
         fileout = outfile+'.pdf'
         if par.saveaspdf == 'Yes':
             plt.savefig('./'+fileout, dpi=160)
