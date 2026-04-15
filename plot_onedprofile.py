@@ -124,7 +124,7 @@ def plotonedprofile():
 
         for j in range(len(directory)):  # loop over directories
 
-            myfield  = Field(field=par.whatfield, fluid=par.fluid, on=on[k], directory=directory[j], physical_units=par.physical_units, nodiff=par.nodiff, fieldofview=par.fieldofview, onedprofile=par.onedprofile, z_average=par.z_average, override_units=par.override_units)
+            myfield  = Field(field=par.whatfield, fluid=par.fluid, on=0, directory=directory[j], physical_units=par.physical_units, nodiff=par.nodiff, fieldofview=par.fieldofview, onedprofile=par.onedprofile, z_average=par.z_average, override_units=par.override_units)
 
             R = myfield.rmed
             if par.physical_units == 'Yes':
