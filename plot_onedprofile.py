@@ -129,7 +129,6 @@ def plotonedprofile():
             R = myfield.rmed
             if par.physical_units == 'Yes':
                 R *= (myfield.culength / 1.5e11) # in au
-            mylabel = myfield.strtime
 
             array = np.zeros((myfield.nrad,myfield.nsec))
 
@@ -155,7 +154,7 @@ def plotonedprofile():
             
             mycolor = par.c20[j]
 
-            ax.plot(R, axiarray, color=mycolor, lw=2., linestyle = 'solid', label=mylabel)
+            ax.plot(R, axiarray, color=mycolor, lw=2., linestyle = 'solid', label=myfield.strtime)
             ax.set_ylabel('r.t.a. '+myfield.strname)
 
         # ax.set_ylim(ymin,ymax)
