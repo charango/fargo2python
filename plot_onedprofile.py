@@ -20,7 +20,7 @@ def plotonedprofile():
     on = par.on
     if isinstance(par.on, int) == True:
         on = [on]
-    if par.movie == 'Yes':
+    if (par.movie == 'Yes' or ('running_time_average' in open('paramsf2p.dat').read()) and (par.running_time_average == 'Yes')):
         on = range(on[0],on[1]+1,par.take_one_point_every)
     directory = par.directory
     if isinstance(par.directory, str) == True:
@@ -104,70 +104,44 @@ def plotonedprofile():
         if par.log_xyplots_x == 'Yes':
             ax.set_xscale('log')
 
+
     # -----------------------------
     # then plot via double for loop
     # -----------------------------
-    for k in range(len(on)):     # loop over output numbers
-        
-        if par.movie == 'Yes':
-            print('animation: output number '+str(k)+' / '+str(len(on)-1),end='\r')
-            # first prepare figure
-            fig = plt.figure(figsize=(8.,8.))
-            plt.subplots_adjust(left=0.20, right=0.95, top=0.94, bottom=0.12)
-            ax = fig.gca()
-            ax.set_xlabel(xtitle)
-            if par.log_xyplots_y == 'Yes':
-                ax.set_yscale('log')
-            if par.log_xyplots_x == 'Yes':
-                ax.set_xscale('log')
-                
+    # case 1: a running-time averaged 1D profile is requested
+    if ('running_time_average' in open('paramsf2p.dat').read()) and (par.running_time_average == 'Yes'):
+
+        # first prepare figure
+        fig = plt.figure(figsize=(8.,8.))
+        plt.subplots_adjust(left=0.20, right=0.95, top=0.94, bottom=0.12)
+        ax = fig.gca()
+        ax.set_xlabel(xtitle)
+        if par.log_xyplots_y == 'Yes':
+            ax.set_yscale('log')
+        if par.log_xyplots_x == 'Yes':
+            ax.set_xscale('log')
+
+
         for j in range(len(directory)):  # loop over directories
-            # it does not take much time to read all fields again...
+
             myfield  = Field(field=par.whatfield, fluid=par.fluid, on=on[k], directory=directory[j], physical_units=par.physical_units, nodiff=par.nodiff, fieldofview=par.fieldofview, onedprofile=par.onedprofile, z_average=par.z_average, override_units=par.override_units)
-            
-            # stuff we do only once: set xmin and xmax
-            if k == 0 and j == 0:
-                R = myfield.redge
-                if par.physical_units == 'Yes':
-                    R *= (myfield.culength / 1.5e11) # in au
-                if (par.myrmin == '#'):
-                    xmin = R.min()
-                else:
-                    xmin = par.myrmin
-                if (par.myrmax == '#'):
-                    xmax = R.max()
-                else:
-                    xmax = par.myrmax
-                strfield = myfield.strname
-            
-            if par.nodiff == 'No':
-                myfield0  = Field(field=par.whatfield, fluid=par.fluid, on=0, directory=directory[j], physical_units=par.physical_units, nodiff=par.nodiff, fieldofview=par.fieldofview, onedprofile=par.onedprofile, z_average=par.z_average, override_units=par.override_units)
-                array = (myfield.data-myfield0.data)/myfield0.data
-            else:
-                array = myfield.data
-                # conversion in physical units
-                if par.physical_units == 'Yes':
-                    array = myfield.data * myfield.unit
-                if par.log_xyplots_y == 'Yes' and (par.whatfield == 'vrad' or par.whatfield == 'vy'):
-                    #print('1D vrad displayed with log y-scale')
-                    array = np.abs(array)
-                    
-            axiarray = np.sum(array,axis=1)/myfield.nsec
 
-            if par.onedprofile == 'Cut':
-                axiarray = array[:,0]    # azimuthal cut at zero azimuth (j=0)
-
-            if par.onedprofile == 'Median':
-                axiarray = np.median(array,axis=1)   # median over azimuth of the density profile
-
-            #axiarray = axiarray[2:-2]  # CUIDADIN!!
             R = myfield.rmed
-            #R = R[2:-2] # CUIDADIN!!
-            
             if par.physical_units == 'Yes':
                 R *= (myfield.culength / 1.5e11) # in au
             mylabel = myfield.strtime
 
+            array = np.zeros((myfield.nrad,myfield.nsec))
+
+            for k in range(len(on)):     # loop over output numbers
+                myfield  = Field(field=par.whatfield, fluid=par.fluid, on=on[k], directory=directory[j], physical_units=par.physical_units, nodiff=par.nodiff, fieldofview=par.fieldofview, onedprofile=par.onedprofile, z_average=par.z_average, override_units=par.override_units)
+                array += myfield.data
+
+            array /= len(on)
+            axiarray = np.sum(array,axis=1)/myfield.nsec
+            if par.physical_units == 'Yes':
+                axiarray *= myfield.unit
+            
             if len(directory) > 1:
                 if ('use_legend' in open('paramsf2p.dat').read()) and (par.use_legend != '#'):
                     use_legend = par.use_legend
@@ -178,59 +152,159 @@ def plotonedprofile():
                     mylabel = mylegend + ', '+ mylabel
                 else:
                     mylabel = str(directory[j]) + ', '+ mylabel
-                    
-            if par.movie == 'Yes':
-                mycolor = par.c20[j]
-            else:
-                mycolor = par.c20[k*len(directory)+j]
+            
+            mycolor = par.c20[j]
 
             ax.plot(R, axiarray, color=mycolor, lw=2., linestyle = 'solid', label=mylabel)
-            ax.set_ylabel(strfield)
+            ax.set_ylabel('r.t.a. '+myfield.strname)
 
-            if ( ('dynamical_colorscale' in open('paramsf2p.dat').read()) and (par.dynamical_colorscale == 'Yes') ):
-                ymin = axiarray.min()
-                ymax = axiarray.max()
-
-            ax.set_ylim(ymin,ymax)
-            ax.set_xlim(xmin,xmax)
-            ax.tick_params(top='on', right='on', length = 5, width=1.0, direction='out')
-            #plt.ticklabel_format(axis='y', style='scientific', scilimits=(0,0))
-            ax.get_xaxis().set_major_formatter(matplotlib.ticker.ScalarFormatter())
-            ax.xaxis.set_major_formatter(matplotlib.ticker.FormatStrFormatter('%.1f'))
-            if par.movie == 'Yes':
-                ax.legend(frameon=False,fontsize=15,loc='upper left')
-            else:
-                ax.legend(frameon=False,fontsize=15)
-            fig.add_subplot(ax)
-
-            # option to write result in 1D ascii file
-            if ( ('write_ascii' in open('paramsf2p.dat').read()) and (par.write_ascii == 'Yes') ):
-                 ascii = open('1D'+directory[j]+par.whatfield+str(on[k])+'.dat','w')
-                 for v in range(len(R)):
-                    ascii.write(str(R[v])+'\t'+str(axiarray[v])+'\n')
-
-        prefix = 'axi'
-        if par.onedprofile == 'Cut':
-            prefix = 'cut'
-        if par.onedprofile == 'Median':
-            prefix = 'median'
+        # ax.set_ylim(ymin,ymax)
+        # ax.set_xlim(xmin,xmax)
+        ax.tick_params(top='on', right='on', length = 5, width=1.0, direction='out')
+        #plt.ticklabel_format(axis='y', style='scientific', scilimits=(0,0))
+        ax.get_xaxis().set_major_formatter(matplotlib.ticker.ScalarFormatter())
+        ax.xaxis.set_major_formatter(matplotlib.ticker.FormatStrFormatter('%.1f'))
+        ax.legend(frameon=False,fontsize=15)
+        fig.add_subplot(ax)
 
         # save file
         if len(directory) == 1:           
-            outfile = prefix+par.fluid+'_'+par.whatfield+'_'+str(directory[0])+'_'+str(on[k]).zfill(4)
-            if par.movie == 'Yes' and par.take_one_point_every != 1:
-                outfile = prefix+par.fluid+'_'+par.whatfield+'_'+str(directory[0])+'_'+str(k).zfill(4)
+            outfile = par.fluid+'_rta_'+par.whatfield+'_'+str(directory[0])+'_'+str(on[k]).zfill(4)
         else:
-            outfile = prefix+par.fluid+'_'+par.whatfield+'_'+str(on[k]).zfill(4)
-            if par.movie == 'Yes' and par.take_one_point_every != 1:
-                outfile = prefix+par.fluid+'_'+par.whatfield+'_'+str(k).zfill(4)
+            outfile = par.fluid+'_rta_'+par.whatfield+'_'+str(on[k]).zfill(4)
         fileout = outfile+'.pdf'
         if par.saveaspdf == 'Yes':
             plt.savefig('./'+fileout, dpi=160)
         if par.saveaspng == 'Yes':
             plt.savefig('./'+re.sub('.pdf', '.png', fileout), dpi=120)
-        if par.movie == 'Yes':
-            plt.close(fig)  # close figure as we reopen figure at every output number
+
+
+    # case otherwise (default):
+    else:
+        for k in range(len(on)):     # loop over output numbers
+            
+            if par.movie == 'Yes':
+                print('animation: output number '+str(k)+' / '+str(len(on)-1),end='\r')
+                # first prepare figure
+                fig = plt.figure(figsize=(8.,8.))
+                plt.subplots_adjust(left=0.20, right=0.95, top=0.94, bottom=0.12)
+                ax = fig.gca()
+                ax.set_xlabel(xtitle)
+                if par.log_xyplots_y == 'Yes':
+                    ax.set_yscale('log')
+                if par.log_xyplots_x == 'Yes':
+                    ax.set_xscale('log')
+                    
+            for j in range(len(directory)):  # loop over directories
+                # it does not take much time to read all fields again...
+                myfield  = Field(field=par.whatfield, fluid=par.fluid, on=on[k], directory=directory[j], physical_units=par.physical_units, nodiff=par.nodiff, fieldofview=par.fieldofview, onedprofile=par.onedprofile, z_average=par.z_average, override_units=par.override_units)
+                
+                # stuff we do only once: set xmin and xmax
+                if k == 0 and j == 0:
+                    R = myfield.redge
+                    if par.physical_units == 'Yes':
+                        R *= (myfield.culength / 1.5e11) # in au
+                    if (par.myrmin == '#'):
+                        xmin = R.min()
+                    else:
+                        xmin = par.myrmin
+                    if (par.myrmax == '#'):
+                        xmax = R.max()
+                    else:
+                        xmax = par.myrmax
+                    strfield = myfield.strname
+                
+                if par.nodiff == 'No':
+                    myfield0  = Field(field=par.whatfield, fluid=par.fluid, on=0, directory=directory[j], physical_units=par.physical_units, nodiff=par.nodiff, fieldofview=par.fieldofview, onedprofile=par.onedprofile, z_average=par.z_average, override_units=par.override_units)
+                    array = (myfield.data-myfield0.data)/myfield0.data
+                else:
+                    array = myfield.data
+                    # conversion in physical units
+                    if par.physical_units == 'Yes':
+                        array = myfield.data * myfield.unit
+                    if par.log_xyplots_y == 'Yes' and (par.whatfield == 'vrad' or par.whatfield == 'vy'):
+                        #print('1D vrad displayed with log y-scale')
+                        array = np.abs(array)
+                        
+                axiarray = np.sum(array,axis=1)/myfield.nsec
+
+                if par.onedprofile == 'Cut':
+                    axiarray = array[:,0]    # azimuthal cut at zero azimuth (j=0)
+
+                if par.onedprofile == 'Median':
+                    axiarray = np.median(array,axis=1)   # median over azimuth of the density profile
+
+                #axiarray = axiarray[2:-2]  # CUIDADIN!!
+                R = myfield.rmed
+                #R = R[2:-2] # CUIDADIN!!
+                
+                if par.physical_units == 'Yes':
+                    R *= (myfield.culength / 1.5e11) # in au
+                mylabel = myfield.strtime
+
+                if len(directory) > 1:
+                    if ('use_legend' in open('paramsf2p.dat').read()) and (par.use_legend != '#'):
+                        use_legend = par.use_legend
+                        if isinstance(par.use_legend, str) == True:
+                            use_legend = [par.use_legend]
+                        mylegend = str(use_legend[j])
+                        mylegend = mylegend.replace("_", " ")
+                        mylabel = mylegend + ', '+ mylabel
+                    else:
+                        mylabel = str(directory[j]) + ', '+ mylabel
+                        
+                if par.movie == 'Yes':
+                    mycolor = par.c20[j]
+                else:
+                    mycolor = par.c20[k*len(directory)+j]
+
+                ax.plot(R, axiarray, color=mycolor, lw=2., linestyle = 'solid', label=mylabel)
+                ax.set_ylabel(myfield.strname)
+
+                if ( ('dynamical_colorscale' in open('paramsf2p.dat').read()) and (par.dynamical_colorscale == 'Yes') ):
+                    ymin = axiarray.min()
+                    ymax = axiarray.max()
+
+                ax.set_ylim(ymin,ymax)
+                ax.set_xlim(xmin,xmax)
+                ax.tick_params(top='on', right='on', length = 5, width=1.0, direction='out')
+                #plt.ticklabel_format(axis='y', style='scientific', scilimits=(0,0))
+                ax.get_xaxis().set_major_formatter(matplotlib.ticker.ScalarFormatter())
+                ax.xaxis.set_major_formatter(matplotlib.ticker.FormatStrFormatter('%.1f'))
+                if par.movie == 'Yes':
+                    ax.legend(frameon=False,fontsize=15,loc='upper left')
+                else:
+                    ax.legend(frameon=False,fontsize=15)
+                fig.add_subplot(ax)
+
+                # option to write result in 1D ascii file
+                if ( ('write_ascii' in open('paramsf2p.dat').read()) and (par.write_ascii == 'Yes') ):
+                    ascii = open('1D'+directory[j]+par.whatfield+str(on[k])+'.dat','w')
+                    for v in range(len(R)):
+                        ascii.write(str(R[v])+'\t'+str(axiarray[v])+'\n')
+
+            prefix = 'axi'
+            if par.onedprofile == 'Cut':
+                prefix = 'cut'
+            if par.onedprofile == 'Median':
+                prefix = 'median'
+
+            # save file
+            if len(directory) == 1:           
+                outfile = prefix+par.fluid+'_'+par.whatfield+'_'+str(directory[0])+'_'+str(on[k]).zfill(4)
+                if par.movie == 'Yes' and par.take_one_point_every != 1:
+                    outfile = prefix+par.fluid+'_'+par.whatfield+'_'+str(directory[0])+'_'+str(k).zfill(4)
+            else:
+                outfile = prefix+par.fluid+'_'+par.whatfield+'_'+str(on[k]).zfill(4)
+                if par.movie == 'Yes' and par.take_one_point_every != 1:
+                    outfile = prefix+par.fluid+'_'+par.whatfield+'_'+str(k).zfill(4)
+            fileout = outfile+'.pdf'
+            if par.saveaspdf == 'Yes':
+                plt.savefig('./'+fileout, dpi=160)
+            if par.saveaspng == 'Yes':
+                plt.savefig('./'+re.sub('.pdf', '.png', fileout), dpi=120)
+            if par.movie == 'Yes':
+                plt.close(fig)  # close figure as we reopen figure at every output number
 
             
     # finally concatenate png if movie requested
