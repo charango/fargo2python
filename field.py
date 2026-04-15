@@ -366,6 +366,12 @@ class Field(Mesh):
             # ----
             if field == 'label':
                 self.strname = 'concentration'
+
+            # ----
+            # DUST PARTICLES
+            # ----
+            if fluid == 'pc':
+                self.strname = 'particles'
                     
         else:
             #print('input file ',input_file,' does not exist!')
@@ -375,9 +381,11 @@ class Field(Mesh):
             # TEMPERATURE or PRESSURE or ENTROPY or TOOMRE Q-parameter = c_s Omega / pi G Sigma
             # or BETA_COOLING parameter beta = Sigma tau_eff Omega / 4 pi / (gamma-1) / sigma_SB / T^3
             # ----
-            if field == 'temp' or field == 'pressure' or field == 'entropy' or field == 'toomre' or field == 'betacooling' or field == 'stokes':
+            if field == 'temp' or field == 'pressure' or field == 'entropy' or field == 'toomre' or field == 'betacooling' or field == 'stokes' or field == 'dlogPdlogR':
                 if field == 'pressure':
                     self.strname += ' pressure'
+                if field == 'dlogPdlogR':
+                    self.strname += r' $d\log P/d\log R$'
                 if field == 'toomre':
                     self.strname += ' Toomre parameter'
                 if field == 'entropy':
@@ -481,6 +489,19 @@ class Field(Mesh):
                 if field == 'pressure':
                     dens = self.__open_field(directory+fluid+'dens'+str(on)+'.dat',dtype,fieldofview,slice,z_average)
                     self.data *= dens   # pressure
+
+                if field == 'dlogPdlogR':
+                    dens = self.__open_field(directory+fluid+'dens'+str(on)+'.dat',dtype,fieldofview,slice,z_average)
+                    self.data *= dens   # pressure # (nrad,nsec)
+                    axipressure = np.sum(self.data,axis=1)/self.nsec
+                    dlogpdlogr = np.zeros(self.nrad)
+                    for i in range(1,self.nrad):
+                        dlogpdlogr[i] = (axipressure[i]-axipressure[i-1])/((self.rmed)[i]-(self.rmed)[i-1]) # dp/dr
+                        dlogpdlogr[i] *= self.redge[i]
+                        dlogpdlogr[i] /= (0.5*(axipressure[i]+axipressure[i-1])) # r/p x dp/dr
+                    dlogpdlogr[0] = dlogpdlogr[1]
+                    for i in range(self.nrad):
+                        self.data[i,:] = dlogpdlogr[i]
                 
                 # work out specific entropy then S = P rho^-gamma = T x rho^(1-gamma)
                 if field == 'entropy':
@@ -846,7 +867,7 @@ class Field(Mesh):
                 for j in range(self.nsec):
                     for i in range(1,self.nrad):
                         drrvphi[i,j] = ( (self.rmed)[i]*vphi[i,j] - (self.rmed)[i-1]*vphi[i-1,j] ) / ((self.rmed)[i] - (self.rmed)[i-1] )
-                    drrvphi[0,j] = drrvphi[1,j]
+                    drrvphi[0,j] = drrvphi[1,j]*np.sqrt(self.rmed[1]/self.rmed[0]) # simple power-law extrapolation! dr (rvphi) ~ r^-1/2
                 # then we calculate dphivr
                 dphivr = np.zeros((self.nrad,self.nsec))
                 for j in range(self.nsec):
@@ -1071,6 +1092,7 @@ class Field(Mesh):
                     self.unit = (self.cumass*1e3)/((self.culength*1e2)**2.)
                     self.strname += r' [g cm$^{-2}$]'
 
+
             # ----
             # density over azimuthally-averaged density 
             # ----        
@@ -1085,13 +1107,14 @@ class Field(Mesh):
             # ----        
             if field == 'alpha_reynolds':
 
-                if par.movie == 'Yes':
-                    on = range(0,on,par.take_one_point_every)
-                else:
-                    if np.isscalar(par.on) == False:
-                        on = range(par.on[0],par.on[1]+1,par.take_one_point_every)
-                    else:
-                        on = [par.on] 
+                # if par.movie == 'Yes':
+                #     on = range(0,on,par.take_one_point_every)
+                # else:
+                #     if np.isscalar(par.on) == False:
+                #         on = range(par.on[0],par.on[1]+1,par.take_one_point_every)
+                #     else:
+                #         on = [par.on] 
+                on = [on] # cuidadin!
                     
                 for k in range(len(on)):
                     #print('k = ', k,' / ', len(on))
