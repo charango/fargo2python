@@ -155,7 +155,7 @@ def plotonedprofile():
             mycolor = par.c20[j]
 
             ax.plot(R, axiarray, color=mycolor, lw=2., linestyle = 'solid', label=myfield.strtime)
-            ax.set_ylabel('r.t.a. '+myfield.strname)
+            ax.set_ylabel('time-averaged '+myfield.strname)
 
         if (par.fieldmin != '#') and (par.fieldmax != '#'):
             ymin = par.fieldmin

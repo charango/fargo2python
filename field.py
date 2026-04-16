@@ -693,7 +693,7 @@ class Field(Mesh):
                     else:  # 2D
                         self.data = 0.5*np.pi*s*rho_dust_int/sigma_gas
 
-                    self.strname += ' Stokes number'
+                    self.strname = 'Stokes number'
 
 
             # ----
