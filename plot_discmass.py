@@ -106,7 +106,8 @@ def plotdiscmass():
             # get total disc mass and time at current output number
             disc_mass[k] = np.sum(mass)
             # get time
-            mytime[k] = date[take_one_point_every*k]/2.0/np.pi/(apla**1.5)  # orbital periods at apla
+            mytime[k] = date[take_one_point_every*k]/2.0/np.pi  # orbital periods at apla
+            # mytime[k] = date[take_one_point_every*k]/2.0/np.pi/(apla**1.5)  # orbital periods at apla
 
             if par.physical_units == 'Yes':
                 disc_mass[k] *= dens.cumass/2e30  # in solar masses

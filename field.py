@@ -429,7 +429,7 @@ class Field(Mesh):
                         buf = subprocess.getoutput(command)
                     gamma = float(buf.split()[1])
 
-                    if field == 'toomre':
+                    if field == 'toomre' or field == 'betacooling':
                         vphi = self.__open_field(directory+fluid+'vtheta'+str(on)+'.dat',dtype,fieldofview,slice,z_average)
                     
                 # case we're running with Fargo3D    
@@ -460,7 +460,7 @@ class Field(Mesh):
                         buf = subprocess.getoutput(command)
                     gamma = float(buf.split()[1])          
 
-                    if field == 'toomre':
+                    if field == 'toomre' or field == 'betacooling':
                         vphi = self.__open_field(directory+fluid+'vx'+str(on)+'.dat',dtype,fieldofview,slice,z_average)
                         
                 # work out temperature first: self.data contains the gas temperature
@@ -535,7 +535,7 @@ class Field(Mesh):
 
                     # angular frequency
                     omega = np.zeros((self.nrad,self.nsec))
-                    vphi = self.__open_field(directory+fluid+'vx'+str(on)+'.dat',dtype,fieldofview,slice,z_average)
+                    # vphi = self.__open_field(directory+fluid+'vx'+str(on)+'.dat',dtype,fieldofview,slice,z_average)
                     # vphi, read above, is in the corotating frame!
                     for i in range(self.nrad):
                         vphi[i,:] += (self.rmed)[i]*omegaframe
