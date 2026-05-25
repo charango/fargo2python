@@ -144,7 +144,7 @@ if movie == 'Yes':
             else:
                 dir = directory
             if fargo3d == 'No':
-                nboutputs = len(fnmatch.filter(os.listdir(dir), 'gasdens*.dat'))
+                nboutputs = len(fnmatch.filter(os.listdir(dir), 'gasdens*.dat'))-len(fnmatch.filter(os.listdir(dir), 'gasdens.ascii*.dat'))
                 if fargo2d1d == 'Yes':
                    nboutputs = len(fnmatch.filter(os.listdir(dir), 'gasdens1D*.dat'))
             else:
@@ -160,7 +160,7 @@ else:
         else:
             dir = directory
         if fargo3d == 'No':
-            nboutputs = len(fnmatch.filter(os.listdir(dir), 'gasdens*.dat'))
+            nboutputs = len(fnmatch.filter(os.listdir(dir), 'gasdens*.dat'))-len(fnmatch.filter(os.listdir(dir), 'gasdens.ascii*.dat'))
             if fargo2d1d == 'Yes':
                    nboutputs = len(fnmatch.filter(os.listdir(dir), 'gasdens1D*.dat'))
         else:

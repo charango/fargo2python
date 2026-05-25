@@ -273,67 +273,68 @@ class Field(Mesh):
                     self.data[i,:] += (self.rmed)[i]*omegaframe
             
             if field == 'Test':
+                self.unit = 1.0
 
-                self.strname = 'Direct torque on planet'
-                self.data *= self.nsec
+            #     self.strname = 'Direct torque on planet'
+            #     self.data *= self.nsec
 
-                if par.normalize_torque == 'Yes':
-                    # get planet-to-star mass ratio q
-                    q = mpla[on]   # time-varying array
+            #     if par.normalize_torque == 'Yes':
+            #         # get planet-to-star mass ratio q
+            #         q = mpla[on]   # time-varying array
                     
-                    # get planet's orbital radius, local disc's aspect ratio + check if energy equation was used
-                    if self.fargo3d == 'Yes':
-                        command  = par.awk_command+' " /^ASPECTRATIO/ " '+directory+'/*.par'
-                        command2 = par.awk_command+' " /^FLARINGINDEX/ " '+directory+'/*.par'
-                        if "ISOTHERMAL" in open(directory+'/summary0.dat',"r").read():
-                            energyequation = "No"
-                        else:
-                            energyequation = "Yes"
-                    else:
-                        command  = par.awk_command+' " /^AspectRatio/ " '+directory+'/*.par'
-                        command2 = par.awk_command+' " /^FlaringIndex/ " '+directory+'/*.par'
-                        command3 = par.awk_command+' " /^EnergyEquation/ " '+directory+'/*.par'
-                        buf3 = subprocess.getoutput(command3)
-                        energyequation = str(buf3.split()[1])
+            #         # get planet's orbital radius, local disc's aspect ratio + check if energy equation was used
+            #         if self.fargo3d == 'Yes':
+            #             command  = par.awk_command+' " /^ASPECTRATIO/ " '+directory+'/*.par'
+            #             command2 = par.awk_command+' " /^FLARINGINDEX/ " '+directory+'/*.par'
+            #             if "ISOTHERMAL" in open(directory+'/summary0.dat',"r").read():
+            #                 energyequation = "No"
+            #             else:
+            #                 energyequation = "Yes"
+            #         else:
+            #             command  = par.awk_command+' " /^AspectRatio/ " '+directory+'/*.par'
+            #             command2 = par.awk_command+' " /^FlaringIndex/ " '+directory+'/*.par'
+            #             command3 = par.awk_command+' " /^EnergyEquation/ " '+directory+'/*.par'
+            #             buf3 = subprocess.getoutput(command3)
+            #             energyequation = str(buf3.split()[1])
             
-                    buf = subprocess.getoutput(command)
-                    aspectratio = float(buf.split()[1])
-                    buf2 = subprocess.getoutput(command2)
-                    fli = float(buf2.split()[1])
-                    rpla0_normtq = np.sqrt( xpla[0]*xpla[0] + ypla[0]*ypla[0] )
-                    h = aspectratio*(rpla0_normtq**fli)  # constant in time
+            #         buf = subprocess.getoutput(command)
+            #         aspectratio = float(buf.split()[1])
+            #         buf2 = subprocess.getoutput(command2)
+            #         fli = float(buf2.split()[1])
+            #         rpla0_normtq = np.sqrt( xpla[0]*xpla[0] + ypla[0]*ypla[0] )
+            #         h = aspectratio*(rpla0_normtq**fli)  # constant in time
                     
-                    # get adiabatic index
-                    if energyequation == 'Yes':
-                        if fargo3d == 'Yes':
-                            command4 = par.awk_command+' " /^GAMMA/ " '+directory[j]+'/*.par'
-                        else:
-                            command4 = par.awk_command+' " /^AdiabaticIndex/ " '+directory[j]+'/*.par'
-                        buf4 = subprocess.getoutput(command4)
-                        adiabatic_index = float(buf4.split()[1])
-                    else:
-                        adiabatic_index = 1.0
+            #         # get adiabatic index
+            #         if energyequation == 'Yes':
+            #             if fargo3d == 'Yes':
+            #                 command4 = par.awk_command+' " /^GAMMA/ " '+directory[j]+'/*.par'
+            #             else:
+            #                 command4 = par.awk_command+' " /^AdiabaticIndex/ " '+directory[j]+'/*.par'
+            #             buf4 = subprocess.getoutput(command4)
+            #             adiabatic_index = float(buf4.split()[1])
+            #         else:
+            #             adiabatic_index = 1.0
 
-                    # get local azimuthally averaged surface density
-                    myfield0 = Field(field='dens', fluid='gas', on=0, directory=directory, physical_units='No', nodiff='Yes', fieldofview=par.fieldofview, slice='midplane',z_average='No', onedprofile='Yes', override_units=par.override_units)
-                    dens = np.sum(myfield0.data,axis=1) / myfield0.nsec
-                    imin = np.argmin(np.abs(myfield0.rmed-rpla0_normtq))
-                    sigmap = dens[imin]
+            #         # get local azimuthally averaged surface density
+            #         myfield0 = Field(field='dens', fluid='gas', on=0, directory=directory, physical_units='No', nodiff='Yes', fieldofview=par.fieldofview, slice='midplane',z_average='No', onedprofile='Yes', override_units=par.override_units)
+            #         dens = np.sum(myfield0.data,axis=1) / myfield0.nsec
+            #         imin = np.argmin(np.abs(myfield0.rmed-rpla0_normtq))
+            #         sigmap = dens[imin]
 
-                    # Finally infer Gamma_0
-                    Gamma_0 = (q/h/h)*sigmap*rpla0_normtq/adiabatic_index
-                    print('q = ', q)
-                    print('h = ', h)
-                    print('rpla0_normtq = ', rpla0_normtq)
-                    print('sigmap = ', sigmap)
-                    print('adiabatic index = ', adiabatic_index)
-                    print('Gamma_0 = ', Gamma_0)
+            #         # Finally infer Gamma_0
+            #         Gamma_0 = (q/h/h)*sigmap*rpla0_normtq/adiabatic_index
+            #         print('q = ', q)
+            #         print('h = ', h)
+            #         print('rpla0_normtq = ', rpla0_normtq)
+            #         print('sigmap = ', sigmap)
+            #         print('adiabatic index = ', adiabatic_index)
+            #         print('Gamma_0 = ', Gamma_0)
 
-                    self.data /= Gamma_0
+            #         self.data /= Gamma_0
 
-                    self.strname += r' [$\Gamma_0$]'
+            #         self.strname += r' [$\Gamma_0$]'
 
-                print('total torque dfadsg = ', np.sum(self.data)/self.nsec)
+            #     print('total torque dfadsg = ', np.sum(self.data)/self.nsec)
 
             '''
             if field == 'dens' and 'cavity_gas' in open('paramsf2p.dat').read() and cavity_gas == 'Yes':
@@ -1470,6 +1471,11 @@ class Field(Mesh):
                 if physical_units == 'Yes' and nodiff != 'No':
                     self.unit = 1e-3*(self.culength)/(self.cutime)
                     self.strname += r' [km s$^{-1}$]'
+            if field == 'energy' and  self.fargo3d == 'No':
+                self.strname += ' thermal energy density'
+                if physical_units == 'Yes' and nodiff != 'No':
+                    self.unit = 1
+                    self.strname += r' [code units]'
             if field == 'vrad' or field == 'vy':
                 if field == 'vy' and self.cartesian_grid == 'Yes':
                     self.strname += r' $v_{y}$'
