@@ -50,7 +50,7 @@ def plotdiscmass():
 
         # find how many output numbers were produced for each directory
         if par.fargo3d == 'No':
-            nboutputs = len(fnmatch.filter(os.listdir(directory[j]), 'gasdens*.dat'))
+            nboutputs = len(fnmatch.filter(os.listdir(directory[j]), 'gasdens*.dat'))-len(fnmatch.filter(os.listdir(directory[j]), 'gasdens.ascii*.dat'))
         else:
             nboutputs = len(fnmatch.filter(os.listdir(directory[j]), 'summary*.dat'))
         print('number of outputs for directory ',directory[j],': ',nboutputs)
@@ -121,6 +121,12 @@ def plotdiscmass():
 
         # display data as scatter plot for each directory
         ax.scatter(mytime, disc_mass, s=20, c=par.c20[j], alpha=1.0, label=mylabel)
+
+        # option to write result in 1D ascii file
+        if ( ('write_ascii' in open('paramsf2p.dat').read()) and (par.write_ascii == 'Yes') ):
+            ascii = open('discmass_'+directory[j]+'.dat','w')
+            for v in range(len(mytime)):
+                ascii.write(str(mytime[v])+'\t'+str(disc_mass[v])+'\n')
 
         
     # set x-range
