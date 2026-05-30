@@ -1143,17 +1143,31 @@ class Field(Mesh):
                         buf = subprocess.getoutput(command)
                         flaringindex = float(buf.split()[1])
                         
-                    axivrad = np.sum(vrad*dens,axis=1)/np.sum(dens,axis=1)  # density-weighted azimuthal average
-                    axivphi = np.sum(vphi*dens,axis=1)/np.sum(dens,axis=1)  # density-weighted azimuthal average
-                    axidens = np.sum(dens,axis=1)/self.nsec  # (nrad)
+                    # OLD WAY
+                    # axivrad = np.sum(vrad*dens,axis=1)/np.sum(dens,axis=1)  # density-weighted azimuthal average
+                    # axivphi = np.sum(vphi*dens,axis=1)/np.sum(dens,axis=1)  # density-weighted azimuthal average
+                    # axidens = np.sum(dens,axis=1)/self.nsec  # (nrad)
+                    # deltavr = vrad-axivrad.repeat(self.nsec).reshape(self.nrad,self.nsec) # (nrad, nsec)
+                    # deltavp = vphi-axivphi.repeat(self.nsec).reshape(self.nrad,self.nsec) # (nrad, nsec)
+                    # axidvrdvp = np.sum(deltavr*deltavp*dens,axis=1)/np.sum(dens,axis=1)  # density-weighted azimuthal average (nrad)
+                    # # get pressure
+                    # cs = aspectratio * self.rmed**(flaringindex-0.5)  # isothermal sound speed (nrad)
+                    # pressure = dens*((cs*cs).repeat(self.nsec).reshape(self.nrad,self.nsec))  # 2D thermal pressure
+                    # axipres = np.sum(pressure*dens,axis=1)/np.sum(dens,axis=1)  # density-weighted azimuthal average (nrad)
+                    # self.data += (axidens*axidvrdvp/axipres).repeat(self.nsec).reshape(self.nrad,self.nsec) # 2D
+
+                    # NEW WAY (>june 2026)
+                    axivrad = np.sum(vrad,axis=1)/self.nsec  # azimuthally-averaged radial velocity
+                    axivphi = np.sum(vphi,axis=1)/self.nsec  # azimuthally-averaged azimithal velocity
                     deltavr = vrad-axivrad.repeat(self.nsec).reshape(self.nrad,self.nsec) # (nrad, nsec)
                     deltavp = vphi-axivphi.repeat(self.nsec).reshape(self.nrad,self.nsec) # (nrad, nsec)
-                    axidvrdvp = np.sum(deltavr*deltavp*dens,axis=1)/np.sum(dens,axis=1)  # density-weighted azimuthal average (nrad)
+                    axidensdvrdvp = np.sum(deltavr*deltavp*dens,axis=1)/self.nsec  
                     # get pressure
-                    cs = aspectratio * self.rmed**(flaringindex-0.5)  # isothermal sound speed (nrad)
+                    cs = aspectratio * self.rmed**(flaringindex-0.5)  # isothermal sound speed (nrad)!
                     pressure = dens*((cs*cs).repeat(self.nsec).reshape(self.nrad,self.nsec))  # 2D thermal pressure
-                    axipres = np.sum(pressure*dens,axis=1)/np.sum(dens,axis=1)  # density-weighted azimuthal average (nrad)
-                    self.data += (axidens*axidvrdvp/axipres).repeat(self.nsec).reshape(self.nrad,self.nsec) # 2D
+                    axipres = np.sum(pressure,axis=1)/self.nsec  # azimuthally-averaged pressure
+                    self.data += (2.0*axidensdvrdvp/3.0/axipres).repeat(self.nsec).reshape(self.nrad,self.nsec) # 2D
+
 
                 self.data /= len(on)
                 self.strname = r'$\alpha_{\rm Reynolds}$'
