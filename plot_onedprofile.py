@@ -157,6 +157,13 @@ def plotonedprofile():
             ax.plot(R, axiarray, color=mycolor, lw=2., linestyle = 'solid', label=myfield.strtime)
             ax.set_ylabel('time-averaged '+myfield.strname)
 
+            # option to write result in 1D ascii file
+            if ( ('write_ascii' in open('paramsf2p.dat').read()) and (par.write_ascii == 'Yes') ):
+                ascii = open('1Drta'+directory[j]+par.whatfield+str(on[k])+'.dat','w')
+                for v in range(len(R)):
+                    ascii.write(str(R[v])+'\t'+str(axiarray[v])+'\n')
+
+
         if (par.fieldmin != '#') and (par.fieldmax != '#'):
             ymin = par.fieldmin
             ymax = par.fieldmax
