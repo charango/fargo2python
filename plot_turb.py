@@ -262,8 +262,9 @@ def plot_alphas():
 
 
 
-# function that plots histogram of quantity (Sigma - <Sigma>) / <Sigma> at different times
-def plot_histodens():
+# function that plots histogram of quantity (X - <X>) / <X> at different times
+# where X is read as par.field
+def plot_histofield():
 
     # first import global variables
     import par
@@ -278,16 +279,13 @@ def plot_histodens():
         on = range(par.on[0],par.on[1]+1,par.take_one_point_every)
     else:
         on = [par.on]
-        #nboutputs = len(fnmatch.filter(os.listdir(par.directory), 'summary*.dat'))
-        #on = range(0,nboutputs,take_one_point_every)
 
     # prepare figure
     fig = plt.figure(figsize=(8.,8.))
-    plt.subplots_adjust(left=0.16, right=0.96, top=0.95, bottom=0.12)
+    plt.subplots_adjust(left=0.18, right=0.96, top=0.95, bottom=0.12)
     ax = fig.gca()
-    xtitle = r'$(\Sigma - \langle \Sigma\rangle_\varphi) / \langle \Sigma\rangle_\varphi$'
+    
     ytitle = 'Histogram'
-    ax.set_xlabel(xtitle)
     ax.set_ylabel(ytitle)
     ax.tick_params(top='on', right='on', length = 5, width=1.0, direction='out')
 
@@ -297,7 +295,7 @@ def plot_histodens():
     else:
         mylabel = str(par.directory)
 
-    ax.set_yscale('log')
+    # ax.set_yscale('log')
     #ax.set_xscale('log')
 
     if par.fieldmin != '#':
@@ -308,8 +306,18 @@ def plot_histodens():
         max_bin = par.fieldmax
     else:
         max_bin = 0.3
-    nb_bins = 50
+    nb_bins = 30
     mybins = min_bin + (max_bin-min_bin)*np.arange(nb_bins)/(nb_bins-1.0)
+
+    myfield = Field(field='dens', fluid='gas', on=0, directory=par.directory, physical_units=par.physical_units, nodiff='Yes', fieldofview=par.fieldofview, onedprofile='No', slice='midplane', z_average=par.z_average, override_units=par.override_units)
+
+    nrad = myfield.nrad
+    nsec = myfield.nsec
+    rmed = myfield.rmed
+    myrmin = 0.5 # 0.8
+    imin = np.argmin(np.abs(rmed-myrmin))
+    myrmax = 2.1 # 1.2
+    imax = np.argmin(np.abs(rmed-myrmax))
 
     # ========================
     # loop over output numbers
@@ -317,24 +325,42 @@ def plot_histodens():
     for k in range(len(on)):
 
         print('k = ', k, ' / ', len(on)-1 )
-        # get disc midplane density: array of size (nrad, nsec)
-        dens = Field(field='dens', fluid='gas', on=on[k], directory=par.directory, physical_units=par.physical_units, nodiff='Yes', fieldofview=par.fieldofview, onedprofile='No', slice='midplane', z_average=par.z_average, override_units=par.override_units)
-        nrad = dens.nrad
-        nsec = dens.nsec
 
-        axidens = (np.sum(dens.data ,axis=1)/nsec).repeat(nsec).reshape(nrad,nsec)
-        dens = (dens.data-axidens)/axidens
+        # get disc midplane X field: array of size (nrad, nsec)
+        buf = Field(field=par.whatfield, fluid=par.fluid, on=on[k], directory=par.directory, physical_units=par.physical_units, nodiff='Yes', fieldofview=par.fieldofview, onedprofile='No', slice='midplane', z_average=par.z_average, override_units=par.override_units)
+        axifield = (np.sum(buf.data ,axis=1)/nsec).repeat(nsec).reshape(nrad,nsec)
+        myfield = buf.data-axifield
 
-        dens1d = dens.reshape(nrad*nsec)
+        if par.whatfield == 'dens' or par.whatfield == 'vtheta':
+            myfield = (buf.data-axifield)/axifield
 
-        # add histogram here
-        cmap = matplotlib.cm.get_cmap('Spectral')
-        c20 = cmap(k/(len(on)-1.0))
-        n, bins, patches = plt.hist(x=dens1d, bins=mybins, color=c20, alpha=0.5, rwidth=0.9)
-    
+        myfieldnew = myfield[imin:imax,:]
+        myfieldoned = myfieldnew.reshape((imax-imin)*nsec)
+
+        # # add histogram here
+        cmap = matplotlib.cm.get_cmap('Spectral_r')
+        if len(on) > 1:
+            c20 = cmap(k/(len(on)-1.0))
+        else:
+            c20 = 'tab:blue'
+
+        counts, bins, patches = plt.hist(myfieldoned, bins=mybins, color=c20, alpha=0.3, rwidth=0.9, density=True)
+        if k==0:
+            ax.set_ylim(0,2.5*counts.max())
+            ax.set_xlim(bins.min(),bins.max())
+            if par.whatfield == 'dens':
+                xtitle = r'$(\Sigma - \langle \Sigma\rangle_\varphi) / \langle \Sigma\rangle_\varphi$'
+                outfile = 'histodens_'
+            if par.whatfield == 'vrad':
+                xtitle = r'$v_r - \langle v_r \rangle_\varphi$'
+                outfile = 'histovrad_'
+            if par.whatfield == 'vtheta':
+                xtitle = r'$(v_{\phi} - \langle v_{\phi} \rangle_\varphi) / \langle v_{\phi} \rangle_\varphi$'
+                outfile = 'histovtheta_'
+            ax.set_xlabel(xtitle)
 
     # And save file
-    outfile = 'histodens_'+str(par.directory)+'_'
+    outfile = outfile+str(par.directory)+'_'
     if np.isscalar(par.on) == False:
         outfile += str(par.on[0])+'_'+str(par.on[1])
     else:
@@ -344,3 +370,136 @@ def plot_histodens():
         plt.savefig('./'+fileout, dpi=160)
     if par.saveaspng == 'Yes':
         plt.savefig('./'+re.sub('.pdf', '.png', fileout), dpi=120)
+
+
+# function that plots histogram of the specific torque
+def plot_histotorque():
+
+    # first import global variables
+    import par
+
+    # prepare figure
+    fig = plt.figure(figsize=(8.,8.))
+    plt.subplots_adjust(left=0.16, right=0.96, top=0.95, bottom=0.12)
+    ax = fig.gca()
+    xtitle = 'Specific turbulent torque'
+    ytitle = 'Histogram'
+    ax.set_xlabel(xtitle)
+    ax.set_ylabel(ytitle)
+    ax.tick_params(top='on', right='on', length = 5, width=1.0, direction='out')
+
+    # now, read tqwk0.dat file
+    f1, it, ot, f4, f5, ip, op, f8, f9, time = np.loadtxt(par.directory+"/tqwk0.dat",unpack=True)
+    tq = it+ot
+
+    if par.myymin != '#':
+        min_bin = par.myymin
+    else:
+        min_bin = tq.min()
+    if par.myymax != '#':
+        max_bin = par.myymax
+    else:
+        max_bin = tq.max()
+    nb_bins = 30
+    mybins = min_bin + (max_bin-min_bin)*np.arange(nb_bins)/(nb_bins-1.0)
+
+    # plot histogram
+    n, bins, patches = plt.hist(x=tq, bins=mybins, color=par.c20[0], alpha=1.0, rwidth=0.9)
+
+    # And save file
+    fileout = 'histotorque_'+str(par.directory)+'.pdf'
+    if par.saveaspdf == 'Yes':
+        plt.savefig('./'+fileout, dpi=160)
+    if par.saveaspng == 'Yes':
+        plt.savefig('./'+re.sub('.pdf', '.png', fileout), dpi=120)
+
+
+# function that plots time evolution of the disc-averaged Reynolds alpha parameter
+def plot_time_alphaRey():
+
+    # first import global variables
+    import par
+
+    # Define range of output numbers to consider
+    if par.take_one_point_every == '#':
+        take_one_point_every = 1
+    else:
+        take_one_point_every = par.take_one_point_every
+
+    if par.on == 'all':
+        import fnmatch
+        if isinstance(par.directory, list) == True:
+            dir = par.directory[0]
+        else:
+            dir = par.directory
+        if par.fargo3d == 'No':
+            nboutputs = len(fnmatch.filter(os.listdir(dir), 'gasdens*.dat'))-len(fnmatch.filter(os.listdir(dir), 'gasdens.ascii*.dat'))
+            if par.fargo2d1d == 'Yes':
+                nboutputs = len(fnmatch.filter(os.listdir(dir), 'gasdens1D*.dat'))
+        else:
+            nboutputs = len(fnmatch.filter(os.listdir(dir), 'summary*.dat'))
+        # on = [0,nboutputs-1]
+        on = range(0,nboutputs-1,take_one_point_every)
+    else:
+        if np.isscalar(par.on) == False:
+            on = range(par.on[0],par.on[1]+1,take_one_point_every)
+        else:
+            on = [par.on]
+        
+    # 2D arrays with radius and azimuth
+    dens = Field(field='dens', fluid='gas', on=0, directory=par.directory, physical_units=par.physical_units, nodiff='Yes', fieldofview=par.fieldofview, onedprofile='No', slice='midplane', z_average=par.z_average, override_units=par.override_units)
+
+    # get time
+    if dens.fargo3d == 'Yes':
+        f1, xpla, ypla, f4, f5, f6, f7, f8, date, omega = np.loadtxt(par.directory+"/planet0.dat",unpack=True)
+    else:
+        f1, xpla, ypla, f4, f5, f6, f7, date, omega, f10, f11 = np.loadtxt(par.directory+"/planet0.dat",unpack=True)
+
+    alpharey = np.zeros(len(on))
+    mytime = np.zeros(len(on))
+
+    # ========================
+    # loop over output numbers
+    # ========================
+    for k in range(len(on)):
+
+        print('output number =',str(k+1),'out of', str(len(on)),end='\r')
+
+        # get time
+        mytime[k] = date[take_one_point_every*k]/2.0/np.pi  # orbital periods at R=1
+
+        # get 2D field of Reynolds alpha parameter
+        buf = Field(field='alpha_reynolds', fluid='gas', on=on[k], directory=par.directory, physical_units=par.physical_units, nodiff='Yes', fieldofview=par.fieldofview, onedprofile='No', slice='midplane', z_average=par.z_average, override_units=par.override_units).data
+
+        # Option 1: take the mean of alpha_Rey over the disc
+        # alpharey[k] = np.mean(buf)
+        # Option 1: take the median of alpha_Rey over the disc
+        alpharey[k] = np.median(buf)
+
+
+    # option to write result in 1D ascii file
+    if ( ('write_ascii' in open('paramsf2p.dat').read()) and (par.write_ascii == 'Yes') ):
+        ascii = open('timealpharey_'+par.directory+'.dat','w')
+        for v in range(len(mytime)):
+            ascii.write(str(mytime[v])+'\t'+str(alpharey[v])+'\n')
+
+
+    # prepare figure
+    fig = plt.figure(figsize=(8.,8.))
+    plt.subplots_adjust(left=0.16, right=0.96, top=0.95, bottom=0.12)
+    ax = fig.gca()
+    xtitle = r'Time [$T_0$]'
+    ytitle = 'Disc-averaged Reynolds alpha parameter'
+    ax.set_xlabel(xtitle)
+    ax.set_ylabel(ytitle)
+    ax.tick_params(top='on', right='on', length = 5, width=1.0, direction='out')
+
+    ax.plot(mytime, alpharey, color=par.c20[1])
+
+    # And save file
+    outfile = 'timealpharey_'+str(par.directory)
+    fileout = outfile+'.pdf'
+    if par.saveaspdf == 'Yes':
+        plt.savefig('./'+fileout, dpi=160)
+    if par.saveaspng == 'Yes':
+        plt.savefig('./'+re.sub('.pdf', '.png', fileout), dpi=120)    

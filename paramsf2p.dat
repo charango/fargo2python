@@ -137,8 +137,8 @@ plot_discperarg	No
 plot_libcross   No
 
 ### plot gas quantities for turbulent disc simulations (eg MRI-driven MHD turbulence 
-# with FARGO3D) -- plot_turb can be set to: No, power_spectrum, auto_correlation
-plot_turb       No
+# with FARGO3D) -- plot_turb can be set to: No, power_spectrum, auto_correlation, alphas, histo_field, histo_torque, time_alphareynolds
+plot_turb       time_alphareynolds
 
 
 ################################

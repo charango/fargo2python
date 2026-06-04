@@ -99,8 +99,12 @@ if ( ('plot_turb' in open('paramsf2p.dat').read()) and (par.plot_turb != 'No') )
         plotautocorrelationtimescale()
     if par.plot_turb == 'alphas':
         plot_alphas()
-    if par.plot_turb == 'histo_dens':
-        plot_histodens()
+    if par.plot_turb == 'histo_field':
+        plot_histofield()
+    if par.plot_turb == 'histo_torque':
+        plot_histotorque()
+    if par.plot_turb == 'time_alphareynolds':
+        plot_time_alphaRey()
 
 # =====================
 # 11. DISC'S ECCENTRICITY OR PERICENTRE ARGUMENT

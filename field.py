@@ -1108,15 +1108,18 @@ class Field(Mesh):
             # ----        
             if field == 'alpha_reynolds':
 
-                if par.movie == 'Yes':
-                    on = range(0,on,par.take_one_point_every)
+                if par.plot_turb == 'time_alphareynolds':
+                    on = [on]
                 else:
-                    if np.isscalar(par.on) == False:
-                        on = range(par.on[0],par.on[1]+1,par.take_one_point_every)
+                    if par.movie == 'Yes':
+                        on = range(0,on,par.take_one_point_every)
                     else:
-                        on = [par.on] 
-                # on = [on] # cuidadin!
-                    
+                        if np.isscalar(par.on) == False:
+                            on = range(par.on[0],par.on[1]+1,par.take_one_point_every)
+                        else:
+                            on = [par.on] 
+                    # on = [on] # cuidadin!
+                        
                 for k in range(len(on)):
                     #print('k = ', k,' / ', len(on))
 
@@ -1161,13 +1164,12 @@ class Field(Mesh):
                     axivphi = np.sum(vphi,axis=1)/self.nsec  # azimuthally-averaged azimithal velocity
                     deltavr = vrad-axivrad.repeat(self.nsec).reshape(self.nrad,self.nsec) # (nrad, nsec)
                     deltavp = vphi-axivphi.repeat(self.nsec).reshape(self.nrad,self.nsec) # (nrad, nsec)
-                    axidensdvrdvp = np.sum(deltavr*deltavp*dens,axis=1)/self.nsec  
+                    axidensdvrdvp = np.sum(deltavr*deltavp*dens,axis=1)/self.nsec   # (nrad)
                     # get pressure
                     cs = aspectratio * self.rmed**(flaringindex-0.5)  # isothermal sound speed (nrad)!
                     pressure = dens*((cs*cs).repeat(self.nsec).reshape(self.nrad,self.nsec))  # 2D thermal pressure
-                    axipres = np.sum(pressure,axis=1)/self.nsec  # azimuthally-averaged pressure
+                    axipres = np.sum(pressure,axis=1)/self.nsec  # azimuthally-averaged pressure (nrad)
                     self.data += (2.0*axidensdvrdvp/3.0/axipres).repeat(self.nsec).reshape(self.nrad,self.nsec) # 2D
-
 
                 self.data /= len(on)
                 self.strname = r'$\alpha_{\rm Reynolds}$'
