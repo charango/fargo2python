@@ -69,7 +69,7 @@ def plotspacetimediagram():
         # ------------------------
         for k in range(len(on)):     
 
-            print('directory number '+str(j)+' / '+str(len(directory)-1),' and output number '+str(k)+' / '+str(len(on)-1),end='\r')
+            print('directory number '+str(j+1)+' / '+str(len(directory)),' and output number '+str(k)+' / '+str(len(on)-1),end='\r')
 
             # read field
             myfield  = Field(field=par.whatfield, fluid=par.fluid, on=on[k], directory=directory[j], physical_units=par.physical_units, nodiff=par.nodiff, fieldofview=par.fieldofview, onedprofile=par.onedprofile, z_average=par.z_average, override_units=par.override_units)
@@ -156,5 +156,6 @@ def plotspacetimediagram():
         # save 2D array in binary file
         fileout = outfile+'.dat'
         FILEOUT = open(fileout,'wb')        # binary format
-        np.transpose(spacetime_array).tofile(FILEOUT)
+        spacetime_array = np.swapaxes(spacetime_array, 0, 1)  # nbin ncol nsec nrad
+        spacetime_array.tofile(FILEOUT)
         FILEOUT.close()
