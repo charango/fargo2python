@@ -1180,9 +1180,9 @@ class Field(Mesh):
             if field == 'alpha_reynolds_inst':
 
                 if self.fargo3d == 'No':
-                    vrad = self.__open_field(directory+'gasvrad'+str(on[k])+'.dat',dtype,fieldofview,slice,z_average='No')
-                    vphi = self.__open_field(directory+'gasvtheta'+str(on[k])+'.dat',dtype,fieldofview,slice,z_average='No')
-                    dens = self.__open_field(directory+'gasdens'+str(on[k])+'.dat',dtype,fieldofview,slice,z_average='No')
+                    vrad = self.__open_field(directory+'gasvrad'+str(on)+'.dat',dtype,fieldofview,slice,z_average='No')
+                    vphi = self.__open_field(directory+'gasvtheta'+str(on)+'.dat',dtype,fieldofview,slice,z_average='No')
+                    dens = self.__open_field(directory+'gasdens'+str(on)+'.dat',dtype,fieldofview,slice,z_average='No')
                     # get isothermal sound speed
                     command = par.awk_command+' " /^AspectRatio/ " '+directory+'*.par'
                     buf = subprocess.getoutput(command)
@@ -1191,9 +1191,9 @@ class Field(Mesh):
                     buf = subprocess.getoutput(command)
                     flaringindex = float(buf.split()[1])
                 else:
-                    vrad = self.__open_field(directory+'gasvy'+str(on[k])+'.dat',dtype,fieldofview,slice,z_average='Yes')
-                    vphi = self.__open_field(directory+'gasvx'+str(on[k])+'.dat',dtype,fieldofview,slice,z_average='Yes')
-                    dens = self.__open_field(directory+'gasdens'+str(on[k])+'.dat',dtype,fieldofview,slice,z_average='Yes')
+                    vrad = self.__open_field(directory+'gasvy'+str(on)+'.dat',dtype,fieldofview,slice,z_average='Yes')
+                    vphi = self.__open_field(directory+'gasvx'+str(on)+'.dat',dtype,fieldofview,slice,z_average='Yes')
+                    dens = self.__open_field(directory+'gasdens'+str(on)+'.dat',dtype,fieldofview,slice,z_average='Yes')
                     # get isothermal sound speed
                     command = par.awk_command+' " /^ASPECTRATIO/ " '+directory+'*.par'
                     buf = subprocess.getoutput(command)
