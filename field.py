@@ -1111,14 +1111,14 @@ class Field(Mesh):
                 if par.plot_turb == 'time_alphareynolds':
                     on = [on]
                 else:
-                    if par.movie == 'Yes':
-                        on = range(0,on,par.take_one_point_every)
-                    else:
-                        if np.isscalar(par.on) == False:
-                            on = range(par.on[0],par.on[1]+1,par.take_one_point_every)
-                        else:
-                            on = [par.on] 
-                    # on = [on] # cuidadin!
+                    # if par.movie == 'Yes':
+                    #     on = range(0,on,par.take_one_point_every)
+                    # else:
+                    #     if np.isscalar(par.on) == False:
+                    #         on = range(par.on[0],par.on[1]+1,par.take_one_point_every)
+                    #     else:
+                    #         on = [par.on] 
+                    on = [on] # cuidadin!
                         
                 for k in range(len(on)):
                     #print('k = ', k,' / ', len(on))
@@ -1173,6 +1173,50 @@ class Field(Mesh):
 
                 self.data /= len(on)
                 self.strname = r'$\alpha_{\rm Reynolds}$'
+
+            # ----
+            # Instantaneous Reynolds alpha parameter
+            # ----        
+            if field == 'alpha_reynolds_inst':
+
+                if self.fargo3d == 'No':
+                    vrad = self.__open_field(directory+'gasvrad'+str(on[k])+'.dat',dtype,fieldofview,slice,z_average='No')
+                    vphi = self.__open_field(directory+'gasvtheta'+str(on[k])+'.dat',dtype,fieldofview,slice,z_average='No')
+                    dens = self.__open_field(directory+'gasdens'+str(on[k])+'.dat',dtype,fieldofview,slice,z_average='No')
+                    # get isothermal sound speed
+                    command = par.awk_command+' " /^AspectRatio/ " '+directory+'*.par'
+                    buf = subprocess.getoutput(command)
+                    aspectratio = float(buf.split()[1])
+                    command = par.awk_command+' " /^FlaringIndex/ " '+directory+'*.par'
+                    buf = subprocess.getoutput(command)
+                    flaringindex = float(buf.split()[1])
+                else:
+                    vrad = self.__open_field(directory+'gasvy'+str(on[k])+'.dat',dtype,fieldofview,slice,z_average='Yes')
+                    vphi = self.__open_field(directory+'gasvx'+str(on[k])+'.dat',dtype,fieldofview,slice,z_average='Yes')
+                    dens = self.__open_field(directory+'gasdens'+str(on[k])+'.dat',dtype,fieldofview,slice,z_average='Yes')
+                    # get isothermal sound speed
+                    command = par.awk_command+' " /^ASPECTRATIO/ " '+directory+'*.par'
+                    buf = subprocess.getoutput(command)
+                    aspectratio = float(buf.split()[1])
+                    command = par.awk_command+' " /^FLARINGINDEX/ " '+directory+'*.par'
+                    buf = subprocess.getoutput(command)
+                    flaringindex = float(buf.split()[1])
+
+
+                # NEW WAY (>june 2026)
+                axivrad = np.sum(vrad,axis=1)/self.nsec  # azimuthally-averaged radial velocity
+                axivphi = np.sum(vphi,axis=1)/self.nsec  # azimuthally-averaged azimithal velocity
+                deltavr = vrad-axivrad.repeat(self.nsec).reshape(self.nrad,self.nsec) # (nrad, nsec)
+                deltavp = vphi-axivphi.repeat(self.nsec).reshape(self.nrad,self.nsec) # (nrad, nsec)
+                axidensdvrdvp = np.sum(deltavr*deltavp*dens,axis=1)/self.nsec   # (nrad)
+                # get pressure
+                cs = aspectratio * self.rmed**(flaringindex-0.5)  # isothermal sound speed (nrad)!
+                pressure = dens*((cs*cs).repeat(self.nsec).reshape(self.nrad,self.nsec))  # 2D thermal pressure
+                axipres = np.sum(pressure,axis=1)/self.nsec  # azimuthally-averaged pressure (nrad)
+                self.data = (2.0*axidensdvrdvp/3.0/axipres).repeat(self.nsec).reshape(self.nrad,self.nsec) # 2D
+
+                self.strname = r'$\alpha_{\rm Reynolds}$'
+
 
             # ----
             # time-averaged Reynolds alpha parameter
