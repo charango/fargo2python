@@ -1111,14 +1111,14 @@ class Field(Mesh):
                 if par.plot_turb == 'time_alphareynolds':
                     on = [on]
                 else:
-                    # if par.movie == 'Yes':
-                    #     on = range(0,on,par.take_one_point_every)
-                    # else:
-                    #     if np.isscalar(par.on) == False:
-                    #         on = range(par.on[0],par.on[1]+1,par.take_one_point_every)
-                    #     else:
-                    #         on = [par.on] 
-                    on = [on] # cuidadin!
+                    if par.movie == 'Yes':
+                        on = range(0,on,par.take_one_point_every)
+                    else:
+                        if np.isscalar(par.on) == False:
+                            on = range(par.on[0],par.on[1]+1,par.take_one_point_every)
+                        else:
+                            on = [par.on] 
+                    # on = [on] # cuidadin!
                         
                 for k in range(len(on)):
                     #print('k = ', k,' / ', len(on))
