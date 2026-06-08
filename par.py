@@ -44,6 +44,7 @@ plot_discecc = 'No'
 plot_discperarg = 'No'
 plot_turb = 'No'
 central_binary = 'No'
+onedspacetime = 'No'
 
 par = []                       # allocating a dictionary
 var = []                       # allocating a dictionary

@@ -43,8 +43,13 @@ if par.onedprofile == 'No' and par.plot_field == True:
 # 3. DISPLAY AZIMUTHALLY-AVERAGED RADIAL 1D PROFILES
 # =====================
 if par.onedprofile != 'No' and par.plot_field == True:
-    from plot_onedprofile import *
-    plotonedprofile()
+    if par.onedspacetime == 'Yes':
+        from plot_spacetimediagram import *
+        plotspacetimediagram()
+    
+    else:
+        from plot_onedprofile import *
+        plotonedprofile()
 
 # =====================
 # 4. DISPLAY TIME EVOLUTION OF DISC TORQUE OR POWER ON PLANET(s)

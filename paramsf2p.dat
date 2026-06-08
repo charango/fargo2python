@@ -45,7 +45,8 @@ plot_dust	    No
 
 fluid		    gas			# what fluid? gas, dust or all (FARGO3D only)
 whatfield	    dens		# full list of available fields to be displayed at the bottom of this file
-onedprofile	    No			# default is to plot (1D) azimuthally-averaged radial profile. Other options: Cut, Median
+onedprofile	    Yes			# default is to plot (1D) azimuthally-averaged radial profile. Other options: Cut, Median
+onedspacetime   No          # if we want to display space-time diagrams instead of 1D radial profiles (if onedprofile set to Yes)
 nodiff	        Yes			# relative difference wrt initial field? (Yes, No, nao or normnao)
                             # nao = X - <X>_phi, normnao = X / <X>_phi - 1
 
@@ -138,7 +139,7 @@ plot_libcross   No
 
 ### plot gas quantities for turbulent disc simulations (eg MRI-driven MHD turbulence 
 # with FARGO3D) -- plot_turb can be set to: No, power_spectrum, auto_correlation, alphas, histo_field, histo_torque, time_alphareynolds
-plot_turb       time_alphareynolds
+plot_turb       No
 
 
 ################################
