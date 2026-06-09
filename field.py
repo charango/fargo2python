@@ -392,7 +392,8 @@ class Field(Mesh):
                 if field == 'entropy':
                     self.strname += ' specific entropy'
                 if field == 'betacooling':
-                    self.strname += r' $\beta = \tau_{\rm cool} / T_{\rm orb}$'
+                    self.strname += r' $\beta = \Omega\tau_{\rm cool}$'
+                    # self.strname += r' $\beta = \tau_{\rm cool} / T_{\rm orb}$'
 
                 # check that no energy equation was employed
                 if self.fargo3d == 'No':
@@ -607,9 +608,13 @@ class Field(Mesh):
 
                     # check gamma is not unity...
                     if gamma == 1.0:
-                        gamma = 5./3
+                        gamma = 1.57 # 5./3
 
-                    den = 4.0*np.pi*(gamma-1.0)*sigma_SB*(temp**3)
+                    # den = 4.0*np.pi*(gamma-1.0)*sigma_SB*(temp**3)
+                    # CB (june 2026): have modified the calculation of beta such that it corresponds to tau_cool x Omega
+                    # instead of tau_cool / Torb. Hence a 2pi factor removed. The other factor 2 is to have an expression 
+                    # for beta in agreement with that in Zhu+2012 (2026 project)
+                    den = (gamma-1.0)*sigma_SB*(temp**3)
                     self.data = num/den
 
 
