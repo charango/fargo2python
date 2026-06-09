@@ -525,6 +525,7 @@ class Field(Mesh):
                     for i in range(self.nrad):
                         omega[i,:] = vphi[i,:] / self.rmed[i]
 
+                    # compute the horizontal epicyclic frequency instead
                     kappa = np.zeros((self.nrad,self.nsec))
                     for i in range(self.nrad):
                         if (i < self.nrad-1):
@@ -534,7 +535,9 @@ class Field(Mesh):
                         if (i == self.nrad-1):
                             kappa[i,:] = kappa[i-1,:]
 
+                    # Q = cs Omega / pi G Sigma:
                     # self.data *= omega
+                    # Q = cs kappa / pi G Sigma:
                     self.data *= kappa
 
                 # BETA_COOLING parameter: beta = Sigma tau_eff Omega / 4 pi / (gamma-1) / sigma_SB / T^3
