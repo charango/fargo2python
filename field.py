@@ -525,7 +525,17 @@ class Field(Mesh):
                     for i in range(self.nrad):
                         omega[i,:] = vphi[i,:] / self.rmed[i]
 
-                    self.data *= omega
+                    kappa = np.zeros((self.nrad,self.nsec))
+                    for i in range(self.nrad):
+                        if (i < self.nrad-1):
+                            kappa[i,:] = (self.rmed[i+1]*axivphi[i+1]-self.rmed[i]*axivphi[i])/(self.rmed[i+1]-self.rmed[i]) # d(R^2 Omega) / dR
+                            kappa[i,:] *= (2.0*axivphi[i]/(self.rmed[i]**2)) # multiply by 2 Omega / R
+                            kappa[i,:] = np.sqrt(kappa[i,:]) # finally take square root
+                        if (i == self.nrad-1):
+                            kappa[i,:] = kappa[i-1,:]
+
+                    # self.data *= omega
+                    self.data *= kappa
 
                 # BETA_COOLING parameter: beta = Sigma tau_eff Omega / 4 pi / (gamma-1) / sigma_SB / T^3
                 if field == 'betacooling':
