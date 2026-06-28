@@ -1171,7 +1171,32 @@ class Field(Mesh):
                         else:
                             on = [par.on] 
                     # on = [on] # cuidadin!
-                        
+
+                if self.fargo3d == 'No':
+                    # get isothermal sound speed
+                    command = par.awk_command+' " /^AspectRatio/ " '+directory+'*.par'
+                    buf = subprocess.getoutput(command)
+                    aspectratio = float(buf.split()[1])
+                    command = par.awk_command+' " /^FlaringIndex/ " '+directory+'*.par'
+                    buf = subprocess.getoutput(command)
+                    flaringindex = float(buf.split()[1])
+                else:
+                    # get isothermal sound speed
+                    command = par.awk_command+' " /^ASPECTRATIO/ " '+directory+'*.par'
+                    buf = subprocess.getoutput(command)
+                    aspectratio = float(buf.split()[1])
+                    command = par.awk_command+' " /^FLARINGINDEX/ " '+directory+'*.par'
+                    buf = subprocess.getoutput(command)
+                    flaringindex = float(buf.split()[1])
+                    # check if energy equation was used and then get adiabatic index
+                    command = par.awk_command+' " /^EnergyEquation/ " '+directory+'*.par'
+                    buf = subprocess.getoutput(command)
+                    energyequation = str(buf.split()[1])
+                    command = par.awk_command+' " /^AdiabaticIndex/ " '+directory+'*.par'
+                    buf = subprocess.getoutput(command)
+                    gamma = float(buf.split()[1])
+
+
                 for k in range(len(on)):
                     #print('k = ', k,' / ', len(on))
 
@@ -1179,32 +1204,10 @@ class Field(Mesh):
                         vrad = self.__open_field(directory+'gasvrad'+str(on[k])+'.dat',dtype,fieldofview,slice,z_average='No')
                         vphi = self.__open_field(directory+'gasvtheta'+str(on[k])+'.dat',dtype,fieldofview,slice,z_average='No')
                         dens = self.__open_field(directory+'gasdens'+str(on[k])+'.dat',dtype,fieldofview,slice,z_average='No')
-                        # get isothermal sound speed
-                        command = par.awk_command+' " /^AspectRatio/ " '+directory+'*.par'
-                        buf = subprocess.getoutput(command)
-                        aspectratio = float(buf.split()[1])
-                        command = par.awk_command+' " /^FlaringIndex/ " '+directory+'*.par'
-                        buf = subprocess.getoutput(command)
-                        flaringindex = float(buf.split()[1])
                     else:
                         vrad = self.__open_field(directory+'gasvy'+str(on[k])+'.dat',dtype,fieldofview,slice,z_average='Yes')
                         vphi = self.__open_field(directory+'gasvx'+str(on[k])+'.dat',dtype,fieldofview,slice,z_average='Yes')
                         dens = self.__open_field(directory+'gasdens'+str(on[k])+'.dat',dtype,fieldofview,slice,z_average='Yes')
-                        # get isothermal sound speed
-                        command = par.awk_command+' " /^ASPECTRATIO/ " '+directory+'*.par'
-                        buf = subprocess.getoutput(command)
-                        aspectratio = float(buf.split()[1])
-                        command = par.awk_command+' " /^FLARINGINDEX/ " '+directory+'*.par'
-                        buf = subprocess.getoutput(command)
-                        flaringindex = float(buf.split()[1])
-                        # check if energy equation was used and then get adiabatic index
-                        command = par.awk_command+' " /^EnergyEquation/ " '+directory+'*.par'
-                        buf = subprocess.getoutput(command)
-                        energyequation = str(buf.split()[1])
-                        command = par.awk_command+' " /^AdiabaticIndex/ " '+directory+'*.par'
-                        buf = subprocess.getoutput(command)
-                        gamma = float(buf.split()[1])
-
                         
                     # OLD WAY
                     # axivrad = np.sum(vrad*dens,axis=1)/np.sum(dens,axis=1)  # density-weighted azimuthal average
@@ -1226,11 +1229,16 @@ class Field(Mesh):
                     deltavp = vphi-axivphi.repeat(self.nsec).reshape(self.nrad,self.nsec) # (nrad, nsec)
                     axidensdvrdvp = np.sum(deltavr*deltavp*dens,axis=1)/self.nsec   # (nrad)
                     # get pressure
-                    if (self.fargo3d == 'No' and energyequation == 'Yes'):
-                        temp = self.__open_field(directory+'Temperature'+str(on[k])+'.dat',dtype,fieldofview,slice,z_average='No')
-                        pressure = gamma*dens*temp
-                        axipres = np.sum(pressure,axis=1)/self.nsec  # azimuthally-averaged pressure (nrad)
-                    else:
+                    if self.fargo3d == 'No':
+                        if energyequation == 'Yes':
+                            temp = self.__open_field(directory+'Temperature'+str(on[k])+'.dat',dtype,fieldofview,slice,z_average='No')
+                            pressure = gamma*dens*temp
+                            axipres = np.sum(pressure,axis=1)/self.nsec  # azimuthally-averaged pressure (nrad)
+                        else:
+                            cs = aspectratio * self.rmed**(flaringindex-0.5)  # isothermal sound speed (nrad)!
+                            pressure = dens*((cs*cs).repeat(self.nsec).reshape(self.nrad,self.nsec))  # 2D thermal pressure
+                            axipres = np.sum(pressure,axis=1)/self.nsec  # azimuthally-averaged pressure (nrad)
+                    else: # need to improve this...
                         cs = aspectratio * self.rmed**(flaringindex-0.5)  # isothermal sound speed (nrad)!
                         pressure = dens*((cs*cs).repeat(self.nsec).reshape(self.nrad,self.nsec))  # 2D thermal pressure
                         axipres = np.sum(pressure,axis=1)/self.nsec  # azimuthally-averaged pressure (nrad)
