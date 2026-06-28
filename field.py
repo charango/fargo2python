@@ -1180,6 +1180,13 @@ class Field(Mesh):
                     command = par.awk_command+' " /^FlaringIndex/ " '+directory+'*.par'
                     buf = subprocess.getoutput(command)
                     flaringindex = float(buf.split()[1])
+                    # check if energy equation was used and then get adiabatic index
+                    command = par.awk_command+' " /^EnergyEquation/ " '+directory+'*.par'
+                    buf = subprocess.getoutput(command)
+                    energyequation = str(buf.split()[1])
+                    command = par.awk_command+' " /^AdiabaticIndex/ " '+directory+'*.par'
+                    buf = subprocess.getoutput(command)
+                    gamma = float(buf.split()[1])
                 else:
                     # get isothermal sound speed
                     command = par.awk_command+' " /^ASPECTRATIO/ " '+directory+'*.par'
@@ -1188,14 +1195,6 @@ class Field(Mesh):
                     command = par.awk_command+' " /^FLARINGINDEX/ " '+directory+'*.par'
                     buf = subprocess.getoutput(command)
                     flaringindex = float(buf.split()[1])
-                    # check if energy equation was used and then get adiabatic index
-                    command = par.awk_command+' " /^EnergyEquation/ " '+directory+'*.par'
-                    buf = subprocess.getoutput(command)
-                    energyequation = str(buf.split()[1])
-                    command = par.awk_command+' " /^AdiabaticIndex/ " '+directory+'*.par'
-                    buf = subprocess.getoutput(command)
-                    gamma = float(buf.split()[1])
-
 
                 for k in range(len(on)):
                     #print('k = ', k,' / ', len(on))
