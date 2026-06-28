@@ -138,7 +138,7 @@ plot_discperarg	No
 plot_libcross   No
 
 ### plot gas quantities for turbulent disc simulations (eg MRI-driven MHD turbulence 
-# with FARGO3D) -- plot_turb can be set to: No, power_spectrum, auto_correlation, alphas, histo_field, histo_torque, time_alphareynolds
+# with FARGO3D) -- plot_turb can be set to: No, power_spectrum, auto_correlation, alphas, histo_field, histo_torque, time_alphareynolds, time_alphagrav
 plot_turb       No
 
 
@@ -164,6 +164,7 @@ plot_turb       No
 # invvortensity: inverse vortensity
 # normvorticity: ratio of horizontal epicyclic frequency squared over angular frequency squared
 # drl: radial derivative of specific angular momentum
+# divv: velocity divergence (2D)
 # ecc: disc eccentricity assuming each grid cell interacts with the star as a two-body problem (2D)
 # stokes: dust Stokes number (2D like 3D)
 # label: passive scalar (original 2D)

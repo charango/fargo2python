@@ -44,8 +44,8 @@ def plotpowerspectrum():
         surface[:,th] = surf
 
     # Range of azimuthal wavenumbers    
-    m_min = 1
-    m_max = int(dens.nsec/8)
+    m_min = 0 # 1
+    m_max = 10 # int(dens.nsec/8)
     azi_wavenb = range(m_min,m_max,1)
     # if grid's azimuthal extent is pi: only odd values of m are relevant
     if np.abs(dens.pmed[-1]-dens.pmed[0]-3.14) < 0.1:
@@ -75,18 +75,20 @@ def plotpowerspectrum():
         for m in range(len(azi_wavenb)):
 
             # real part of Fourier decomposition
-            an[m] = (np.sum(dens*surface*np.cos(azi_wavenb[m]*pmed2d))/mass)
+            an[m] = np.sum(dens*surface*np.cos(azi_wavenb[m]*pmed2d)) / mass
+            # an[m] = np.sum(dens*np.cos(azi_wavenb[m]*pmed2d)) / np.sum(dens)
 
             # imaginary part of Fourier decomposition
-            bn[m] = (np.sum(dens*surface*np.sin(azi_wavenb[m]*pmed2d))/mass)
+            bn[m] = np.sum(dens*surface*np.sin(azi_wavenb[m]*pmed2d)) / mass
+            # bn[m] = np.sum(dens*np.sin(azi_wavenb[m]*pmed2d)) / np.sum(dens)
 
-            # amplitude
+            # amplitude (the += arises when averaging over mutliple outputs)
             cn[m] += np.sqrt( an[m]*an[m] + bn[m]*bn[m] )
-    
+
     # final amplitude - divide by len(on) in case of average over multiple output numbers
     for m in range(len(azi_wavenb)):
         cn[m] /= len(on)
-        #print(azi_wavenb[m],cn[m])
+        # print(azi_wavenb[m],cn[m])
 
     # prepare figure
     fig = plt.figure(figsize=(8.,8.))
@@ -105,7 +107,7 @@ def plotpowerspectrum():
         mylabel = str(par.directory)
 
     ax.set_yscale('log')
-    ax.set_xscale('log')
+    # ax.set_xscale('log')
     ax.scatter(azi_wavenb, cn, color=par.c20[0], s=10, label=mylabel)
 
     # And save file
@@ -472,9 +474,9 @@ def plot_time_alphaRey():
         buf = Field(field='alpha_reynolds', fluid='gas', on=on[k], directory=par.directory, physical_units=par.physical_units, nodiff='Yes', fieldofview=par.fieldofview, onedprofile='No', slice='midplane', z_average=par.z_average, override_units=par.override_units).data
 
         # Option 1: take the mean of alpha_Rey over the disc
-        # alpharey[k] = np.mean(buf)
+        alpharey[k] = np.mean(buf)
         # Option 1: take the median of alpha_Rey over the disc
-        alpharey[k] = np.median(buf)
+        # alpharey[k] = np.median(buf)
 
 
     # option to write result in 1D ascii file
@@ -498,6 +500,241 @@ def plot_time_alphaRey():
 
     # And save file
     outfile = 'timealpharey_'+str(par.directory)
+    fileout = outfile+'.pdf'
+    if par.saveaspdf == 'Yes':
+        plt.savefig('./'+fileout, dpi=160)
+    if par.saveaspng == 'Yes':
+        plt.savefig('./'+re.sub('.pdf', '.png', fileout), dpi=120)    
+
+
+
+# function that plots time evolution of the disc-averaged gravitational stress tensor (alpha form)
+def plot_time_alphaGrav():
+
+    # first import global variables
+    import par
+    
+   # Define range of output numbers to consider
+    if par.take_one_point_every == '#':
+        take_one_point_every = 1
+    else:
+        take_one_point_every = par.take_one_point_every
+
+    if par.on == 'all':
+        import fnmatch
+        if isinstance(par.directory, list) == True:
+            dir = par.directory[0]
+        else:
+            dir = par.directory
+        nboutputs = len(fnmatch.filter(os.listdir(dir), 'gasdens*.dat'))-len(fnmatch.filter(os.listdir(dir), 'gasdens.ascii*.dat'))
+        if par.fargo2d1d == 'Yes':
+            nboutputs = len(fnmatch.filter(os.listdir(dir), 'gasdens1D*.dat'))
+        # on = [0,nboutputs-1]
+        on = range(0,nboutputs-1,take_one_point_every)
+    else:
+        if np.isscalar(par.on) == False:
+            on = range(par.on[0],par.on[1]+1,take_one_point_every)
+        else:
+            on = [par.on]
+
+    # get time
+    f1, xpla, ypla, f4, f5, f6, f7, date, omega, f10, f11 = np.loadtxt(par.directory+"/planet0.dat",unpack=True)
+
+    # 2D arrays with radius and azimuth
+    dens = Field(field='dens', fluid='gas', on=0, directory=par.directory, physical_units=par.physical_units, nodiff='Yes', fieldofview=par.fieldofview, onedprofile='No', slice='midplane', z_average=par.z_average, override_units=par.override_units)
+    rmed = dens.rmed
+    rmax = rmed.max()
+    rmin = rmed.min()
+    nrad = dens.nrad
+    nsec = dens.nsec
+    pmed2d  = np.zeros((nrad,nsec))
+    rmed2d  = np.zeros((nrad,nsec))
+    surface = np.zeros((nrad,nsec))
+
+    for r in range(nrad):
+        pmed2d[r,:] = dens.pmed
+
+    for phi in range(nsec):
+        rmed2d[:,phi] = rmed
+
+    Rinf = dens.redge[0:len(dens.redge)-1]
+    Rsup = dens.redge[1:len(dens.redge)]
+    surf = np.pi * (Rsup*Rsup - Rinf*Rinf) / nsec
+    for th in range(nsec):
+        surface[:,th] = surf
+
+    # Range of azimuthal wavenumbers    
+    m_min = 1 # 1
+    m_max = 10 # int(dens.nsec/8)
+    azi_wavenb = range(m_min,m_max,1)
+    # if grid's azimuthal extent is pi: only odd values of m are relevant
+    if np.abs(dens.pmed[-1]-dens.pmed[0]-3.14) < 0.1:
+        azi_wavenb = range(2*m_min,m_max,2)
+
+    # Range of radial wavenumbers
+    kr_min = 1 # 1
+    kr_max = 10 # int(dens.nsec/8)
+    rad_wavenb = range(kr_min,kr_max,1)
+
+    # allocate disc-averaged alpha gravitational stress
+    alphagrav = np.zeros(len(on))
+    mytime = np.zeros(len(on))
+
+    # get isothermal sound speed
+    command = par.awk_command+' " /^AspectRatio/ " '+par.directory+'/*.par'
+    buf = subprocess.getoutput(command)
+    aspectratio = float(buf.split()[1])
+    command = par.awk_command+' " /^FlaringIndex/ " '+par.directory+'/*.par'
+    buf = subprocess.getoutput(command)
+    flaringindex = float(buf.split()[1])
+
+    # ========================
+    # loop over output numbers
+    # ========================
+    for i in range(len(on)):
+
+        print('output number =',str(i+1),'out of', str(len(on)),end='\r')
+
+        # get disc midplane density: array of size (nrad, nsec)
+        dens = Field(field='dens', fluid='gas', on=on[i], directory=par.directory, physical_units=par.physical_units, nodiff='Yes', fieldofview=par.fieldofview, onedprofile='No', slice='midplane', z_average=par.z_average, override_units=par.override_units).data
+
+        # total mass
+        mass = np.sum(dens*surface)
+
+        # get mean pressure
+        cs = aspectratio * rmed**(flaringindex-0.5)  # isothermal sound speed (nrad)!
+        pressure = dens*((cs*cs).repeat(nsec).reshape(nrad,nsec))  # 2D thermal pressure
+        meanpres = np.mean(pressure)
+
+        # get time
+        mytime[i] = date[take_one_point_every*i]/2.0/np.pi  # orbital periods at R=1
+
+        # -------------------------------
+        # loop over azimuthal wavenumbers
+        # -------------------------------
+        for m in range(len(azi_wavenb)):
+
+            # -------------------------------
+            # loop over radial wavenumbers
+            # -------------------------------
+            for kr in range(len(rad_wavenb)):
+
+                # real part of Fourier decomposition
+                # an = np.sum(dens*surface*np.cos(azi_wavenb[m]*pmed2d+rad_wavenb[kr]*rmed2d)) / mass
+                # an = np.sum(dens*surface*np.cos(azi_wavenb[m]*pmed2d + 2.0*np.pi*rad_wavenb[kr]*rmed2d/(rmax-rmin))) / mass
+                an = np.sum(dens*np.cos(azi_wavenb[m]*pmed2d + rad_wavenb[kr]*rmed2d/(rmax-rmin)))
+
+                # imaginary part of Fourier decomposition
+                # bn = np.sum(dens*surface*np.sin(azi_wavenb[m]*pmed2d+rad_wavenb[kr]*rmed2d)) / mass
+                # bn = np.sum(dens*surface*np.sin(azi_wavenb[m]*pmed2d + 2.0*np.pi*rad_wavenb[kr]*rmed2d/(rmax-rmin))) / mass
+                bn = np.sum(dens*np.sin(azi_wavenb[m]*pmed2d + rad_wavenb[kr]*rmed2d/(rmax-rmin)))
+
+                # amplitude
+                cn = np.sqrt( an*an + bn*bn )
+
+                # calculation of alpha_grav as sum in Fourier space
+                kphi = azi_wavenb[m]/(rmax-rmin)
+                # krad = 2.0*np.pi*rad_wavenb[kr]/(rmax-rmin)
+                krad = rad_wavenb[kr]/(rmax-rmin)
+                k3 = (np.sqrt( krad*krad + kphi*kphi ))**3
+                alphagrav[i] += (np.pi*kphi*krad*cn*cn/k3/meanpres) # divide by mean pressure?
+
+
+     # option to write result in 1D ascii file
+    if ( ('write_ascii' in open('paramsf2p.dat').read()) and (par.write_ascii == 'Yes') ):
+        ascii = open('timealphagrav_'+par.directory+'.dat','w')
+        for v in range(len(mytime)):
+            ascii.write(str(mytime[v])+'\t'+str(alphagrav[v])+'\n')
+
+
+    # prepare figure
+    fig = plt.figure(figsize=(8.,8.))
+    plt.subplots_adjust(left=0.16, right=0.96, top=0.95, bottom=0.12)
+    ax = fig.gca()
+    xtitle = r'Time [$T_0$]'
+    ytitle = 'Disc-averaged gravitationnal alpha parameter'
+    ax.set_xlabel(xtitle)
+    ax.set_ylabel(ytitle)
+    ax.tick_params(top='on', right='on', length = 5, width=1.0, direction='out')
+
+    ax.plot(mytime, alphagrav, color=par.c20[1])
+
+    # And save file
+    outfile = 'timealphagrav_'+str(par.directory)
+    fileout = outfile+'.pdf'
+    if par.saveaspdf == 'Yes':
+        plt.savefig('./'+fileout, dpi=160)
+    if par.saveaspng == 'Yes':
+        plt.savefig('./'+re.sub('.pdf', '.png', fileout), dpi=120)  
+
+
+
+# function that plots time evolution of the disc-averaged gravitational stress tensor (alpha form)
+def plot_time_alphaGrav_direct():
+
+    # first import global variables
+    import par
+
+    # get all files alphasg_gl_X.dat where X = output number
+    alphafiles = fnmatch.filter(os.listdir('.'), 'alphasg*.dat')
+    nboutputs = len(alphafiles)
+
+    # get output number
+    on = np.zeros(nboutputs)
+    for i in range(nboutputs):
+        on[i] = alphafiles[i][11:-4]
+
+    # integer array with output numbers
+    inton = [int(x) for x in on]
+    sortedon = [0] * nboutputs
+    sortedalphafiles = ["" for x in range(nboutputs)]
+
+    for i in range(nboutputs):
+        index = np.argsort(inton)[i]
+        sortedalphafiles[i] = alphafiles[index]
+        sortedon[i] = int(inton[index])
+
+    # get time
+    f1, xpla, ypla, f4, f5, f6, f7, date, omega, f10, f11 = np.loadtxt(par.directory+"/planet0.dat",unpack=True)
+
+    alphagrav = np.zeros(nboutputs)
+    mytime = np.zeros(nboutputs)
+
+    # ========================
+    # loop over output numbers
+    # ========================
+    for k in range(nboutputs):
+
+        # get time
+        mytime[k] = date[sortedon[k]]/2.0/np.pi  # orbital periods at R=1
+
+        # read alphasg_glX.dat file
+        r, a = np.loadtxt(sortedalphafiles[k],unpack=True)
+
+        alphagrav[k] = np.mean(a)
+
+
+    # option to write result in 1D ascii file
+    if ( ('write_ascii' in open('paramsf2p.dat').read()) and (par.write_ascii == 'Yes') ):
+        ascii = open('timealphagravdir_'+par.directory+'.dat','w')
+        for v in range(len(mytime)):
+            ascii.write(str(mytime[v])+'\t'+str(alphagrav[v])+'\n')
+
+
+    # prepare figure
+    fig = plt.figure(figsize=(8.,8.))
+    plt.subplots_adjust(left=0.16, right=0.96, top=0.95, bottom=0.12)
+    ax = fig.gca()
+    xtitle = r'Time [$T_0$]'
+    ytitle = 'Disc-averaged gravitational alpha parameter'
+    ax.set_xlabel(xtitle)
+    ax.set_ylabel(ytitle)
+    ax.tick_params(top='on', right='on', length = 5, width=1.0, direction='out')
+
+    ax.plot(mytime, alphagrav, color=par.c20[1])
+
+    # And save file
+    outfile = 'timealphagravdir_'+str(par.directory)
     fileout = outfile+'.pdf'
     if par.saveaspdf == 'Yes':
         plt.savefig('./'+fileout, dpi=160)

@@ -534,6 +534,14 @@ class Field(Mesh):
                             kappa[i,:] = np.sqrt(kappa[i,:]) # finally take square root
                         if (i == self.nrad-1):
                             kappa[i,:] = kappa[i-1,:]
+                    # Attempt 2: failure since kappa^2 can take negative values on some grid cells.
+                    # for i in range(self.nrad):
+                    #     if (i < self.nrad-1):
+                    #         kappa[i,:] = (self.rmed[i+1]*vphi[i+1,:]-self.rmed[i]*vphi[i,:])/(self.rmed[i+1]-self.rmed[i]) # d(R^2 Omega) / dR
+                    #         kappa[i,:] *= (2.0*vphi[i,:]/(self.rmed[i]**2)) # multiply by 2 Omega / R
+                    #         kappa[i,:] = np.sqrt(kappa[i,:]) # finally take square root
+                    #     if (i == self.nrad-1):
+                    #         kappa[i,:] = kappa[i-1,:]
 
                     # Q = cs Omega / pi G Sigma:
                     # self.data *= omega
@@ -868,7 +876,7 @@ class Field(Mesh):
             # ----
             # VORTICITY or VORTENSITY
             # ----
-            if (field == 'vorticity' or field == 'drl' or field == 'vortensity' or field == 'invvortensity' or field == 'normvorticity' or field == 'rossby'):
+            if (field == 'vorticity' or field == 'drl' or field == 'vortensity' or field == 'invvortensity' or field == 'normvorticity' or field == 'rossby' or field == 'divv'):
 
                 if self.fargo3d == 'No':
                     vrad = self.__open_field(directory+fluid+'vrad'+str(on)+'.dat',dtype,fieldofview,slice,z_average)
@@ -986,7 +994,32 @@ class Field(Mesh):
                         self.strname += ' vortensity'
                 if field == 'vorticity':
                     self.strname += ' vorticity'
-            
+
+                # velocity divergence
+                if (field == 'divv'):
+                    # we first calculate drrvr
+                    drrvr = np.zeros((self.nrad,self.nsec))
+                    for j in range(self.nsec):
+                        for i in range(0,self.nrad-1):
+                            drrvr[i,j] = ( (self.redge)[i+1]*vrad[i+1,j] - (self.redge)[i]*vrad[i,j] ) / ((self.redge)[i+1] - (self.redge)[i] )
+                        drrvr[self.nrad-1,j] = drrvr[self.nrad-2,j]
+                    # then we calculate dphivphi
+                    dphivphi = np.zeros((self.nrad,self.nsec))
+                    for j in range(self.nsec):
+                        if j==0:
+                            jm1 = self.nsec-1
+                        else:
+                            jm1 = j-1
+                        for i in range(self.nrad):
+                            dphivphi[i,j] = (vphi[i,j]-vphi[i,jm1])/2.0/np.pi*self.nsec
+                    # we finally get the velocity divergence
+                    for j in range(self.nsec):
+                        for i in range(self.nrad):
+                            self.data[i,j] = np.abs((drrvr[i,j] + dphivphi[i,j]) / (self.rmed)[i])
+
+                    self.strname += r' $|\nabla\cdot v|$'
+
+
             # ----
             # GAS self-gravitating accelerations
             # ----
@@ -1121,6 +1154,7 @@ class Field(Mesh):
                 self.data = dens/(axidens.repeat(self.nsec).reshape(self.nrad,self.nsec))
                 self.strname = r'$\Sigma / \langle\Sigma\rangle_\varphi$'
 
+
             # ----
             # time-averaged Reynolds alpha parameter
             # ----        
@@ -1163,6 +1197,14 @@ class Field(Mesh):
                         command = par.awk_command+' " /^FLARINGINDEX/ " '+directory+'*.par'
                         buf = subprocess.getoutput(command)
                         flaringindex = float(buf.split()[1])
+                        # check if energy equation was used and then get adiabatic index
+                        command = par.awk_command+' " /^EnergyEquation/ " '+directory+'*.par'
+                        buf = subprocess.getoutput(command)
+                        energyequation = str(buf.split()[1])
+                        command = par.awk_command+' " /^AdiabaticIndex/ " '+directory+'*.par'
+                        buf = subprocess.getoutput(command)
+                        gamma = float(buf.split()[1])
+
                         
                     # OLD WAY
                     # axivrad = np.sum(vrad*dens,axis=1)/np.sum(dens,axis=1)  # density-weighted azimuthal average
@@ -1184,55 +1226,17 @@ class Field(Mesh):
                     deltavp = vphi-axivphi.repeat(self.nsec).reshape(self.nrad,self.nsec) # (nrad, nsec)
                     axidensdvrdvp = np.sum(deltavr*deltavp*dens,axis=1)/self.nsec   # (nrad)
                     # get pressure
-                    cs = aspectratio * self.rmed**(flaringindex-0.5)  # isothermal sound speed (nrad)!
-                    pressure = dens*((cs*cs).repeat(self.nsec).reshape(self.nrad,self.nsec))  # 2D thermal pressure
-                    axipres = np.sum(pressure,axis=1)/self.nsec  # azimuthally-averaged pressure (nrad)
+                    if (self.fargo3d == 'No' and energyequation == 'Yes'):
+                        temp = self.__open_field(directory+'Temperature'+str(on[k])+'.dat',dtype,fieldofview,slice,z_average='No')
+                        pressure = gamma*dens*temp
+                        axipres = np.sum(pressure,axis=1)/self.nsec  # azimuthally-averaged pressure (nrad)
+                    else:
+                        cs = aspectratio * self.rmed**(flaringindex-0.5)  # isothermal sound speed (nrad)!
+                        pressure = dens*((cs*cs).repeat(self.nsec).reshape(self.nrad,self.nsec))  # 2D thermal pressure
+                        axipres = np.sum(pressure,axis=1)/self.nsec  # azimuthally-averaged pressure (nrad)
                     self.data += (2.0*axidensdvrdvp/3.0/axipres).repeat(self.nsec).reshape(self.nrad,self.nsec) # 2D
 
                 self.data /= len(on)
-                self.strname = r'$\alpha_{\rm Reynolds}$'
-
-            # ----
-            # Instantaneous Reynolds alpha parameter
-            # ----        
-            if field == 'alpha_reynolds_inst':
-
-                if self.fargo3d == 'No':
-                    vrad = self.__open_field(directory+'gasvrad'+str(on)+'.dat',dtype,fieldofview,slice,z_average='No')
-                    vphi = self.__open_field(directory+'gasvtheta'+str(on)+'.dat',dtype,fieldofview,slice,z_average='No')
-                    dens = self.__open_field(directory+'gasdens'+str(on)+'.dat',dtype,fieldofview,slice,z_average='No')
-                    # get isothermal sound speed
-                    command = par.awk_command+' " /^AspectRatio/ " '+directory+'*.par'
-                    buf = subprocess.getoutput(command)
-                    aspectratio = float(buf.split()[1])
-                    command = par.awk_command+' " /^FlaringIndex/ " '+directory+'*.par'
-                    buf = subprocess.getoutput(command)
-                    flaringindex = float(buf.split()[1])
-                else:
-                    vrad = self.__open_field(directory+'gasvy'+str(on)+'.dat',dtype,fieldofview,slice,z_average='Yes')
-                    vphi = self.__open_field(directory+'gasvx'+str(on)+'.dat',dtype,fieldofview,slice,z_average='Yes')
-                    dens = self.__open_field(directory+'gasdens'+str(on)+'.dat',dtype,fieldofview,slice,z_average='Yes')
-                    # get isothermal sound speed
-                    command = par.awk_command+' " /^ASPECTRATIO/ " '+directory+'*.par'
-                    buf = subprocess.getoutput(command)
-                    aspectratio = float(buf.split()[1])
-                    command = par.awk_command+' " /^FLARINGINDEX/ " '+directory+'*.par'
-                    buf = subprocess.getoutput(command)
-                    flaringindex = float(buf.split()[1])
-
-
-                # NEW WAY (>june 2026)
-                axivrad = np.sum(vrad,axis=1)/self.nsec  # azimuthally-averaged radial velocity
-                axivphi = np.sum(vphi,axis=1)/self.nsec  # azimuthally-averaged azimithal velocity
-                deltavr = vrad-axivrad.repeat(self.nsec).reshape(self.nrad,self.nsec) # (nrad, nsec)
-                deltavp = vphi-axivphi.repeat(self.nsec).reshape(self.nrad,self.nsec) # (nrad, nsec)
-                axidensdvrdvp = np.sum(deltavr*deltavp*dens,axis=1)/self.nsec   # (nrad)
-                # get pressure
-                cs = aspectratio * self.rmed**(flaringindex-0.5)  # isothermal sound speed (nrad)!
-                pressure = dens*((cs*cs).repeat(self.nsec).reshape(self.nrad,self.nsec))  # 2D thermal pressure
-                axipres = np.sum(pressure,axis=1)/self.nsec  # azimuthally-averaged pressure (nrad)
-                self.data = (2.0*axidensdvrdvp/3.0/axipres).repeat(self.nsec).reshape(self.nrad,self.nsec) # 2D
-
                 self.strname = r'$\alpha_{\rm Reynolds}$'
 
 
