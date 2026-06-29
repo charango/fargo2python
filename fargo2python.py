@@ -112,8 +112,8 @@ if ( ('plot_turb' in open('paramsf2p.dat').read()) and (par.plot_turb != 'No') )
         plot_time_alphaRey()
     if par.plot_turb == 'time_alphagrav':
         plot_time_alphaGrav()
-    if par.plot_turb == 'time_alphagrav_dir':
-        plot_time_alphaGrav_direct()
+    if par.plot_turb == 'time_alphagrav_ext':
+        plot_time_alphaGrav_external()
 
 # =====================
 # 11. DISC'S ECCENTRICITY OR PERICENTRE ARGUMENT
