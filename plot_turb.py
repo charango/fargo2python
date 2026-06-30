@@ -316,9 +316,9 @@ def plot_histofield():
     nrad = myfield.nrad
     nsec = myfield.nsec
     rmed = myfield.rmed
-    myrmin = 0.5 # 0.8
+    myrmin = 1.1*rmed.min()
     imin = np.argmin(np.abs(rmed-myrmin))
-    myrmax = 2.1 # 1.2
+    myrmax = 0.9*rmed.max()
     imax = np.argmin(np.abs(rmed-myrmax))
 
     # ========================
