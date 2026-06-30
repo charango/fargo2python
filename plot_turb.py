@@ -348,7 +348,7 @@ def plot_histofield():
 
         counts, bins, patches = plt.hist(myfieldoned, bins=mybins, color=c20, alpha=0.3, rwidth=0.9, density=True)
         if k==0:
-            ax.set_ylim(0,2.5*counts.max())
+            ax.set_ylim(0,1.5*counts.max())
             ax.set_xlim(bins.min(),bins.max())
             if par.whatfield == 'dens':
                 xtitle = r'$(\Sigma - \langle \Sigma\rangle_\varphi) / \langle \Sigma\rangle_\varphi$'
