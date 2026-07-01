@@ -1364,7 +1364,7 @@ class Field(Mesh):
                     
                     # get adiabatic index
                     if energyequation == 'Yes':
-                        if fargo3d == 'Yes':
+                        if self.fargo3d == 'Yes':
                             command4 = par.awk_command+' " /^GAMMA/ " '+directory[j]+'/variables.par'
                         else:
                             command4 = par.awk_command+' " /^AdiabaticIndex/ " '+directory[j]+'/*.par'

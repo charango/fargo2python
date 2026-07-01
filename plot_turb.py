@@ -316,9 +316,15 @@ def plot_histofield():
     nrad = myfield.nrad
     nsec = myfield.nsec
     rmed = myfield.rmed
-    myrmin = 1.1*rmed.min()
+
+    if ( ('myrmin' in open('paramsf2p.dat').read()) and (par.myrmin != '#') and (('myrmax' in open('paramsf2p.dat').read()) and (par.myrmax != '#')) ):
+        myrmin = par.myrmin
+        myrmax = par.myrmax
+    else:
+        myrmin = 1.1*rmed.min()
+        myrmax = 0.9*rmed.max()
+        
     imin = np.argmin(np.abs(rmed-myrmin))
-    myrmax = 0.9*rmed.max()
     imax = np.argmin(np.abs(rmed-myrmax))
 
     if myfield.fargo3d == 'No':
