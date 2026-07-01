@@ -308,7 +308,7 @@ def plot_histofield():
         max_bin = par.fieldmax
     else:
         max_bin = 0.3
-    nb_bins = 30
+    nb_bins = 80
     mybins = min_bin + (max_bin-min_bin)*np.arange(nb_bins)/(nb_bins-1.0)
 
     myfield = Field(field='dens', fluid='gas', on=0, directory=par.directory, physical_units=par.physical_units, nodiff='Yes', fieldofview=par.fieldofview, onedprofile='No', slice='midplane', z_average=par.z_average, override_units=par.override_units)
