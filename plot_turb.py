@@ -357,6 +357,10 @@ def plot_histofield():
         buf = subprocess.getoutput(command)
         gamma = float(buf.split()[1])
 
+    # define and allocate array for space-time diagram
+    if par.onedspacetime == 'Yes':
+        spacetime_array = np.zeros((nb_bins,len(on)-1))
+
 
     # ========================
     # loop over output numbers
@@ -408,6 +412,10 @@ def plot_histofield():
                 outfile = 'histovtheta_'
             ax.set_xlabel(xtitle)
 
+        # save into spacetime_array array
+        if (par.onedspacetime == 'Yes' and k != len(on)-1):
+            spacetime_array[:,k] = counts
+
     # And save file
     outfile = outfile+str(par.directory)+'_'
     if np.isscalar(par.on) == False:
@@ -419,6 +427,15 @@ def plot_histofield():
         plt.savefig('./'+fileout, dpi=160)
     if par.saveaspng == 'Yes':
         plt.savefig('./'+re.sub('.pdf', '.png', fileout), dpi=120)
+
+    # save 2D array in binary file
+    if (par.onedspacetime == 'Yes'):
+        outfile = 'SpaceTime_histo_'+par.fluid+'_'+par.whatfield+'_'+str(par.directory)
+        fileout = outfile+'.dat'
+        FILEOUT = open(fileout,'wb')        # binary format
+        spacetime_array = np.swapaxes(spacetime_array, 0, 1)  
+        spacetime_array.tofile(FILEOUT)
+        FILEOUT.close()
 
 
 # function that plots histogram of the specific torque
