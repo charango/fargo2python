@@ -359,7 +359,7 @@ def plot_histofield():
 
     # define and allocate array for space-time diagram
     if par.onedspacetime == 'Yes':
-        spacetime_array = np.zeros((nb_bins,len(on)-1))
+        spacetime_array = np.zeros((nb_bins-1,len(on)-1))
 
 
     # ========================
