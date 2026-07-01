@@ -374,7 +374,7 @@ def plot_histofield():
         axifield = (np.sum(buf.data ,axis=1)/nsec).repeat(nsec).reshape(nrad,nsec)
         myfield = buf.data-axifield    # X - <X>
 
-        if par.whatfield == 'dens' or par.whatfield == 'vtheta':
+        if par.whatfield == 'dens': #or par.whatfield == 'vtheta':
             myfield = (buf.data-axifield)/axifield   # (X - <X>)/<X>
 
         if par.whatfield == 'vrad':
@@ -385,6 +385,14 @@ def plot_histofield():
                 cs = aspectratio*rmed**(flaringindex-0.5)
             # myfield /= cs  # (vr - <vr>) / cs ?
             myfield = buf.data/cs  # vr / cs
+
+        if par.whatfield == 'vtheta':
+            if energyequation == 'Yes':
+                temp = Field(field='temp', fluid='gas', on=on[k], directory=par.directory, physical_units='No', nodiff='Yes', fieldofview=par.fieldofview, onedprofile='No', slice='midplane', z_average=par.z_average, override_units=par.override_units).data
+                cs = np.sqrt(gamma*temp)
+            else:
+                cs = aspectratio*rmed**(flaringindex-0.5)
+            myfield = (buf.data-axifield)/cs  # vr / cs
 
         myfieldnew = myfield[imin:imax,:]
         myfieldoned = myfieldnew.reshape((imax-imin)*nsec)
