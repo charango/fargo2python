@@ -321,6 +321,37 @@ def plot_histofield():
     myrmax = 0.9*rmed.max()
     imax = np.argmin(np.abs(rmed-myrmax))
 
+    if myfield.fargo3d == 'No':
+        # get isothermal sound speed
+        command = par.awk_command+' " /^AspectRatio/ " '+par.directory+'/*.par'
+        buf = subprocess.getoutput(command)
+        aspectratio = float(buf.split()[1])
+        command = par.awk_command+' " /^FlaringIndex/ " '+par.directory+'/*.par'
+        buf = subprocess.getoutput(command)
+        flaringindex = float(buf.split()[1])
+        # check if energy equation was used and then get adiabatic index
+        command = par.awk_command+' " /^EnergyEquation/ " '+par.directory+'/*.par'
+        buf = subprocess.getoutput(command)
+        energyequation = str(buf.split()[1])
+        command = par.awk_command+' " /^AdiabaticIndex/ " '+par.directory+'/*.par'
+        buf = subprocess.getoutput(command)
+        gamma = float(buf.split()[1])
+    else:
+        command = par.awk_command+' " /^ASPECTRATIO/ " '+par.directory+'/*.par'
+        buf = subprocess.getoutput(command)
+        aspectratio = float(buf.split()[1])
+        command = par.awk_command+' " /^FLARINGINDEX/ " '+par.directory+'/*.par'
+        buf = subprocess.getoutput(command)
+        flaringindex = float(buf.split()[1])        
+        if "ISOTHERMAL" in open(par.directory+'/summary0.dat',"r").read():
+            energyequation = "No"
+        else:
+            energyequation = "Yes"
+        command = par.awk_command+' " /^GAMMA/ " '+par.directory+'/*.par'
+        buf = subprocess.getoutput(command)
+        gamma = float(buf.split()[1])
+
+
     # ========================
     # loop over output numbers
     # ========================
@@ -329,12 +360,21 @@ def plot_histofield():
         print('k = ', k, ' / ', len(on)-1 )
 
         # get disc midplane X field: array of size (nrad, nsec)
-        buf = Field(field=par.whatfield, fluid=par.fluid, on=on[k], directory=par.directory, physical_units=par.physical_units, nodiff='Yes', fieldofview=par.fieldofview, onedprofile='No', slice='midplane', z_average=par.z_average, override_units=par.override_units)
+        buf = Field(field=par.whatfield, fluid=par.fluid, on=on[k], directory=par.directory, physical_units='No', nodiff='Yes', fieldofview=par.fieldofview, onedprofile='No', slice='midplane', z_average=par.z_average, override_units=par.override_units)
         axifield = (np.sum(buf.data ,axis=1)/nsec).repeat(nsec).reshape(nrad,nsec)
-        myfield = buf.data-axifield
+        myfield = buf.data-axifield    # X - <X>
 
         if par.whatfield == 'dens' or par.whatfield == 'vtheta':
-            myfield = (buf.data-axifield)/axifield
+            myfield = (buf.data-axifield)/axifield   # (X - <X>)/<X>
+
+        if par.whatfield == 'vrad':
+            if energyequation == 'Yes':
+                temp = Field(field='temp', fluid='gas', on=on[k], directory=par.directory, physical_units='No', nodiff='Yes', fieldofview=par.fieldofview, onedprofile='No', slice='midplane', z_average=par.z_average, override_units=par.override_units).data
+                cs = np.sqrt(gamma*temp)
+            else:
+                cs = aspectratio*rmed**(flaringindex-0.5)
+            # myfield /= cs  # (vr - <vr>) / cs ?
+            myfield = buf.data/cs  # vr / cs
 
         myfieldnew = myfield[imin:imax,:]
         myfieldoned = myfieldnew.reshape((imax-imin)*nsec)
@@ -354,7 +394,8 @@ def plot_histofield():
                 xtitle = r'$(\Sigma - \langle \Sigma\rangle_\varphi) / \langle \Sigma\rangle_\varphi$'
                 outfile = 'histodens_'
             if par.whatfield == 'vrad':
-                xtitle = r'$v_r - \langle v_r \rangle_\varphi$'
+                # xtitle = r'$v_r - \langle v_r \rangle_\varphi$'
+                xtitle = r'$v_r / c_s$'
                 outfile = 'histovrad_'
             if par.whatfield == 'vtheta':
                 xtitle = r'$(v_{\phi} - \langle v_{\phi} \rangle_\varphi) / \langle v_{\phi} \rangle_\varphi$'
