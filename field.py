@@ -382,11 +382,13 @@ class Field(Mesh):
             # TEMPERATURE or PRESSURE or ENTROPY or TOOMRE Q-parameter = c_s Omega / pi G Sigma
             # or BETA_COOLING parameter beta = Sigma tau_eff Omega / 4 pi / (gamma-1) / sigma_SB / T^3
             # ----
-            if field == 'temp' or field == 'pressure' or field == 'entropy' or field == 'toomre' or field == 'betacooling' or field == 'stokes' or field == 'dlogPdlogR':
+            if field == 'temp' or field == 'pressure' or field == 'entropy' or field == 'toomre' or field == 'betacooling' or field == 'stokes' or field == 'dlogPdlogR' or field == 'Mach':
                 if field == 'pressure':
                     self.strname += ' pressure'
                 if field == 'dlogPdlogR':
                     self.strname += r' $d\log P/d\log R$'
+                if field == 'Mach':
+                    self.strname += r' Mach number $v_r / c_{\rm s}$'
                 if field == 'toomre':
                     self.strname += ' Toomre parameter'
                 if field == 'entropy':
@@ -492,6 +494,7 @@ class Field(Mesh):
                     dens = self.__open_field(directory+fluid+'dens'+str(on)+'.dat',dtype,fieldofview,slice,z_average)
                     self.data *= dens   # pressure
 
+                # pressure logarithmic radial gradient
                 if field == 'dlogPdlogR':
                     dens = self.__open_field(directory+fluid+'dens'+str(on)+'.dat',dtype,fieldofview,slice,z_average)
                     self.data *= dens   # pressure # (nrad,nsec)
@@ -504,6 +507,11 @@ class Field(Mesh):
                     dlogpdlogr[0] = dlogpdlogr[1]
                     for i in range(self.nrad):
                         self.data[i,:] = dlogpdlogr[i]
+
+                # Mach number
+                if field == 'Mach':
+                    vrad = self.__open_field(directory+fluid+'vrad'+str(on)+'.dat',dtype,fieldofview,slice,z_average)
+                    self.data = vrad / np.sqrt(gamma*self.data) # vrad / cs with cs = sqrt(gamma T)
                 
                 # work out specific entropy then S = P rho^-gamma = T x rho^(1-gamma)
                 if field == 'entropy':
