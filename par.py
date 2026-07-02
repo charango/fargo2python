@@ -237,6 +237,9 @@ else:
     if mycolormap == 'lipary':
         import cmcrameri
         mycolormap = cmcrameri.cm.lipari
+    if mycolormap == 'managua':
+        import cmcrameri
+        mycolormap = cmcrameri.cm.managua
 
 if whatfield == 'rossby':
     try:
