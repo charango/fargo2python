@@ -137,6 +137,12 @@ plot_discperarg	No
 ### plot time evolution of librating, orbit-crossing flow vortensities?
 plot_libcross   No
 
+### plot time evolution of m decomposition of gas density? Azimuthal wavenumber 
+### set in plot_fourier option below (defaults to 'No')
+### if set to naodens: plot time evolution of maximum of non-axisymmetric density perturbation
+### if set to rossby: plot time evolution of minimum of Rossby number
+plot_fourier    No # 1 or naodens or rossby
+
 ### plot gas quantities for turbulent disc simulations (eg MRI-driven MHD turbulence 
 # with FARGO3D) -- plot_turb can be set to: No, power_spectrum, auto_correlation, 
 # alphas (FARGO3D), histo_field, histo_torque, time_alphareynolds, time_alphagrav, 

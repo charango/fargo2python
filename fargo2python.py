@@ -124,3 +124,13 @@ if ( ('plot_discecc' in open('paramsf2p.dat').read()) and (par.plot_discecc != '
 if ( ('plot_discperarg' in open('paramsf2p.dat').read()) and (par.plot_discperarg != 'No') ):
     from plot_discbinary import *
     plotdiscperarg()
+
+# =====================
+# 12. FOURIER ANALYSIS
+# =====================
+if ( ('plot_fourier' in open('paramsf2p.dat').read()) and (par.plot_fourier != 'No') ):
+    from plot_fourier import *
+    if (par.plot_fourier == 'naodens' or par.plot_fourier == 'rossby'):
+        plotmaxnaodens_orminrossby()
+    else:
+        plotfourier()
