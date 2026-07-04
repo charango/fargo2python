@@ -349,6 +349,10 @@ def plottwodfield():
                     ylim_max = myphimax
                     #ax.set_ylim(myphimin,myphimax)
                     #ax.set_xlim(myrmin,myrmax)
+
+                # CB: TEST JUNE 2026
+                if par.log_xyplots_x == 'Yes':
+                    ax.set_xscale('log')
             #
             # -------------------------
             # LATITUDINAL FIELD OF VIEW
@@ -843,6 +847,8 @@ def plottwodfield():
             filempg = re.sub('.mpg', '_dust.mpg', filempg)
         if par.nodiff == 'Yes':
             filempg = re.sub('.mpg', '_nodiff.mpg', filempg)
+        if (par.fieldofview == 'polar' and par.log_xyplots_x == 'Yes'):
+            filempg = re.sub('.mpg', '_logR.mpg', filempg)
         # call to ffmpeg-python (you also need to install ffmpeg on your local environement!)
         if len(on) <= 201:
             myframerate = 10
