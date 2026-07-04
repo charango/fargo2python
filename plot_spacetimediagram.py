@@ -93,6 +93,9 @@ def plotspacetimediagram():
             if par.onedprofile == 'Median':
                 axiarray = np.median(array,axis=1)   # median over azimuth of the density profile
 
+            if par.onedprofile == 'Min':
+                axiarray = np.min(array,axis=1)   # median over azimuth of the density profile
+
             # save into spacetime_array array
             if k != len(on)-1:
                 spacetime_array[:,k] = axiarray
@@ -145,6 +148,8 @@ def plotspacetimediagram():
             prefix = 'SpaceTime_cut'
         if par.onedprofile == 'Median':
             prefix = 'SpaceTime_median'
+        if par.onedprofile == 'Min':
+            prefix = 'SpaceTime_min'
         outfile = prefix+par.fluid+'_'+par.whatfield+'_'+str(directory[j])
         fileout = outfile+'.pdf'
         if par.saveaspdf == 'Yes':
@@ -156,6 +161,6 @@ def plotspacetimediagram():
         # save 2D array in binary file
         fileout = outfile+'.dat'
         FILEOUT = open(fileout,'wb')        # binary format
-        spacetime_array = np.swapaxes(spacetime_array, 0, 1)  # nbin ncol nsec nrad
+        spacetime_array = np.swapaxes(spacetime_array, 0, 1)  
         spacetime_array.tofile(FILEOUT)
         FILEOUT.close()

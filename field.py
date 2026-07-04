@@ -1023,9 +1023,10 @@ class Field(Mesh):
                     # we finally get the velocity divergence
                     for j in range(self.nsec):
                         for i in range(self.nrad):
-                            self.data[i,j] = np.abs((drrvr[i,j] + dphivphi[i,j]) / (self.rmed)[i])
+                            self.data[i,j] = (drrvr[i,j] + dphivphi[i,j]) / (self.rmed)[i]
+                            # self.data[i,j] = np.abs((drrvr[i,j] + dphivphi[i,j]) / (self.rmed)[i])
 
-                    self.strname += r' $|\nabla\cdot v|$'
+                    self.strname += r' $\nabla\cdot v$'
 
 
             # ----

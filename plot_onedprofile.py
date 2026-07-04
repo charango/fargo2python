@@ -244,6 +244,13 @@ def plotonedprofile():
                 if par.onedprofile == 'Median':
                     axiarray = np.median(array,axis=1)   # median over azimuth of the density profile
 
+                if par.onedprofile == 'Max':
+                    axiarray = np.max(array,axis=1)   # max over azimuth of the density profile
+
+                if par.onedprofile == 'Min':
+                    axiarray = np.min(array,axis=1)   # max over azimuth of the density profile
+                    
+
                 #axiarray = axiarray[2:-2]  # CUIDADIN!!
                 R = myfield.rmed
                 #R = R[2:-2] # CUIDADIN!!
@@ -298,6 +305,8 @@ def plotonedprofile():
                 prefix = 'cut'
             if par.onedprofile == 'Median':
                 prefix = 'median'
+            if par.onedprofile == 'Max':
+                prefix = 'max'
 
             # save file
             if len(directory) == 1:           
