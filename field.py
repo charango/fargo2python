@@ -884,7 +884,7 @@ class Field(Mesh):
             # ----
             # VORTICITY or VORTENSITY
             # ----
-            if (field == 'vorticity' or field == 'drl' or field == 'vortensity' or field == 'invvortensity' or field == 'normvorticity' or field == 'rossby' or field == 'divv'):
+            if (field == 'vorticity' or field == 'drl' or field == 'vortensity' or field == 'invvortensity' or field == 'normvorticity' or field == 'rossby' or field == 'divv' or field == 'divvoveromega'):
 
                 if self.fargo3d == 'No':
                     vrad = self.__open_field(directory+fluid+'vrad'+str(on)+'.dat',dtype,fieldofview,slice,z_average)
@@ -1004,7 +1004,7 @@ class Field(Mesh):
                     self.strname += ' vorticity'
 
                 # velocity divergence
-                if (field == 'divv'):
+                if (field == 'divv' or field == 'divvoveromega'):
                     # we first calculate drrvr
                     drrvr = np.zeros((self.nrad,self.nsec))
                     for j in range(self.nsec):
@@ -1026,7 +1026,14 @@ class Field(Mesh):
                             self.data[i,j] = (drrvr[i,j] + dphivphi[i,j]) / (self.rmed)[i]
                             # self.data[i,j] = np.abs((drrvr[i,j] + dphivphi[i,j]) / (self.rmed)[i])
 
-                    self.strname += r' $\nabla\cdot v$'
+                    if field == 'divvoveromega':
+                        for i in range(self.nrad):
+                            self.data[i,:] *= ((self.rmed)[i]**(1.5))
+
+                    if field == 'divv':
+                        self.strname += r' $\nabla\cdot v$'
+                    if field == 'divvoveromega':
+                        self.strname += r' $\nabla\cdot v / \Omega$'
 
 
             # ----
