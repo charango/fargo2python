@@ -109,6 +109,7 @@ def plotspacetimediagram():
                     rcut *= (myfield0.culength / 1.5e11) # in au
                 imin = np.argmin(np.abs(R-rcut))
                 axiarray = array[imin,:]
+                print(imin,axiarray.min(),axiarray.max())
 
             # save into spacetime_array array
             if k != len(on)-1:
