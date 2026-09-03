@@ -61,6 +61,8 @@ def plotspacetimediagram():
         else:
             xmax = par.myrmax
 
+        pmed = myfield0.pmed
+
         # define and allocate array for space-time diagram
         # default: plot against radius
         spacetime_array = np.zeros((len(myfield0.rmed),len(on)-1))
@@ -136,8 +138,11 @@ def plotspacetimediagram():
             mynorm = matplotlib.colors.LogNorm(vmin=ymin,vmax=ymax)
         else:
             mynorm = matplotlib.colors.Normalize(vmin=ymin,vmax=ymax)
-        
-        CF = ax.pcolormesh(R,np.arange(len(on)),np.transpose(spacetime_array),cmap=mycolormap,norm=mynorm,rasterized=True)
+
+        if par.onedprofile != 'Azi':        
+            CF = ax.pcolormesh(R,np.arange(len(on)),np.transpose(spacetime_array),cmap=mycolormap,norm=mynorm,rasterized=True)
+        else:
+            CF = ax.pcolormesh(pmed,np.arange(len(on)),np.transpose(spacetime_array),cmap=mycolormap,norm=mynorm,rasterized=True)
 
         # plot color-bars
         divider = make_axes_locatable(ax)
