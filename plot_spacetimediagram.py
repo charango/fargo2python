@@ -61,7 +61,7 @@ def plotspacetimediagram():
         else:
             xmax = par.myrmax
 
-        pmed = myfield0.pmed
+        pmed = myfield0.pedge
 
         # define and allocate array for space-time diagram
         # default: plot against radius
