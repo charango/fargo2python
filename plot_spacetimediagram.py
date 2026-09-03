@@ -104,7 +104,7 @@ def plotspacetimediagram():
                 axiarray = np.min(array,axis=1)   # median over azimuth of the density profile
 
             if par.onedprofile == 'Azi':
-                rcut = 1.0
+                rcut = 2.0 # 1.0
                 if par.physical_units == 'Yes':
                     rcut *= (myfield0.culength / 1.5e11) # in au
                 imin = np.argmin(np.abs(R-rcut))
