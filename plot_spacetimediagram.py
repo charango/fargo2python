@@ -62,7 +62,12 @@ def plotspacetimediagram():
             xmax = par.myrmax
 
         # define and allocate array for space-time diagram
+        # default: plot against radius
         spacetime_array = np.zeros((len(myfield0.rmed),len(on)-1))
+
+        # case we plot time evolution of a field at a given radius, against azimuth
+        if par.onedprofile == 'Azi':
+            spacetime_array = np.zeros((len(myfield0.pmed),len(on)-1))
 
         # ------------------------
         # loop over output numbers
@@ -96,6 +101,13 @@ def plotspacetimediagram():
             if par.onedprofile == 'Min':
                 axiarray = np.min(array,axis=1)   # median over azimuth of the density profile
 
+            if par.onedprofile == 'Azi':
+                rcut = 1.0
+                if par.physical_units == 'Yes':
+                    rcut *= (myfield0.culength / 1.5e11) # in au
+                imin = np.argmin(np.abs(R-rcut))
+                axiarray = array[imin,:]
+
             # save into spacetime_array array
             if k != len(on)-1:
                 spacetime_array[:,k] = axiarray
@@ -111,6 +123,8 @@ def plotspacetimediagram():
             xtitle = 'radius [au]'
         else:
             xtitle = 'radius [code units]'
+        if par.onedprofile == 'Azi':
+            xtitle = 'Azimuth [rad]'
         ax.set_xlabel(xtitle)
         if par.log_xyplots_x == 'Yes':
             ax.set_xscale('log')
@@ -150,6 +164,8 @@ def plotspacetimediagram():
             prefix = 'SpaceTime_median'
         if par.onedprofile == 'Min':
             prefix = 'SpaceTime_min'
+        if par.onedprofile == 'Azi':
+            prefix = 'SpaceTime_azi'
         outfile = prefix+par.fluid+'_'+par.whatfield+'_'+str(directory[j])
         fileout = outfile+'.pdf'
         if par.saveaspdf == 'Yes':
