@@ -54,13 +54,36 @@ def plotdiscecc():
     for j in range(len(directory)):
 
         # find how many output numbers were produced for each directory
-        if par.fargo3d == 'No':
-            nboutputs = len(fnmatch.filter(os.listdir(directory[j]), 'gasdens*.dat'))
-        else:
-            nboutputs = len(fnmatch.filter(os.listdir(directory[j]), 'summary*.dat'))
-        print('number of outputs for directory ',directory[j],': ',nboutputs)
 
-        on = range(0,nboutputs-1,take_one_point_every)
+        # if par.fargo3d == 'No':
+        #     nboutputs = len(fnmatch.filter(os.listdir(directory[j]), 'gasdens*.dat'))
+        # else:
+        #     nboutputs = len(fnmatch.filter(os.listdir(directory[j]), 'summary*.dat'))
+        # print('number of outputs for directory ',directory[j],': ',nboutputs)
+
+        # on = range(0,nboutputs-1,take_one_point_every)
+
+        # CB (sep 2026): new attempt
+        if par.fargo3d == 'No':
+            files = [f for f in os.listdir(directory[j]) if f.startswith('gasdens') and f.endswith('.dat')]
+        else:
+            files = [f for f in os.listdir(directory[j]) if f.startswith('summary') and f.endswith('.dat')]
+            print(files)
+        nboutputs = len(files)
+        if nboutputs > 0:
+            def get_number(filename):
+                match = re.search(r'\d+', filename)
+                return int(match.group()) if match else float('inf')
+
+            smallest_file = min(files, key=get_number)
+            onmin = get_number(smallest_file)
+
+            largest_file = max(files, key=get_number)
+            onmax = get_number(largest_file)
+
+            on = range(onmin,onmax,take_one_point_every)
+        else:
+            print("No matching files found.")
 
         disc_ecc = np.zeros(len(on))
         mytime    = np.zeros(len(on))
