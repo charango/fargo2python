@@ -68,7 +68,6 @@ def plotdiscecc():
             files = [f for f in os.listdir(directory[j]) if f.startswith('gasdens') and f.endswith('.dat')]
         else:
             files = [f for f in os.listdir(directory[j]) if f.startswith('summary') and f.endswith('.dat')]
-            print(files)
         nboutputs = len(files)
         if nboutputs > 0:
             def get_number(filename):
