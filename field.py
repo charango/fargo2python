@@ -39,17 +39,18 @@ class Field(Mesh):
         # with fargo2d / original fargo code (somewhat redundant with
         # what is done in par.py...)
         if isinstance(directory, str) == False:
-            summary0_file = directory[0]+'/summary0.dat'
+            if any(f.startswith('summary') for f in os.listdir(directory[0])) == True:
+                self.fargo3d = 'Yes'
+            else:
+                self.fargo3d = 'No'
             usedazi_file  = directory[0]+'/used_azi.dat'
         else:
-            summary0_file = directory+'/summary0.dat'
+            if any(f.startswith('summary') for f in os.listdir(directory)) == True:
+                self.fargo3d = 'Yes'
+            else:
+                self.fargo3d = 'No'
             usedazi_file  = directory+'/used_azi.dat'
-        if os.path.isfile(summary0_file) == True:
-            # Simulations were carried out with Fargo3D
-            self.fargo3d = 'Yes'
-        else:
-            # Simulations were carried out with Fargo2D
-            self.fargo3d = 'No'
+        if self.fargo3d == 'No':
             if os.path.isfile(usedazi_file) == True:
                 # Simulations were carried out with Dusty FARGO-ADSG
                 self.fargo_orig = 'No'
@@ -264,7 +265,7 @@ class Field(Mesh):
             else:
                 self.strname += r' $\kappa_{\rm Ross}$'
                 self.unit = 1.0
-            
+
 
         if os.path.isfile(input_file) == True:
             self.data = self.__open_field(input_file,dtype,fieldofview,slice,z_average)
@@ -274,6 +275,14 @@ class Field(Mesh):
             
             if field == 'Test':
                 self.unit = 1.0
+                self.strname = 'Artificial-to-compressional heating ratio'
+                buf1 = self.__open_field(directory+'/Test'+str(on)+'.dat',dtype,fieldofview,slice,z_average)
+                buf2 = self.__open_field(directory+'/OtherTest'+str(on)+'.dat',dtype,fieldofview,slice,z_average)
+                self.data = buf2/(buf1+1e-8)
+
+            if field == 'OtherTest':
+                self.unit = 1.0
+                self.strname = 'Artificial viscous heating'
 
             #     self.strname = 'Direct torque on planet'
             #     self.data *= self.nsec
@@ -1033,7 +1042,7 @@ class Field(Mesh):
                     if field == 'divv':
                         self.strname += r' $\nabla\cdot v$'
                     if field == 'divvoveromega':
-                        self.strname += r' $\nabla\cdot v / \Omega$'
+                        self.strname = r'$\Omega^{-1}\;\nabla\cdot v$'
 
 
             # ----

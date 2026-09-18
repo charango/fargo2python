@@ -82,7 +82,7 @@ def plotplanet():
         fargo3d = 'No'
         fargo_orig = 'Yes'
         fargo2d1d = 'No'
-        if os.path.isfile(directory[j]+'/summary0.dat') == True:
+        if any(f.startswith('summary') for f in os.listdir(directory[j])) == True:
             # Simulation was carried out with Fargo3D
             fargo3d = 'Yes'
             fargo_orig = 'No'

@@ -39,6 +39,7 @@ params.close()
 # Global booleans set to No by default
 plot_disccom = 'No'
 plot_discmass = 'No'
+plot_fourier = 'No'
 plot_libcross = 'No'
 plot_discecc = 'No'
 plot_discperarg = 'No'
@@ -96,17 +97,17 @@ fargo3d = 'No'
 fargo_orig = 'No'
 fargo2d1d = 'No'
 if isinstance(directory, str) == False:
-    summary0_file = directory[0]+'/summary0.dat'
     usedazi_file  = directory[0]+'/used_azi.dat'
     dims1d_file  = directory[0]+'/dims1D.dat'
+    if any(f.startswith('summary') for f in os.listdir(directory[0])) == True:
+        fargo3d = 'Yes'
 else:
-    summary0_file = directory+'/summary0.dat'
     usedazi_file  = directory+'/used_azi.dat'
     dims1d_file  = directory+'/dims1D.dat'
-if os.path.isfile(summary0_file) == True:
-    # Simulations were carried out with Fargo3D
-    fargo3d = 'Yes'
-else:
+    if any(f.startswith('summary') for f in os.listdir(directory)) == True:
+        fargo3d = 'Yes'
+
+if fargo3d == 'No':
     # Simulations were carried out with Fargo2D
     if os.path.isfile(usedazi_file) == False:
        # Simulations were carried out with the original FARGO code
@@ -118,7 +119,7 @@ else:
 # global boolean: if True, then plot 1D or 2D fields
 plot_field = True
 
-if ( (plot_tqwk != 'No') or (plot_planet != 'No') or (plot_disccom != 'No') or (plot_discmass != 'No') or (plot_libcross != 'No') or (plot_turb != 'No') or (plot_discecc != 'No') or (plot_discperarg != 'No') ):
+if ( (plot_tqwk != 'No') or (plot_planet != 'No') or (plot_disccom != 'No') or (plot_discmass != 'No') or (plot_fourier != 'No') or (plot_libcross != 'No') or (plot_turb != 'No') or (plot_discecc != 'No') or (plot_discperarg != 'No') ):
     plot_field = False
     movie = 'No'
     if plot_planet[1] == 'mmr':
@@ -189,7 +190,7 @@ if whatfield == 'bx' or whatfield == 'by' or whatfield == 'bz' or whatfield == '
     fluid = ''
 
 # case polargrid Test has been used in simulation
-if whatfield == 'Test':
+if whatfield == 'Test' or whatfield == 'OtherTest' :
     fluid = ''
 
 # case direct or indirect torque of disc on planet is computed
