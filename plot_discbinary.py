@@ -140,8 +140,8 @@ def plotdiscecc():
         # find minimum anx maximum
         ymin = disc_ecc.min()
         ymax = disc_ecc.max()
-        mytmin = np.minimum(mytmin,mytime[onmin])
-        mytmax = np.maximum(mytmax,mytime[onmax-onmin-1])
+        mytmin = np.minimum(mytmin,mytime[0])
+        mytmax = np.maximum(mytmax,mytime[len(on)-1])
 
         # display data as scatter plot for each directory
         ax.scatter(mytime, disc_ecc, s=20, c=par.c20[j], alpha=1.0, label=mylabel)
