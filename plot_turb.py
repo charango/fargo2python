@@ -123,6 +123,116 @@ def plotpowerspectrum():
         plt.savefig('./'+re.sub('.pdf', '.png', fileout), dpi=120)
 
 
+def plotpowerspectrum_time():
+
+    # first import global variables
+    import par
+    
+    # Define range of output numbers to consider (in case a time-averaged spectrum is required)
+    if par.take_one_point_every == '#':
+        take_one_point_every = 1
+    else:
+        take_one_point_every = par.take_one_point_every
+
+    if np.isscalar(par.on) == False:
+        on = range(par.on[0],par.on[1]+1,par.take_one_point_every)
+    else:
+        on = [par.on]
+        #nboutputs = len(fnmatch.filter(os.listdir(par.directory), 'summary*.dat'))
+        #on = range(0,nboutputs,take_one_point_every)
+    #print('output numbers = ', on)
+
+    # 2D arrays with radius and azimuth
+    dens = Field(field='dens', fluid='gas', on=0, directory=par.directory, physical_units=par.physical_units, nodiff='Yes', fieldofview=par.fieldofview, onedprofile='No', slice='midplane', z_average=par.z_average, override_units=par.override_units)
+    pmed2d  = np.zeros((dens.nrad,dens.nsec))
+    surface = np.zeros((dens.nrad,dens.nsec))
+
+    for r  in range(dens.nrad):
+        pmed2d[r,:] = dens.pmed
+
+    Rinf = dens.redge[0:len(dens.redge)-1]
+    Rsup = dens.redge[1:len(dens.redge)]
+    surf = np.pi * (Rsup*Rsup - Rinf*Rinf) / dens.nsec
+    for th in range(dens.nsec):
+        surface[:,th] = surf
+
+    # Range of azimuthal wavenumbers    
+    azi_wavenb = 1 # hard-coded!
+
+    # allocate arrays for Fourier-decomposition
+    cn = np.zeros(len(on))
+
+    if dens.fargo3d == 'Yes':
+        f1, xpla, ypla, f4, f5, f6, f7, f8, date, omega = np.loadtxt(par.directory+"/planet0.dat",unpack=True)
+    else:
+        f1, xpla, ypla, f4, f5, f6, f7, date, omega, f10, f11 = np.loadtxt(par.directory+"/planet0.dat",unpack=True)
+    
+    mytime = np.zeros(len(on))
+
+    # ========================
+    # loop over output numbers
+    # ========================
+    for k in range(len(on)):
+
+        print('k = ', k, ' / ', len(on)-1 )
+        # get disc midplane density: array of size (nrad, nsec)
+        dens = Field(field='dens', fluid='gas', on=on[k], directory=par.directory, physical_units=par.physical_units, nodiff='Yes', fieldofview=par.fieldofview, onedprofile='No', slice='midplane', z_average=par.z_average, override_units=par.override_units).data
+
+        # get time
+        mytime[k] = date[take_one_point_every*k]/2.0/np.pi  # orbital periods at R=1
+
+        # total mass
+        mass = np.sum(dens*surface)
+
+        # real part of Fourier decomposition
+        an = np.sum(dens*surface*np.cos(azi_wavenb*pmed2d)) / mass
+
+        # imaginary part of Fourier decomposition
+        bn = np.sum(dens*surface*np.sin(azi_wavenb*pmed2d)) / mass
+
+        # amplitude (the += arises when averaging over mutliple outputs)
+        cn[k] = np.sqrt( an*an + bn*bn )
+
+
+    # prepare figure
+    fig = plt.figure(figsize=(8.,8.))
+    plt.subplots_adjust(left=0.16, right=0.96, top=0.95, bottom=0.12)
+    ax = fig.gca()
+    xtitle = 'Time [orbits]'
+    ytitle = r'Fourier amplitude coefficient $c_m$'
+    ax.set_xlabel(xtitle)
+    ax.set_ylabel(ytitle)
+    ax.tick_params(top='on', right='on', length = 5, width=1.0, direction='out')
+
+    # handle labels
+    if ('use_legend' in open('paramsf2p.dat').read()) and (par.use_legend != '#'):
+        mylabel = str(par.use_legend)
+    else:
+        mylabel = str(par.directory)
+
+    ax.set_yscale('log')
+    # ax.set_xscale('log')
+    ax.scatter(mytime, cn, color=par.c20[0], s=10, label=mylabel)
+
+    # And save file
+    outfile = 'power_spectrum_time_'+str(par.directory)+'_'
+    if np.isscalar(par.on) == False:
+        outfile += str(par.on[0])+'_'+str(par.on[1])
+    else:
+        outfile += str(par.on)
+    fileout = outfile+'.pdf'
+    if par.saveaspdf == 'Yes':
+        plt.savefig('./'+fileout, dpi=160)
+    if par.saveaspng == 'Yes':
+        plt.savefig('./'+re.sub('.pdf', '.png', fileout), dpi=120)
+
+    # option to write result in 1D ascii file
+    if ( ('write_ascii' in open('paramsf2p.dat').read()) and (par.write_ascii == 'Yes') ):
+        ascii = open('power_spectrum_time_'+par.directory+'_m'+str(azi_wavenb)+'.dat','w')
+        for v in range(len(mytime)):
+            ascii.write(str(mytime[v])+'\t'+str(cn[v])+'\n')
+
+
 def plotautocorrelationtimescale():
 
     # first import global variables
