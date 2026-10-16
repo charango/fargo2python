@@ -356,7 +356,7 @@ class Field(Mesh):
             # ----
             # print out disc mass if density field is computed
             # ----
-            if field == 'dens' and par.verbose == 'Yes' and ( par.fieldofview == 'cartesian' or par.fieldofview == 'polar'):
+            if field == 'dens' and par.verbose == 'Yes' and ( par.fieldofview == 'cart' or par.fieldofview == 'polar'):
                 mass    = np.zeros((self.nrad,self.nsec))
                 surface = np.zeros((self.nrad,self.nsec))
 
