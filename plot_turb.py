@@ -377,6 +377,9 @@ def plot_histofield():
         if par.whatfield == 'dens': #or par.whatfield == 'vtheta':
             myfield = (buf.data-axifield)/axifield   # (X - <X>)/<X>
 
+        if par.whatfield == 'temp': #or par.whatfield == 'vtheta':
+            myfield = (buf.data-axifield)/axifield   # (X - <X>)/<X>
+
         if par.whatfield == 'vrad':
             if energyequation == 'Yes':
                 temp = Field(field='temp', fluid='gas', on=on[k], directory=par.directory, physical_units='No', nodiff='Yes', fieldofview=par.fieldofview, onedprofile='No', slice='midplane', z_average=par.z_average, override_units=par.override_units).data
@@ -411,6 +414,9 @@ def plot_histofield():
             if par.whatfield == 'dens':
                 xtitle = r'$(\Sigma - \langle \Sigma\rangle_\varphi) / \langle \Sigma\rangle_\varphi$'
                 outfile = 'histodens_'
+            if par.whatfield == 'temp':
+                xtitle = r'$(T - \langle T \rangle_\varphi) / \langle T \rangle_\varphi$'
+                outfile = 'histotemp_'
             if par.whatfield == 'vrad':
                 # xtitle = r'$v_r - \langle v_r \rangle_\varphi$'
                 xtitle = r'$v_r / c_s$'
